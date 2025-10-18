@@ -13,10 +13,10 @@ export default function NavigationBar() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed top-8 left-1/2 -translate-x-1/2 z-50">
+    <nav className="fixed top-4 sm:top-8 left-1/2 -translate-x-1/2 z-50 w-[90%] sm:w-auto">
       <div className="
-        flex items-center gap-1
-        px-8 py-4
+        flex items-center justify-center gap-1
+        px-3 py-2.5 sm:px-8 sm:py-4
         bg-black/40 backdrop-blur-xs
         border border-white/20
         rounded-full
@@ -29,8 +29,8 @@ export default function NavigationBar() {
             href={item.href}
             className="
               relative
-              px-6 py-2
-              text-sm 
+              px-3 py-1.5 sm:px-6 sm:py-2
+              text-xs sm:text-sm 
               tracking-wide
               text-gray-400
               transition-all duration-300
@@ -42,7 +42,7 @@ export default function NavigationBar() {
             
             {/* Hover underline effect */}
             <span className="
-              absolute bottom-1 left-6 right-6
+              absolute bottom-0.5 sm:bottom-1 left-3 right-3 sm:left-6 sm:right-6
               h-[1px]
               bg-white
               scale-x-0

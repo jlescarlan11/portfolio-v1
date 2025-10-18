@@ -1,11 +1,32 @@
 import NavigationBar from './components/NavigationBar';
+import HeroSection from './sections/HeroSection';
+
+const heroData = {
+  name: 'John Lester Escarlan',
+  role: 'Software Engineer',
+  tagline: 'Building thoughtful digital experiences.',
+  profileImage: {
+    src: '/hero-image.svg', // You'll need to add your profile image
+    alt: 'Profile picture'
+  },
+  socialLinks: [
+    { platform: 'GitHub', url: 'https://github.com', label: 'GitHub', icon: 'github' },
+    { platform: 'LinkedIn', url: 'https://linkedin.com', label: 'LinkedIn', icon: 'linkedin' },
+    { platform: 'Twitter', url: 'https://twitter.com', label: 'Twitter', icon: 'twitter' },
+    { platform: 'Email', url: 'mailto:hello@example.com', label: 'Email', icon: 'email' }
+  ]
+};
+
 
 export default function Home() {
   return (
     <>
       <NavigationBar />
       
-      {/* Hero Section */}
+      <HeroSection {...heroData} />
+
+
+
       <section id="about" className="
         min-h-screen
         flex items-center justify-center
