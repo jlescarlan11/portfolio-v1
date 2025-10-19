@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef } from 'react';
 import Image from 'next/image';
-import { animate } from 'motion';
+import { useHoverAnimation } from '../hooks/useHoverAnimation';
+import { ANIMATION_CONFIG } from '../styles/shared';
 
 interface ProfileImageProps {
   src: string;
@@ -15,32 +15,17 @@ export default function ProfileImage({
   alt, 
   className = '' 
 }: ProfileImageProps) {
-  const imageRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseEnter = () => {
-    if (imageRef.current) {
-      animate(
-        imageRef.current,
-        { transform: ['scale(1) rotate(0deg)', 'scale(1.05) rotate(2deg)'] },
-        { duration: 0.3 }
-      );
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (imageRef.current) {
-      animate(
-        imageRef.current,
-        { transform: ['scale(1.05) rotate(2deg)', 'scale(1) rotate(0deg)'] },
-        { duration: 0.3 }
-      );
-    }
-  };
+  // Use shared hover animation hook (DRY principle)
+  const { ref, handleMouseEnter, handleMouseLeave } = useHoverAnimation<HTMLDivElement>({
+    scale: [1, 1.05],
+    rotate: [0, 2],
+    duration: ANIMATION_CONFIG.durations.medium,
+  });
 
   return (
     <div className={`profile-image-container ${className}`}>
       <div 
-        ref={imageRef}
+        ref={ref}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className="cursor-pointer w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px]"

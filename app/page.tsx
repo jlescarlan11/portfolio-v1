@@ -1,12 +1,14 @@
 import NavigationBar from './components/NavigationBar';
 import HeroSection from './sections/HeroSection';
+import ProjectsSection from './sections/ProjectsSection';
+import { projectsData } from './data/projects';
 
 const heroData = {
   name: 'John Lester Escarlan',
   role: 'Software Engineer',
   tagline: 'Building thoughtful digital experiences.',
   profileImage: {
-    src: '/hero-image.svg', // You'll need to add your profile image
+    src: '/hero-image.svg',
     alt: 'Profile picture'
   },
   socialLinks: [
@@ -25,13 +27,16 @@ export default function Home() {
       
       <HeroSection {...heroData} />
 
+      {/* Projects Section */}
+      <ProjectsSection projects={projectsData} />
 
-
+      {/* About Section */}
       <section id="about" className="
         min-h-screen
         flex items-center justify-center
         px-6 md:px-12
         bg-black
+        border-t border-gray-900
       ">
         <div className="max-w-4xl">
           <h1 className="
@@ -51,35 +56,6 @@ export default function Home() {
             tracking-wide
           ">
             Designer. Developer. Creator.
-          </p>
-        </div>
-      </section>
-
-      {/* Work Section */}
-      <section id="work" className="
-        min-h-screen
-        flex items-center justify-center
-        px-6 md:px-12
-        bg-black
-        border-t border-gray-900
-      ">
-        <div className="max-w-4xl">
-          <h2 className="
-            text-4xl md:text-6xl
-            font-light
-            tracking-tighter
-            leading-none
-            mb-8
-            text-white
-          ">
-            Selected Work
-          </h2>
-          <p className="
-            text-base md:text-lg
-            text-gray-400
-            max-w-2xl
-          ">
-            Portfolio content goes here
           </p>
         </div>
       </section>

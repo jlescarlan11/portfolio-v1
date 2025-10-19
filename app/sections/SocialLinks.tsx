@@ -1,7 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
-import { animate } from 'motion';
+import { useHoverAnimation } from '../hooks/useHoverAnimation';
 
 interface SocialLink {
   platform: string;
@@ -43,32 +42,17 @@ const getIcon = (platform: string) => {
 };
 
 function SocialLinkItem({ link }: { link: SocialLink }) {
-  const linkRef = useRef<HTMLAnchorElement>(null);
-
-  const handleMouseEnter = () => {
-    if (linkRef.current) {
-      animate(
-        linkRef.current,
-        { transform: ['scale(1) translateY(0)', 'scale(1.1) translateY(-4px)'] },
-        { duration: 0.2 }
-      );
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (linkRef.current) {
-      animate(
-        linkRef.current,
-        { transform: ['scale(1.1) translateY(-4px)', 'scale(1) translateY(0)'] },
-        { duration: 0.2 }
-      );
-    }
-  };
+  // Use shared hover animation hook (DRY principle)
+  const { ref, handleMouseEnter, handleMouseLeave } = useHoverAnimation<HTMLAnchorElement>({
+    scale: [1, 1.1],
+    translateY: [0, -4],
+    duration: 0.2,
+  });
 
   return (
     <li>
       <a
-        ref={linkRef}
+        ref={ref}
         href={link.url}
         target="_blank"
         rel="noopener noreferrer"
