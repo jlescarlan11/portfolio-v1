@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import ProfileImage from './ProfileImage';
 import SocialLinks from './SocialLinks';
 import { useStaggeredFadeIn } from '../hooks/useStaggeredFadeIn';
-import { ANIMATION_STYLES, LAYOUT_STYLES, TYPOGRAPHY_STYLES } from '../styles/shared';
+import { ANIMATION_STYLES } from '../styles/shared';
 
 interface HeroSectionProps {
   name: string;

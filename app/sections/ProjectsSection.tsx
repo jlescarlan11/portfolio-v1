@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { ProjectWithDetails } from '../types/project';
-import { LAYOUT_STYLES, TYPOGRAPHY_STYLES, ANIMATION_STYLES, BUTTON_STYLES, SURFACE, MOTION_VARIANTS } from '../styles/shared';
+import { LAYOUT_STYLES, TYPOGRAPHY_STYLES, BUTTON_STYLES, MOTION_VARIANTS } from '../styles/shared';
 
 interface ProjectsSectionProps {
   projects: ProjectWithDetails[];
@@ -28,7 +28,6 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
           <h2 
             ref={titleRef}
             className={TYPOGRAPHY_STYLES.sectionTitle}
-            style={ANIMATION_STYLES.fadeInOpacity}
           >
             Work
           </h2>
@@ -39,7 +38,7 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
           <AnimatePresence initial={false}>
           {visibleProjects.map((project, idx) => (
             <motion.div
-              key={project.id}
+              key={idx}
               initial={MOTION_VARIANTS.fadeUp.initial}
               whileInView={MOTION_VARIANTS.fadeUp.whileInView}
               viewport={MOTION_VARIANTS.fadeUp.viewport}

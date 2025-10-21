@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# John Lester Escarlan - Portfolio
 
-## Getting Started
+A minimalist, monochrome portfolio inspired by Yohji Yamamoto's design philosophy. Built with Next.js 15, React 19, and TypeScript.
 
-First, run the development server:
+## 🎨 Design Philosophy
 
+This portfolio embraces radical minimalism with a monochrome aesthetic, focusing on:
+- **Intentional negative space** - what you don't include matters
+- **Typography as art** - clean, geometric sans-serif fonts
+- **Asymmetry & balance** - purposeful layout decisions
+- **Timeless over trendy** - classic, enduring design
+
+## 🚀 Tech Stack
+
+- **Framework:** Next.js 15 with App Router
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS 4
+- **Animations:** Motion (Framer Motion fork)
+- **Icons:** React Icons
+- **Fonts:** Geist Sans & Geist Mono
+
+## 🛠️ Development
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+
+### Setup
 ```bash
+# Clone the repository
+git clone https://github.com/jlescarlan11/portfolio-v1.git
+
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the portfolio.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
+Create a `.env.local` file in the root directory:
+```env
+NEXT_PUBLIC_SITE_URL=https://yourdomain.com
+NEXT_PUBLIC_CONTACT_EMAIL=your-email@example.com
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📁 Project Structure
 
-## Learn More
+```
+app/
+├── components/          # Reusable UI components
+├── sections/           # Page sections (Hero, About, Projects)
+├── hooks/              # Custom React hooks
+├── styles/             # Shared styles and utilities
+├── types/              # TypeScript type definitions
+├── data/               # Static data (projects, etc.)
+└── globals.css         # Global styles
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 🎯 Key Features
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Responsive Design** - Mobile-first approach with smooth breakpoints
+- **Accessibility** - ARIA labels, semantic HTML, keyboard navigation
+- **Performance** - Optimized images, lazy loading, reduced motion support
+- **SEO Ready** - Meta tags, Open Graph, structured data
+- **Animation** - Smooth transitions with respect for user preferences
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚀 Deployment
 
-## Deploy on Vercel
+The portfolio is optimized for deployment on Vercel:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Build for production
+npm run build
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Start production server
+npm start
+```
+
+## 📱 Responsive Breakpoints
+
+- **Mobile:** < 640px
+- **Tablet:** 640px - 1024px  
+- **Desktop:** > 1024px
+
+## 🎨 Design System
+
+The portfolio follows a comprehensive design system documented in `DESIGN_GUIDE.md`, including:
+- Monochrome color palette
+- Typography scale
+- Spacing system
+- Component patterns
+- Animation guidelines
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 🤝 Contact
+
+- **Email:** jlescarlan11@gmail.com
+- **LinkedIn:** [John Lester Escarlan](https://www.linkedin.com/in/john-lester-escarlan/)
+- **GitHub:** [jlescarlan11](https://github.com/jlescarlan11)
+
+---
+
+*"Black is modest and arrogant at the same time. Black is lazy and easy - but mysterious."* - Yohji Yamamoto

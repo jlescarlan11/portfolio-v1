@@ -18,7 +18,7 @@ export function CarouselIndicators({
         
         return (
           <button
-            key={project.id}
+            key={index}
             onClick={() => onIndicatorClick(index)}
             className={`
               h-[3px]

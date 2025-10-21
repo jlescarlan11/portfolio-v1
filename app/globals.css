@@ -58,6 +58,16 @@ body {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* Infinite scroll animation for tech stack carousel */
+@keyframes infinite-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.333%); }
+}
+
+.animate-infinite-scroll {
+  animation: infinite-scroll 28s linear infinite;
+}
+
 /* Respect reduced motion preferences globally */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
