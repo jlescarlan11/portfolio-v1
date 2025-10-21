@@ -1,6 +1,7 @@
 'use client';
 
 import { useHoverAnimation } from '../hooks/useHoverAnimation';
+import { ANIMATION_CONFIG } from '../styles/shared';
 
 interface SocialLink {
   platform: string;
@@ -46,7 +47,7 @@ function SocialLinkItem({ link }: { link: SocialLink }) {
   const { ref, handleMouseEnter, handleMouseLeave } = useHoverAnimation<HTMLAnchorElement>({
     scale: [1, 1.1],
     translateY: [0, -4],
-    duration: 0.2,
+    duration: ANIMATION_CONFIG.durations.fast,
   });
 
   return (
@@ -56,7 +57,7 @@ function SocialLinkItem({ link }: { link: SocialLink }) {
         href={link.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex flex-col items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300"
+        className="group flex flex-col items-center gap-1.5 text-white/70 hover:text-white transition-colors duration-300"
         aria-label={`Visit ${link.platform} profile`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -64,7 +65,7 @@ function SocialLinkItem({ link }: { link: SocialLink }) {
         <span className="self-center">
           {getIcon(link.platform)}
         </span>
-        <span className="social-label">{link.label}</span>
+        <span className="social-label text-[11px] tracking-[0.3em] uppercase underline decoration-transparent group-hover:decoration-white/80 underline-offset-4">{link.label}</span>
       </a>
     </li>
   );

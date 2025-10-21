@@ -30,7 +30,7 @@ export function DeviceView({ label, imageSrc, alt, aspectRatio }: DeviceViewProp
             src={imageSrc}
             alt={alt}
             fill
-            className="object-cover"
+            className="object-cover grayscale"
           />
         </div>
       </div>

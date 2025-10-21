@@ -28,8 +28,8 @@ export function ImageGallery({ title, images, projectTitle }: ImageGalleryProps)
             className="
               aspect-[4/3]
               overflow-hidden
-              bg-gray-900
-              border border-gray-800
+              bg-black
+              border border-white/12
             "
           >
             <div className="relative w-full h-full">
@@ -37,7 +37,7 @@ export function ImageGallery({ title, images, projectTitle }: ImageGalleryProps)
                 src={image}
                 alt={`${projectTitle} - Additional view ${index + 1}`}
                 fill
-                className="object-cover"
+                className="object-cover grayscale"
               />
             </div>
           </div>

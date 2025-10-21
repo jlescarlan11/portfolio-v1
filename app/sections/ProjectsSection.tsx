@@ -1,139 +1,26 @@
 'use client';
 
-import { useRef, useEffect, useCallback, useMemo } from 'react';
-import type { Project } from '../types/project';
-import { useSimpleCarousel } from '../hooks/useSimpleCarousel';
-import { useFadeInAnimation } from '../hooks/useFadeInAnimation';
-import { useResponsiveCarousel } from '../hooks/useResponsiveCarousel';
-import { useSwipeGesture } from '../hooks/useSwipeGesture';
-import { useWheelNavigation } from '../hooks/useWheelNavigation';
-import { useCarouselNavigation } from '../hooks/useCarouselNavigation';
-import { CarouselButton } from '../components/CarouselButton';
-import { ProjectCard } from '../components/ProjectCard';
-import { CarouselIndicators } from '../components/CarouselIndicators';
-import { LAYOUT_STYLES, TYPOGRAPHY_STYLES, ANIMATION_STYLES } from '../styles/shared';
+import Image from 'next/image';
+import { useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import type { ProjectWithDetails } from '../types/project';
+import { LAYOUT_STYLES, TYPOGRAPHY_STYLES, ANIMATION_STYLES, BUTTON_STYLES, SURFACE, MOTION_VARIANTS } from '../styles/shared';
 
 interface ProjectsSectionProps {
-  projects: Project[];
+  projects: ProjectWithDetails[];
 }
-
-// Constants for infinite scroll configuration
-const INFINITE_SCROLL_CONFIG = {
-  copies: 50,
-  autoPlayInterval: 3000,
-  autoPlayPauseDelay: 1000,
-} as const;
 
 export default function ProjectsSection({ projects }: ProjectsSectionProps) {
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const carouselRef = useRef<HTMLDivElement>(null);
-  const itemsPerView = useResponsiveCarousel();
-  
-  const startIndex = projects.length * (INFINITE_SCROLL_CONFIG.copies / 2);
-
-  // Memoize the infinite projects array
-  const infiniteProjects = useMemo(() => {
-    const copies = [];
-    for (let i = 0; i < INFINITE_SCROLL_CONFIG.copies; i++) {
-      copies.push(...projects);
-    }
-    return copies;
-  }, [projects]);
-  
-  const {
-    currentIndex,
-    goToNext,
-    goToPrevious,
-    goToIndex,
-    pauseAutoPlay,
-    resumeAutoPlay,
-    isTransitioning,
-    isResetting,
-  } = useSimpleCarousel({
-    totalItems: infiniteProjects.length,
-    itemsPerView,
-    autoPlayInterval: INFINITE_SCROLL_CONFIG.autoPlayInterval,
-    initialIndex: startIndex,
-    isInfinite: true,
-    originalItemsCount: projects.length,
-  });
-
-  useFadeInAnimation(titleRef);
-
-  // Extract navigation logic to separate hook (SRP)
-  const { handleNext, handlePrevious } = useCarouselNavigation({
-    goToNext,
-    goToPrevious,
-    pauseAutoPlay,
-    resumeAutoPlay,
-    autoPlayPauseDelay: INFINITE_SCROLL_CONFIG.autoPlayPauseDelay,
-  });
-
-  const { touchHandlers, mouseHandlers, isDragging, hasActiveTouch } = useSwipeGesture({
-    onSwipeLeft: handleNext,
-    onSwipeRight: handlePrevious,
-  });
-
-  const { handleWheel } = useWheelNavigation({
-    onNavigateNext: handleNext,
-    onNavigatePrevious: handlePrevious,
-  });
-
-  // Add native event listeners to prevent browser navigation
-  useEffect(() => {
-    const carouselElement = carouselRef.current;
-    if (!carouselElement) return;
-
-    const handleNativeWheel = (e: WheelEvent) => {
-      const isHorizontalSwipe = Math.abs(e.deltaX) > Math.abs(e.deltaY);
-      if (isHorizontalSwipe && Math.abs(e.deltaX) > 10) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-
-    const handleNativeTouchMove = (e: TouchEvent) => {
-      if (hasActiveTouch) {
-        const target = e.target as HTMLElement;
-        if (carouselElement.contains(target)) {
-          e.preventDefault();
-        }
-      }
-    };
-
-    carouselElement.addEventListener('wheel', handleNativeWheel, { passive: false });
-    carouselElement.addEventListener('touchmove', handleNativeTouchMove, { passive: false });
-
-    return () => {
-      carouselElement.removeEventListener('wheel', handleNativeWheel);
-      carouselElement.removeEventListener('touchmove', handleNativeTouchMove);
-    };
-  }, [hasActiveTouch]);
-
-  // Keyboard navigation
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      handlePrevious();
-    } else if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      handleNext();
-    }
-  }, [handleNext, handlePrevious]);
-
-  const isNavigationDisabled = projects.length <= itemsPerView;
+  const [visible, setVisible] = useState(6);
+  const visibleProjects = projects.slice(0, visible);
 
   return (
     <section 
       id="work"
-      className="min-h-screen px-6 md:px-12 py-16 md:py-24 bg-black border-t border-gray-900"
-      style={{ 
-        scrollPaddingTop: '120px',
-        overscrollBehaviorX: 'none', // Prevent horizontal overscroll at section level
-      }}
+      className="px-6 md:px-12 py-16 md:py-24 bg-black border-t border-white/12"
+      style={{ scrollPaddingTop: '120px' }}
       aria-label="Projects section"
-      onMouseEnter={pauseAutoPlay}
-      onMouseLeave={resumeAutoPlay}
     >
       <div className={LAYOUT_STYLES.container}>
         {/* Section Header */}
@@ -143,101 +30,107 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
             className={TYPOGRAPHY_STYLES.sectionTitle}
             style={ANIMATION_STYLES.fadeInOpacity}
           >
-            Works
+            Work
           </h2>
         </div>
 
-        {/* Carousel Container */}
-        <div 
-          className="relative"
-          onKeyDown={handleKeyDown}
-          tabIndex={0}
-          role="region"
-          aria-label="Projects carousel"
-          aria-live="polite"
-          aria-atomic="false"
-        >
-          {/* Navigation Arrows */}
-          <div className="flex items-center justify-between -mb-6 relative z-20">
-            <CarouselButton 
-              direction="prev" 
-              onClick={handlePrevious} 
-              disabled={isNavigationDisabled} 
-            />
-            
-            <div className="flex-1" />
-            
-            <CarouselButton 
-              direction="next" 
-              onClick={handleNext} 
-              disabled={isNavigationDisabled} 
-            />
-          </div>
-
-          {/* Screen reader announcement */}
-          <div className="sr-only" aria-live="polite" aria-atomic="true">
-            {`Showing project ${(currentIndex % projects.length) + 1} of ${projects.length}`}
-          </div>
-
-          {/* Carousel Track */}
-          <div
-            ref={carouselRef}
-            className="overflow-hidden w-full max-w-4xl mx-auto"
-            style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch',
-              cursor: isDragging ? 'grabbing' : 'grab',
-              userSelect: 'none',
-              touchAction: 'pan-y',
-              overscrollBehaviorX: 'none',
-              overscrollBehavior: 'none',
-            }}
-            {...touchHandlers}
-            {...mouseHandlers}
-            onWheel={handleWheel}
-          >
-            <div 
-              className="flex"
-              style={{
-                transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
-                transition: isResetting ? 'none' : (isTransitioning ? 'transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94)'),
-                willChange: 'transform',
-                backfaceVisibility: 'hidden',
-                perspective: '1000px',
-                transformStyle: 'preserve-3d'
-              }}
+        {/* Editorial List */}
+        <div className="divide-y divide-white/12">
+          <AnimatePresence initial={false}>
+          {visibleProjects.map((project, idx) => (
+            <motion.div
+              key={project.id}
+              initial={MOTION_VARIANTS.fadeUp.initial}
+              whileInView={MOTION_VARIANTS.fadeUp.whileInView}
+              viewport={MOTION_VARIANTS.fadeUp.viewport}
+              transition={MOTION_VARIANTS.fadeUp.transition}
+              className="group block py-12 md:py-16"
+              style={{ willChange: 'transform, opacity' }}
             >
-              {infiniteProjects.map((project, index) => (
-                <div
-                  key={`${project.id}-${index}`}
-                  className="flex-shrink-0"
-                  style={{
-                    width: `${100 / itemsPerView}%`,
-                  }}
-                >
-                  <ProjectCard
-                    project={project}
-                    isActive={
-                      index >= currentIndex &&
-                      index < currentIndex + itemsPerView
-                    }
-                  />
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 items-center">
+                {/* Index + Meta */}
+                <div className="md:col-span-2 flex md:block items-center justify-between">
+                  <div className="text-white/55 text-[11px] tracking-[0.3em] uppercase">
+                    {String(idx + 1).padStart(2, '0')} — {project.category} / {project.year}
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
+
+                {/* Title + Description */}
+                <div className="md:col-span-6 order-2 md:order-none">
+                  <h3 className="text-3xl md:text-4xl lg:text-5xl font-light tracking-tight text-white transition-colors duration-300">
+                    {project.title}
+                  </h3>
+                  <p className="mt-2 text-sm md:text-base text-white/60 max-w-prose md:max-w-[60ch]">
+                    {project.description}
+                  </p>
+                  {/* Tech stack chips */}
+                  {project.technologies?.length ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {project.technologies.slice(0, 6).map((tech) => (
+                        <span key={tech} className="px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] border border-white/15 text-white/75">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  {(project.liveUrl || project.githubUrl) && (
+                    <div className="mt-3 flex items-center gap-6 text-[11px] uppercase tracking-[0.3em] text-white/70">
+                      {project.liveUrl && (
+                        <a
+                          href={project.liveUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline underline-offset-4 decoration-white/20 hover:decoration-white"
+                        >
+                          Live
+                        </a>
+                      )}
+                      {project.githubUrl && (
+                        <a
+                          href={project.githubUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline underline-offset-4 decoration-white/20 hover:decoration-white"
+                        >
+                          GitHub
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Thumbnail */}
+                <div className="md:col-span-4 order-1 md:order-none">
+                  <div className="relative w-full aspect-[16/9] overflow-hidden bg-black">
+                    <Image
+                      src={project.logo}
+                      alt={`${project.title} cover`}
+                      fill
+                      className="object-cover transition-opacity duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:opacity-90 grayscale"
+                    />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+          </AnimatePresence>
         </div>
 
-        <CarouselIndicators
-          projects={projects}
-          currentIndex={currentIndex % projects.length}
-          onIndicatorClick={(index) => {
-            pauseAutoPlay();
-            const targetIndex = projects.length * (INFINITE_SCROLL_CONFIG.copies / 2) + index;
-            goToIndex(targetIndex);
-          }}
-        />
+        {/* Load more */}
+        {visible < projects.length && (
+          <div className="flex flex-col items-center gap-3 pt-8">
+            <div className="text-xs text-white/60">
+              Showing {visible} of {projects.length}
+            </div>
+            <button
+              type="button"
+              onClick={() => setVisible((v) => Math.min(v + 6, projects.length))}
+              className={BUTTON_STYLES.primary}
+            >
+              Load more
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

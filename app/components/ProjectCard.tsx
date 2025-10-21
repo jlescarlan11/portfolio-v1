@@ -10,7 +10,7 @@ interface ProjectCardProps {
 export function ProjectCard({ project, isActive }: ProjectCardProps) {
   return (
     <Link
-      href={`/project/${project.id}`}
+      href="#work"
       className="
         flex-shrink-0
         w-full
@@ -30,7 +30,7 @@ export function ProjectCard({ project, isActive }: ProjectCardProps) {
           font-normal
           tracking-wide
           transition-all duration-500
-          ${isActive ? 'text-white' : 'text-gray-600'}
+          ${isActive ? 'text-white' : 'text-white/60'}
           group-hover:text-white
           text-center
         `}>
@@ -42,7 +42,7 @@ export function ProjectCard({ project, isActive }: ProjectCardProps) {
         aspect-square
         w-full
         overflow-hidden
-        bg-gray-900
+        bg-black
         transition-all duration-500
         flex items-center justify-center
       ">

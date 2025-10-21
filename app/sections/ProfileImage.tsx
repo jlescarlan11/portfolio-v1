@@ -17,8 +17,8 @@ export default function ProfileImage({
 }: ProfileImageProps) {
   // Use shared hover animation hook (DRY principle)
   const { ref, handleMouseEnter, handleMouseLeave } = useHoverAnimation<HTMLDivElement>({
-    scale: [1, 1.05],
-    rotate: [0, 2],
+    scale: [1, 1],
+    rotate: [0, 0],
     duration: ANIMATION_CONFIG.durations.medium,
   });
 
@@ -28,14 +28,14 @@ export default function ProfileImage({
         ref={ref}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className="cursor-pointer w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px]"
+        className="cursor-default w-[200px] h-[200px] sm:w-[260px] sm:h-[260px] md:w-[320px] md:h-[320px]"
       >
         <Image
           src={src}
           alt={alt}
           width={300}
           height={300}
-          className="rounded-full object-cover w-full h-full"
+          className="rounded-full object-cover w-full h-full grayscale"
           priority
         />
       </div>

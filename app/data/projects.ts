@@ -19,7 +19,9 @@ export const projectsData: ProjectWithDetails[] = [
     additionalImages: [
       '/hero-image.svg',
       '/hero-image.svg',
-    ]
+    ],
+    liveUrl: 'https://example.com/ecommerce',
+    githubUrl: 'https://github.com/yourname/ecommerce'
   },
   {
     id: 'project-2',
@@ -38,7 +40,9 @@ export const projectsData: ProjectWithDetails[] = [
     },
     additionalImages: [
       '/hero-image.svg',
-    ]
+    ],
+    liveUrl: 'https://example.com/dashboard',
+    githubUrl: 'https://github.com/yourname/dashboard'
   },
   {
     id: 'project-3',
@@ -58,7 +62,9 @@ export const projectsData: ProjectWithDetails[] = [
     additionalImages: [
       '/hero-image.svg',
       '/hero-image.svg',
-    ]
+    ],
+    liveUrl: 'https://example.com/mobile-banking',
+    githubUrl: 'https://github.com/yourname/mobile-banking'
   },
   {
     id: 'project-4',
@@ -77,7 +83,9 @@ export const projectsData: ProjectWithDetails[] = [
     },
     additionalImages: [
       '/hero-image.svg',
-    ]
+    ],
+    liveUrl: 'https://example.com/ai-content',
+    githubUrl: 'https://github.com/yourname/ai-content'
   },
   {
     id: 'project-5',
@@ -97,7 +105,9 @@ export const projectsData: ProjectWithDetails[] = [
     additionalImages: [
       '/hero-image.svg',
       '/hero-image.svg',
-    ]
+    ],
+    liveUrl: 'https://example.com/fitness',
+    githubUrl: 'https://github.com/yourname/fitness'
   },
   {
     id: 'project-6',
@@ -116,7 +126,9 @@ export const projectsData: ProjectWithDetails[] = [
     },
     additionalImages: [
       '/hero-image.svg',
-    ]
+    ],
+    liveUrl: 'https://example.com/smart-home',
+    githubUrl: 'https://github.com/yourname/smart-home'
   },
   {
     id: 'project-7',
@@ -136,7 +148,9 @@ export const projectsData: ProjectWithDetails[] = [
     additionalImages: [
       '/hero-image.svg',
       '/hero-image.svg',
-    ]
+    ],
+    liveUrl: 'https://example.com/virtual-events',
+    githubUrl: 'https://github.com/yourname/virtual-events'
   },
   {
     id: 'project-8',
@@ -155,7 +169,9 @@ export const projectsData: ProjectWithDetails[] = [
     },
     additionalImages: [
       '/hero-image.svg',
-    ]
+    ],
+    liveUrl: 'https://example.com/restaurant',
+    githubUrl: 'https://github.com/yourname/restaurant'
   },
   {
     id: 'project-9',
@@ -175,7 +191,9 @@ export const projectsData: ProjectWithDetails[] = [
     additionalImages: [
       '/hero-image.svg',
       '/hero-image.svg',
-    ]
+    ],
+    liveUrl: 'https://example.com/lms',
+    githubUrl: 'https://github.com/yourname/lms'
   },
   {
     id: 'project-10',
@@ -194,7 +212,9 @@ export const projectsData: ProjectWithDetails[] = [
     },
     additionalImages: [
       '/hero-image.svg',
-    ]
+    ],
+    liveUrl: 'https://example.com/social-analytics',
+    githubUrl: 'https://github.com/yourname/social-analytics'
   },
   {
     id: 'project-11',
@@ -214,7 +234,9 @@ export const projectsData: ProjectWithDetails[] = [
     additionalImages: [
       '/hero-image.svg',
       '/hero-image.svg',
-    ]
+    ],
+    liveUrl: 'https://example.com/real-estate',
+    githubUrl: 'https://github.com/yourname/real-estate'
   },
   {
     id: 'project-12',
@@ -233,7 +255,9 @@ export const projectsData: ProjectWithDetails[] = [
     },
     additionalImages: [
       '/hero-image.svg',
-    ]
+    ],
+    liveUrl: 'https://example.com/wallet',
+    githubUrl: 'https://github.com/yourname/wallet'
   },
   {
     id: 'project-13',
@@ -253,7 +277,9 @@ export const projectsData: ProjectWithDetails[] = [
     additionalImages: [
       '/hero-image.svg',
       '/hero-image.svg',
-    ]
+    ],
+    liveUrl: 'https://example.com/pm-tool',
+    githubUrl: 'https://github.com/yourname/pm-tool'
   },
 ];
 
