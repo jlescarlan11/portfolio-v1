@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState, useRef } from 'react';
 
 const navItems = [
   { name: 'Work', href: '#work' },
@@ -9,9 +10,42 @@ const navItems = [
 ];
 
 export default function NavigationBar() {
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Hide when scrolling down, show when scrolling up
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY.current) {
+        setIsVisible(true);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   return (
-    <nav className="fixed top-5 sm:top-8 left-6 sm:left-8 z-50">
-      <div className="flex items-center gap-6">
+    <nav 
+      className={`
+        fixed top-5 sm:top-8 left-1/2 -translate-x-1/2 z-50
+        transition-all duration-300 ease-out
+        ${isVisible 
+          ? 'translate-y-0 opacity-100 scale-100' 
+          : '-translate-y-16 opacity-0 scale-95'
+        }
+      `}
+    >
+      <div className="flex items-center gap-6 px-6 py-3 bg-black/80 backdrop-blur-md border border-white/10 rounded-full shadow-lg shadow-black/10">
         {navItems.map((item) => (
           <Link
             key={item.name}
@@ -26,4 +60,3 @@ export default function NavigationBar() {
     </nav>
   );
 }
-

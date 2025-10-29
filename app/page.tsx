@@ -71,13 +71,13 @@ export default function Home() {
         ]}
       />
 
-      {/* Contact Section */}
-      <section id="contact" className="
-        flex items-center
-        px-6 md:px-12 py-16 md:py-24
-        bg-black
-        border-t border-white/10
-      ">
+{/* Contact Section */}
+<section id="contact" className="
+  flex items-center
+  px-6 md:px-12 py-16 md:py-24 pb-32
+  bg-black
+  border-t border-white/10
+">
         <div className={`${LAYOUT_STYLES.container} w-full mx-auto`}>
           <h2 className="text-3xl md:text-5xl font-light tracking-tight leading-[0.95] mb-6 text-white">
             Get in touch

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import WelcomeOverlay from "./components/WelcomeOverlay";
+import Footer from "./components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,9 +52,7 @@ export default function RootLayout({
         <WelcomeOverlay />
         <a href="#work" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:bg-black focus:text-white focus:px-3 focus:py-2 focus:border focus:border-white/20">Skip to content</a>
         {children}
-        <footer className="text-[11px] tracking-[0.3em] uppercase text-white/50 pointer-events-none select-none fixed left-4 bottom-4 sm:static sm:left-auto sm:bottom-auto sm:px-6 sm:py-8">
-          © John Lester Escarlan — {new Date().getFullYear()} • <a href={`mailto:${process.env.NEXT_PUBLIC_CONTACT_EMAIL}`} className="pointer-events-auto underline underline-offset-4 decoration-white/20 hover:decoration-white">{process.env.NEXT_PUBLIC_CONTACT_EMAIL}</a>
-        </footer>
+        <Footer />
       </body>
     </html>
   );
