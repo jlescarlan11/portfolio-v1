@@ -20,7 +20,7 @@ export const projectsData: ProjectWithDetails[] = [
     liveUrl: "https://pricecraft.netlify.app/",
   },
   {
-    title: "HEALTH (Help Everyone Access Local Treatment & Healthcare)",
+    title: "HEALTH",
     category: "Mobile Application",
     description:
       "An AI-powered mobile healthcare navigation application designed for Naga City to help residents identify care levels, locate facilities, and enroll in the YAKAP program.",
