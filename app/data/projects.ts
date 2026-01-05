@@ -16,10 +16,8 @@ export const projectsData: ProjectWithDetails[] = [
       "Vitest",
     ],
     year: "2025",
-    githubUrl:
-      "https://www.google.com/search?q=https://github.com/jlescarlan11/pricing-calculator-app",
-    liveUrl:
-      "https://www.google.com/search?q=https://pricing-calculator-app-jlescarlan.vercel.app",
+    githubUrl: "https://github.com/jlescarlan11/pricing-calculator-app",
+    liveUrl: "https://pricecraft.netlify.app/",
   },
   {
     title: "HEALTH (Help Everyone Access Local Treatment & Healthcare)",
