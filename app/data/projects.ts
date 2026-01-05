@@ -6,7 +6,7 @@ export const projectsData: ProjectWithDetails[] = [
     category: "Web Application / Productivity Tool",
     description:
       "A professional pricing strategy and cost breakdown tool designed to help businesses calculate margins, labor costs, and overheads across multiple product variants.",
-    logo: "public/project/pricecraft.svg",
+    logo: "project/pricecraft.svg",
     technologies: [
       "TypeScript",
       "React",
@@ -24,7 +24,7 @@ export const projectsData: ProjectWithDetails[] = [
     category: "Mobile Application",
     description:
       "An AI-powered mobile healthcare navigation application designed for Naga City to help residents identify care levels, locate facilities, and enroll in the YAKAP program.",
-    logo: "public/project/health.png",
+    logo: "project/health.png",
     technologies: [
       "TypeScript",
       "React Native",
@@ -42,7 +42,7 @@ export const projectsData: ProjectWithDetails[] = [
     category: "Progressive Web App (PWA)",
     description:
       "A community-driven platform for discovering and mapping authentic Filipino cultural experiences through user-curated points of interest (Gems) and guided trails (Krawls).",
-    logo: "public/project/krawl.svg",
+    logo: "project/krawl.svg",
     technologies: [
       "Next.js 16",
       "React 19",
