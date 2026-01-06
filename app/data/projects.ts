@@ -24,7 +24,7 @@ export const projectsData: ProjectWithDetails[] = [
     category: "Mobile Application",
     description:
       "An AI-powered mobile healthcare navigation application designed for Naga City to help residents identify care levels, locate facilities, and enroll in the YAKAP program.",
-    logo: "project/health.png",
+    logo: "project/health.svg",
     technologies: [
       "TypeScript",
       "React Native",
