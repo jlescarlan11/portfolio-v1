@@ -6,7 +6,24 @@ interface ProjectInfoProps {
   githubUrl?: string;
 }
 
+const isRenderableExternalUrl = (url?: string): url is string => {
+  if (!url) return false;
+
+  const trimmed = url.trim();
+  if (!trimmed) return false;
+  if (/^replace/i.test(trimmed) || trimmed.includes('REPLACE_WITH_')) return false;
+
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 export function ProjectInfo({ client, year, technologies, liveUrl, githubUrl }: ProjectInfoProps) {
+  const safeLiveUrl = isRenderableExternalUrl(liveUrl) ? liveUrl : undefined;
+
   return (
     <div className="
       grid grid-cols-1 md:grid-cols-3
@@ -50,11 +67,11 @@ export function ProjectInfo({ client, year, technologies, liveUrl, githubUrl }: 
           ))}
         </div>
       </div>
-      {(liveUrl || githubUrl) && (
+      {(safeLiveUrl || githubUrl) && (
         <div className="md:col-span-3 flex items-center gap-4">
-          {liveUrl && (
+          {safeLiveUrl && (
             <a
-              href={liveUrl}
+              href={safeLiveUrl}
               target="_blank"
               rel="noreferrer"
               className="inline-block px-4 py-2 text-[11px] uppercase tracking-[0.3em] border border-white/80 text-white hover:bg-white/10 transition-colors"

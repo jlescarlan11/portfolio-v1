@@ -5,7 +5,7 @@ export const projectsData: ProjectWithDetails[] = [
     title: "PriceCraft",
     category: "Web Application / Productivity Tool",
     description:
-      "A professional pricing strategy and cost breakdown tool designed to help businesses calculate margins, labor costs, and overheads across multiple product variants.",
+      "A professional pricing strategy and cost breakdown tool designed to help businesses calculate margins, labor costs, and overheads across multiple product variants. Features comprehensive test suite with 300+ tests and real-time data synchronization.",
     logo: "project/pricecraft.svg",
     technologies: [
       "TypeScript",
@@ -23,7 +23,7 @@ export const projectsData: ProjectWithDetails[] = [
     title: "HEALTH",
     category: "Mobile Application",
     description:
-      "An AI-powered mobile healthcare navigation application designed for Naga City to help residents identify care levels, locate facilities, and enroll in the YAKAP program.",
+      "An AI-powered mobile healthcare navigation application with offline-first capabilities, designed for Naga City to help residents identify care levels, locate facilities, and enroll in the YAKAP program. Features JWT authentication, Argon2 password hashing, and rate limiting.",
     logo: "project/health.svg",
     technologies: [
       "TypeScript",
@@ -33,6 +33,7 @@ export const projectsData: ProjectWithDetails[] = [
       "Google Gemini",
       "Prisma",
       "PostgreSQL",
+      "SQLite",
     ],
     year: "2025",
     githubUrl: "https://github.com/jlescarlan11/health",
@@ -41,7 +42,7 @@ export const projectsData: ProjectWithDetails[] = [
     title: "Krawl",
     category: "Progressive Web App (PWA)",
     description:
-      "A community-driven platform for discovering and mapping authentic Filipino cultural experiences through user-curated points of interest (Gems) and guided trails (Krawls).",
+      "A community-driven geospatial platform for discovering and mapping authentic Filipino cultural experiences through user-curated points of interest (Gems) and guided trails (Krawls). Features OAuth2/JWT authentication, location-aware frontend, and offline PWA capabilities.",
     logo: "project/krawl.svg",
     technologies: [
       "Next.js 16",
@@ -51,7 +52,9 @@ export const projectsData: ProjectWithDetails[] = [
       "Java 25",
       "Spring Boot 3.5.7",
       "PostgreSQL",
+      "PostGIS",
       "Mapbox GL JS",
+      "OAuth2",
     ],
     year: "2025",
     githubUrl: "https://github.com/jlescarlan11/project-krawl",

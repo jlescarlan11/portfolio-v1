@@ -2,23 +2,44 @@
 
 import { LAYOUT_STYLES, TYPOGRAPHY_STYLES, SPACING, MOTION } from '../styles/shared';
 import { useMemo, useState } from 'react';
-import { 
-  SiTypescript, 
-  SiJavascript, 
-  SiPython, 
-  SiReact, 
-  SiNextdotjs, 
-  SiNodedotjs, 
-  SiSpring, 
-  SiPostgresql, 
-  SiMongodb, 
-  SiDocker, 
-  SiKubernetes, 
-  SiGit, 
-  SiJest 
+import {
+  SiTypescript,
+  SiJavascript,
+  SiPython,
+  SiReact,
+  SiNextdotjs,
+  SiNodedotjs,
+  SiExpress,
+  SiSpring,
+  SiPostgresql,
+  SiSqlite,
+  SiMongodb,
+  SiDocker,
+  SiKubernetes,
+  SiGit,
+  SiJest,
+  SiVite,
+  SiTailwindcss,
+  SiRedis,
+  SiElectron,
+  SiPrisma,
+  SiDotnet,
+  SiDrizzle,
+  SiStripe,
+  SiOpenid,
+  SiOpenai,
+  SiWebauthn,
+  SiSocketdotio,
+  SiLangchain,
+  SiAmazonwebservices,
+  SiVercel,
+  SiSupabase,
+  SiReplit,
+  SiGithubactions,
+  SiShopify,
+  SiRss,
+  SiSharp
 } from 'react-icons/si';
-import { SiAmazonwebservices } from 'react-icons/si';
-import { SiSharp } from 'react-icons/si';
 import { FaJava } from 'react-icons/fa6';
 
 interface PillProps {
@@ -51,22 +72,51 @@ const getTechIcon = (label: string) => {
     'Java': <FaJava className="h-6 w-6 md:h-8 md:w-8" />,
     'C#': <SiSharp className="h-6 w-6 md:h-8 md:w-8" />,
     'React': <SiReact className="h-6 w-6 md:h-8 md:w-8" />,
+    'React Native': <SiReact className="h-6 w-6 md:h-8 md:w-8" />,
     'Next.js': <SiNextdotjs className="h-6 w-6 md:h-8 md:w-8" />,
     'Node.js': <SiNodedotjs className="h-6 w-6 md:h-8 md:w-8" />,
+    'Express.js': <SiExpress className="h-6 w-6 md:h-8 md:w-8" />,
     'Spring Boot': <SiSpring className="h-6 w-6 md:h-8 md:w-8" />,
+    'ASP.NET': <SiDotnet className="h-6 w-6 md:h-8 md:w-8" />,
+    'Vite': <SiVite className="h-6 w-6 md:h-8 md:w-8" />,
+    'Tailwind CSS': <SiTailwindcss className="h-6 w-6 md:h-8 md:w-8" />,
     'PostgreSQL': <SiPostgresql className="h-6 w-6 md:h-8 md:w-8" />,
+    'PostGIS': <SiPostgresql className="h-6 w-6 md:h-8 md:w-8" />,
+    'SQLite': <SiSqlite className="h-6 w-6 md:h-8 md:w-8" />,
     'MongoDB': <SiMongodb className="h-6 w-6 md:h-8 md:w-8" />,
+    'Redis': <SiRedis className="h-6 w-6 md:h-8 md:w-8" />,
+    'Drizzle ORM': <SiDrizzle className="h-6 w-6 md:h-8 md:w-8" />,
+    'Prisma': <SiPrisma className="h-6 w-6 md:h-8 md:w-8" />,
+    'Prisma ORM': <SiPrisma className="h-6 w-6 md:h-8 md:w-8" />,
     'Docker': <SiDocker className="h-6 w-6 md:h-8 md:w-8" />,
     'Kubernetes': <SiKubernetes className="h-6 w-6 md:h-8 md:w-8" />,
     'AWS': <SiAmazonwebservices className="h-6 w-6 md:h-8 md:w-8" />,
+    'Vercel': <SiVercel className="h-6 w-6 md:h-8 md:w-8" />,
+    'Supabase': <SiSupabase className="h-6 w-6 md:h-8 md:w-8" />,
+    'Replit Object Storage': <SiReplit className="h-6 w-6 md:h-8 md:w-8" />,
+    'GitHub CI/CD': <SiGithubactions className="h-6 w-6 md:h-8 md:w-8" />,
+    'Stripe API': <SiStripe className="h-6 w-6 md:h-8 md:w-8" />,
+    'Shopify Integration': <SiShopify className="h-6 w-6 md:h-8 md:w-8" />,
+    'OAuth2': <SiOpenid className="h-6 w-6 md:h-8 md:w-8" />,
+    'OpenID Connect': <SiOpenid className="h-6 w-6 md:h-8 md:w-8" />,
+    'JWT/OAuth2 Authentication': <SiOpenid className="h-6 w-6 md:h-8 md:w-8" />,
+    'WebAuthn': <SiWebauthn className="h-6 w-6 md:h-8 md:w-8" />,
+    'Socket.io': <SiSocketdotio className="h-6 w-6 md:h-8 md:w-8" />,
+    'WebSocket (Socket.io)': <SiSocketdotio className="h-6 w-6 md:h-8 md:w-8" />,
+    'OpenAI API': <SiOpenai className="h-6 w-6 md:h-8 md:w-8" />,
+    'LangChain': <SiLangchain className="h-6 w-6 md:h-8 md:w-8" />,
+    'Electron': <SiElectron className="h-6 w-6 md:h-8 md:w-8" />,
     'Git': <SiGit className="h-6 w-6 md:h-8 md:w-8" />,
-    'Jest': <SiJest className="h-6 w-6 md:h-8 md:w-8" />
+    'Vitest': <SiJest className="h-6 w-6 md:h-8 md:w-8" />,
+    'Playwright': <SiJest className="h-6 w-6 md:h-8 md:w-8" />,
+    'TanStack Query': <SiReact className="h-6 w-6 md:h-8 md:w-8" />,
+    'RSS Parsing': <SiRss className="h-6 w-6 md:h-8 md:w-8" />
   };
-  
+
   return techIcons[label] || null;
 };
 
-interface TimelineItem { title: string; subtitle: string; badges?: string[]; period?: string; watermark?: string }
+interface TimelineItem { id: string; title: string; subtitle: string; badges?: string[]; period?: string; watermark?: string }
 
 interface AboutSectionProps {
 	education: TimelineItem[];
@@ -79,9 +129,13 @@ interface AboutSectionProps {
     badge?: string; // optional icon URL or short label
     url?: string; // optional external link
   }>;
+  techCategories?: Array<{
+    category: string;
+    items: TechItem[];
+  }>;
 }
 
-export default function AboutSection({ education, experience, tech, certifications = [] }: AboutSectionProps) {
+export default function AboutSection({ education, experience, tech, certifications = [], techCategories = [] }: AboutSectionProps) {
     const [showAll, setShowAll] = useState(false);
 
     const filteredCerts = useMemo(() => {
@@ -141,6 +195,46 @@ export default function AboutSection({ education, experience, tech, certificatio
 									</div>
 								</div>
 							</section>
+
+                        {/* Categorized Tech Section */}
+                        {techCategories && techCategories.length > 0 && (
+                          <section aria-label="Skills by category" className="mb-8">
+                            <h3 className="mb-4 text-[11px] tracking-[0.3em] text-white/70 uppercase">Skills</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                              {techCategories.map(({ category, items }) => (
+                                <div key={category}>
+                                  <div className="mb-3 text-[10px] tracking-[0.3em] text-white/45 uppercase border-b border-white/10 pb-2">
+                                    {category}
+                                  </div>
+                                  <div className="flex flex-wrap gap-3">
+                                    {items.map((t) => (
+                                      <div
+                                        key={t.label}
+                                        className={`group relative h-10 w-10 ${MOTION.hover} shrink-0 flex items-center justify-center`}
+                                        aria-label={t.label}
+                                        title={t.label}
+                                      >
+                                        {getTechIcon(t.label) ? (
+                                          <div className="text-white/70 group-hover:text-white transition-colors duration-300">
+                                            {getTechIcon(t.label)}
+                                          </div>
+                                        ) : (
+                                          <span className="text-[10px] tracking-[0.2em] uppercase text-white/70 group-hover:text-white">
+                                            {t.label}
+                                          </span>
+                                        )}
+                                        <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black/95 text-white text-xs px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 shadow-lg border border-white/10">
+                                          {t.label}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </section>
+                        )}
+
                         {/* Credentials */}
                         {certifications.length > 0 && (
                             <section aria-label="Credentials">
@@ -185,7 +279,7 @@ export default function AboutSection({ education, experience, tech, certificatio
                             <h3 className="mb-3 text-[11px] tracking-[0.3em] text-white/70 uppercase">Experience</h3>
                             <ul className="divide-y divide-white/10">
                                 {experience.map((item) => (
-                                    <li key={item.title} className="py-4">
+                                    <li key={item.id} className="py-4">
                                         <div className="flex items-center justify-between">
                                             <div className="text-white">{item.title}</div>
                                             {item.period ? <div className="text-xs text-white/55">{item.period}</div> : null}
@@ -204,7 +298,7 @@ export default function AboutSection({ education, experience, tech, certificatio
                             <h3 className="mb-3 text-[11px] tracking-[0.3em] text-white/70 uppercase">Education</h3>
                             <ul className="divide-y divide-white/10">
                                 {education.map((item) => (
-                                    <li key={item.title} className="py-4">
+                                    <li key={item.id} className="py-4">
                                         <div className="flex items-center justify-between">
                                             <div className="text-white">{item.title}</div>
                                             {item.period ? <div className="text-xs text-white/55">{item.period}</div> : null}
@@ -226,5 +320,3 @@ export default function AboutSection({ education, experience, tech, certificatio
         </section>
     );
 }
-
-

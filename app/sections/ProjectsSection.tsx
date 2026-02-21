@@ -10,6 +10,21 @@ interface ProjectsSectionProps {
   projects: ProjectWithDetails[];
 }
 
+const isRenderableExternalUrl = (url?: string): url is string => {
+  if (!url) return false;
+
+  const trimmed = url.trim();
+  if (!trimmed) return false;
+  if (/^replace/i.test(trimmed) || trimmed.includes('REPLACE_WITH_')) return false;
+
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 export default function ProjectsSection({ projects }: ProjectsSectionProps) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [visible, setVisible] = useState(6);
@@ -36,7 +51,12 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
         {/* Editorial List */}
         <div className="divide-y divide-white/12">
           <AnimatePresence initial={false}>
-          {visibleProjects.map((project, idx) => (
+          {visibleProjects.map((project, idx) => {
+            const safeLiveUrl = isRenderableExternalUrl(project.liveUrl)
+              ? project.liveUrl
+              : undefined;
+
+            return (
             <motion.div
               key={idx}
               initial={MOTION_VARIANTS.fadeUp.initial}
@@ -72,11 +92,11 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
                       ))}
                     </div>
                   ) : null}
-                  {(project.liveUrl || project.githubUrl) && (
+                  {(safeLiveUrl || project.githubUrl) && (
                     <div className="mt-3 flex items-center gap-6 text-[11px] uppercase tracking-[0.3em] text-white/70">
-                      {project.liveUrl && (
+                      {safeLiveUrl && (
                         <a
-                          href={project.liveUrl}
+                          href={safeLiveUrl}
                           target="_blank"
                           rel="noreferrer"
                           className="underline underline-offset-4 decoration-white/20 hover:decoration-white"
@@ -111,7 +131,8 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
                 </div>
               </div>
             </motion.div>
-          ))}
+          );
+          })}
           </AnimatePresence>
         </div>
 
@@ -134,4 +155,3 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
     </section>
   );
 }
-
