@@ -148,6 +148,17 @@ export default function AboutSection({ education, experience, tech, certificatio
 
 	const VISIBLE_COUNT = 6;
 	const visibleCerts = showAll ? filteredCerts : filteredCerts.slice(0, VISIBLE_COUNT);
+  const iconTech = useMemo(() => tech.filter((t) => getTechIcon(t.label)), [tech]);
+  const iconTechCategories = useMemo(
+    () =>
+      techCategories
+        .map(({ category, items }) => ({
+          category,
+          items: items.filter((t) => getTechIcon(t.label))
+        }))
+        .filter(({ items }) => items.length > 0),
+    [techCategories]
+  );
 
 
     return (
@@ -172,62 +183,60 @@ export default function AboutSection({ education, experience, tech, certificatio
 								<div className="relative overflow-hidden -mx-1 md:-mx-2">
 									<div className="flex items-center gap-4 md:gap-5 px-1 md:px-2 py-8 animate-infinite-scroll hover:[animation-play-state:paused]">
 									{/* Render tech array three times for seamless loop */}
-									{[...tech, ...tech, ...tech].map((t, idx) => (
-											<div 
+									{[...iconTech, ...iconTech, ...iconTech].map((t, idx) => {
+                      const icon = getTechIcon(t.label);
+
+                      return (
+											<div
 												key={`${t.label}-${idx}`} 
 												className={`group relative h-12 w-12 md:h-14 md:w-14 ${MOTION.hover} shrink-0 flex items-center justify-center`}
 												aria-label={t.label}
 												title={t.label}
 											>
-												{getTechIcon(t.label) ? (
-													<div className="text-white/70 group-hover:text-white transition-colors duration-300">
-														{getTechIcon(t.label)}
-													</div>
-												) : (
-													<span className="text-[10px] md:text-xs tracking-[0.25em] uppercase text-white/80">{t.label}</span>
-												)}
+												<div className="text-white/70 group-hover:text-white transition-colors duration-300">
+													{icon}
+												</div>
 												{/* Tooltip */}
 												<span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black/95 text-white text-xs px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 shadow-lg border border-white/10">
 													{t.label}
 												</span>
 											</div>
-										))}
+										);
+                    })}
 									</div>
 								</div>
 							</section>
 
                         {/* Categorized Tech Section */}
-                        {techCategories && techCategories.length > 0 && (
-                          <section aria-label="Skills by category" className="mb-8">
+                        {iconTechCategories.length > 0 && (
+                          <section aria-label="Skills by category" className="mt-10 md:mt-12 mb-8">
                             <h3 className="mb-4 text-[11px] tracking-[0.3em] text-white/70 uppercase">Skills</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                              {techCategories.map(({ category, items }) => (
+                              {iconTechCategories.map(({ category, items }) => (
                                 <div key={category}>
                                   <div className="mb-3 text-[10px] tracking-[0.3em] text-white/45 uppercase border-b border-white/10 pb-2">
                                     {category}
                                   </div>
                                   <div className="flex flex-wrap gap-3">
-                                    {items.map((t) => (
+                                    {items.map((t) => {
+                                      const icon = getTechIcon(t.label);
+
+                                      return (
                                       <div
                                         key={t.label}
                                         className={`group relative h-10 w-10 ${MOTION.hover} shrink-0 flex items-center justify-center`}
                                         aria-label={t.label}
                                         title={t.label}
                                       >
-                                        {getTechIcon(t.label) ? (
-                                          <div className="text-white/70 group-hover:text-white transition-colors duration-300">
-                                            {getTechIcon(t.label)}
-                                          </div>
-                                        ) : (
-                                          <span className="text-[10px] tracking-[0.2em] uppercase text-white/70 group-hover:text-white">
-                                            {t.label}
-                                          </span>
-                                        )}
+                                        <div className="text-white/70 group-hover:text-white transition-colors duration-300">
+                                          {icon}
+                                        </div>
                                         <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black/95 text-white text-xs px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 shadow-lg border border-white/10">
                                           {t.label}
                                         </span>
                                       </div>
-                                    ))}
+                                    );
+                                    })}
                                   </div>
                                 </div>
                               ))}
@@ -237,7 +246,7 @@ export default function AboutSection({ education, experience, tech, certificatio
 
                         {/* Credentials */}
                         {certifications.length > 0 && (
-                            <section aria-label="Credentials">
+                            <section aria-label="Credentials" className="mt-10 md:mt-12">
                                 <h3 className="mb-3 text-[11px] tracking-[0.3em] text-white/70 uppercase">Credentials</h3>
                                 <div className="grid grid-cols-1">
                                     <ul className="divide-y divide-white/10">
