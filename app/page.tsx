@@ -186,7 +186,7 @@ export default function Home() {
               jlescarlan11@gmail.com
             </a>
             <a
-              href="/project/John_Lester_Escarlan_Resume.pdf"
+              href="/John_Lester_Escarlan_Resume.pdf"
               download
               target="_blank"
               rel="noreferrer"
