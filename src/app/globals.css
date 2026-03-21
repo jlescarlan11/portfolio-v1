@@ -1,0 +1,173 @@
+@import "tailwindcss";
+
+:root {
+  --background-rgb: 0, 0, 0;
+  --foreground-rgb: 255, 255, 255;
+  --background: rgb(var(--background-rgb));
+  --foreground: rgb(var(--foreground-rgb));
+  --surface-border: rgba(var(--foreground-rgb), 0.16);
+  --surface-border-strong: rgba(var(--foreground-rgb), 0.28);
+  --surface-border-dim: rgba(var(--foreground-rgb), 0.1);
+  --background-muted: rgba(var(--background-rgb), 0.95);
+  --background-glass: rgba(var(--background-rgb), 0.75);
+  --surface-divider: rgba(var(--foreground-rgb), 0.1);
+  --surface-tint: rgba(var(--foreground-rgb), 0.08);
+  --surface-tint-strong: rgba(var(--foreground-rgb), 0.16);
+  --focus-ring: var(--foreground);
+  --text-foreground: var(--foreground);
+  --text-muted-foreground: rgba(var(--foreground-rgb), 0.7);
+  --text-subtle-foreground: rgba(var(--foreground-rgb), 0.55);
+  --motion-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-poppins);
+  --font-mono: var(--font-poppins);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-poppins), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --background-rgb: 255, 255, 255;
+    --foreground-rgb: 0, 0, 0;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-rgb: 0, 0, 0;
+    --foreground-rgb: 255, 255, 255;
+  }
+}
+
+:where(a, button, [role="button"], input, textarea, summary):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+::selection {
+  background-color: rgba(var(--foreground-rgb), 0.12);
+  color: var(--foreground);
+}
+
+@layer utilities {
+  .text-foreground { color: var(--text-foreground); }
+  .text-muted-foreground { color: var(--text-muted-foreground); }
+  .text-subtle-foreground { color: var(--text-subtle-foreground); }
+  .decoration-foreground { text-decoration-color: var(--text-foreground); }
+  .decoration-muted-foreground { text-decoration-color: var(--text-muted-foreground); }
+  .decoration-subtle-foreground { text-decoration-color: var(--text-subtle-foreground); }
+  .bg-surface { background-color: var(--background); }
+  .bg-surface-muted { background-color: var(--background-muted); }
+  .bg-surface-glass { background-color: var(--background-glass); }
+  .bg-surface-divider { background-color: var(--surface-divider); }
+  .bg-surface-tint { background-color: var(--surface-tint); }
+  .bg-surface-tint-strong { background-color: var(--surface-tint-strong); }
+  .border-surface { border-color: var(--surface-border); }
+  .border-surface-subtle { border-color: rgba(var(--foreground-rgb), 0.06); }
+  .border-surface-strong { border-color: var(--surface-border-strong); }
+  .select-none-safe {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .pointer-events-none-safe {
+    pointer-events: none;
+  }
+  .display {
+    @apply text-4xl md:text-5xl font-semibold tracking-tight leading-tight text-foreground;
+  }
+  .h1 {
+    @apply text-3xl md:text-4xl font-semibold tracking-tight leading-tight text-foreground;
+  }
+  .h2 {
+    @apply text-2xl md:text-3xl font-semibold tracking-tight leading-snug text-foreground;
+  }
+  .h3 {
+    @apply text-xl md:text-2xl font-semibold tracking-tight leading-snug text-foreground;
+  }
+  .h4 {
+    @apply text-lg md:text-xl font-medium leading-snug text-foreground;
+  }
+  .body-lg {
+    @apply text-lg leading-7;
+    color: var(--text-muted-foreground);
+  }
+  .body {
+    @apply text-base leading-7 text-foreground;
+  }
+  .body-sm {
+    @apply text-sm leading-6;
+    color: var(--text-muted-foreground);
+  }
+  .label {
+    @apply text-sm font-medium leading-none text-foreground;
+  }
+  .caption {
+    @apply text-xs leading-5;
+    color: var(--text-muted-foreground);
+  }
+  .code {
+    @apply text-sm font-mono leading-6 text-foreground;
+  }
+  .surface-grid-mask {
+    background-image:
+      linear-gradient(var(--surface-border-dim) 1px, transparent 1px),
+      linear-gradient(90deg, var(--surface-border-dim) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 100% 70% at 50% 40%, black 20%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 100% 70% at 50% 40%, black 20%, transparent 100%);
+  }
+  .animate-enter {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fade-in-up 0.75s var(--motion-ease) forwards;
+    animation-delay: var(--enter-delay, 0ms);
+    will-change: opacity, transform;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+@keyframes infinite-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.333%); }
+}
+
+.animate-infinite-scroll {
+  animation: infinite-scroll 28s linear infinite;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
