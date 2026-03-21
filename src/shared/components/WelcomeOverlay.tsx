@@ -82,7 +82,7 @@ export default function WelcomeOverlay(): React.JSX.Element | null {
       return;
     }
 
-    const duration = reduceMotion ? 0 : 3000;
+    const duration = reduceMotion ? 0 : 1200;
 
     const step = (timestamp: number): void => {
       if (startRef.current == null) {
@@ -164,7 +164,7 @@ export default function WelcomeOverlay(): React.JSX.Element | null {
       aria-label={siteConfig.overlay.ariaLabel}
       aria-live="polite"
       className={[
-        'fixed inset-0 z-[9999] grid place-items-center bg-surface-muted px-6 transition-opacity duration-500',
+        'fixed inset-0 z-[9999] grid place-items-center bg-surface px-6 transition-opacity duration-500',
         closing ? 'opacity-0' : 'opacity-100'
       ].join(' ')}
       onClick={() => {

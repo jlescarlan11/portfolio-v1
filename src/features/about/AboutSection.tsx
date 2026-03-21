@@ -1,7 +1,4 @@
-'use client';
-
 import type { JSX } from 'react';
-import { useMemo, useState } from 'react';
 import { FaJava } from 'react-icons/fa6';
 import {
   SiAmazonwebservices,
@@ -47,6 +44,7 @@ import { Typography } from '@/shared/components/Typography';
 import { FadeIn } from '@/shared/components/FadeIn';
 import { formatMonthYear } from '@/shared/lib/project';
 import { SURFACE } from '@/shared/styles/shared';
+import { CertificationsList } from '@/features/about/components/CertificationsList';
 
 interface AboutSectionProps {
   content: AboutContent;
@@ -216,27 +214,14 @@ function TimelineRow({ title, subtitle, startDate, endDate, isCurrent, bullets }
 }
 
 export default function AboutSection({ content, contributionSlot }: AboutSectionProps): React.JSX.Element {
-  const [showAll, setShowAll] = useState(false);
   const { certifications, education, experience, techCategories } = content;
 
-  const sortedCerts = useMemo(
-    () => [...certifications].sort((a, b) => parseInt(b.year ?? '0', 10) - parseInt(a.year ?? '0', 10)),
-    [certifications]
-  );
-
-  const visibleCerts = showAll ? sortedCerts : sortedCerts.slice(0, content.certificationsVisibleCount);
-  const hiddenCount = sortedCerts.length - content.certificationsVisibleCount;
-
-  const iconCategories = useMemo(
-    () =>
-      techCategories
-        .map(({ category, items }) => ({
-          category,
-          items: items.filter((item) => getTechIcon(item.label) !== null)
-        }))
-        .filter(({ items }) => items.length > 0),
-    [techCategories]
-  );
+  const iconCategories = techCategories
+    .map(({ category, items }) => ({
+      category,
+      items: items.filter((item) => getTechIcon(item.label) !== null)
+    }))
+    .filter(({ items }) => items.length > 0);
 
   return (
     <SectionFrame
@@ -298,59 +283,10 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
             aria-labelledby="credentials-heading"
           >
             <SectionLabel>Credentials</SectionLabel>
-            <ul className="divide-y divide-foreground/5">
-              {visibleCerts.map((cert) => (
-                <li
-                  key={cert.name}
-                  className="group flex items-start justify-between gap-6 py-5 first:pt-0 last:pb-0"
-                >
-                  <div className="min-w-0">
-                    <Typography
-                      variant="body"
-                      as="p"
-                      className="leading-snug transition-colors duration-200 group-hover:text-foreground"
-                    >
-                      {cert.url ? (
-                        <a
-                          href={cert.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline underline-offset-4 decoration-foreground/20 transition-colors duration-200 hover:decoration-foreground"
-                        >
-                          {cert.name}
-                        </a>
-                      ) : cert.name}
-                    </Typography>
-                    {cert.issuer && (
-                      <Typography variant="caption" as="p" className="mt-1 text-[11px] text-subtle-foreground">
-                        {cert.issuer}
-                      </Typography>
-                    )}
-                  </div>
-                  {cert.year && (
-                    <span className={`mt-0.5 flex-shrink-0 border ${SURFACE.hairline} px-2 py-0.5`}>
-                      <Typography
-                        variant="caption"
-                        as="time"
-                        dateTime={cert.year}
-                        className="font-mono text-[10px] tabular-nums text-subtle-foreground"
-                      >
-                        {cert.year}
-                      </Typography>
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-            {hiddenCount > 0 && (
-              <button
-                type="button"
-                onClick={() => setShowAll((v) => !v)}
-                className="mt-5 text-[12px] font-medium text-subtle-foreground underline underline-offset-4 decoration-foreground/20 transition-colors duration-200 hover:text-foreground hover:decoration-foreground"
-              >
-                {showAll ? 'Show less' : `Show ${hiddenCount} more`}
-              </button>
-            )}
+            <CertificationsList 
+              certifications={certifications} 
+              initialVisibleCount={content.certificationsVisibleCount} 
+            />
           </FadeIn>
         )}
 

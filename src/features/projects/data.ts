@@ -19,7 +19,7 @@ export const projects: ProjectRecord[] = [
     category: 'Web Application / Personal Finance',
     description:
       'A personal finance web app for Filipino students and young adults featuring transaction tracking, budget management, a Hold Vault for pausing impulse purchases, and a regret-tagging system called "Sayang".',
-    logo: '/project/kaizen.svg',
+    logo: '',
     technologies: ['TypeScript', 'React', 'Java', 'Spring Boot', 'PostgreSQL', 'Tailwind CSS'],
     completedAt: '2026-03', // last pushed 2026-03-21
     links: {
@@ -72,7 +72,7 @@ export const projects: ProjectRecord[] = [
     category: 'Personal Portfolio',
     description:
       'A personal developer portfolio showcasing projects, skills, and background — built with TypeScript and deployed on Netlify.',
-    logo: '/project/portfolio.svg',
+    logo: '',
     technologies: ['TypeScript', 'React', 'Tailwind CSS'],
     completedAt: '2026-02', // last pushed 2026-02-21
     links: {
@@ -153,7 +153,7 @@ export const projects: ProjectRecord[] = [
     category: 'Personal Portfolio',
     description:
       'An earlier developer portfolio deployed on Vercel — presenting projects, skills, and background as a full-stack developer.',
-    logo: '/project/devsite.svg',
+    logo: '/project/blogit.svg',
     technologies: ['TypeScript', 'React', 'Tailwind CSS'],
     completedAt: '2025-10', // last pushed 2025-10-16
     links: {
@@ -174,6 +174,7 @@ export const projects: ProjectRecord[] = [
       ]
     }
   },
+
   {
     slug: 'regex2nfa',
     title: 'Regex to NFA Converter',

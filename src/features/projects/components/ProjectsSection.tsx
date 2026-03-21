@@ -133,6 +133,7 @@ function FeaturedProjectCard({
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-surface pt-6">
           <Link
             href={`/projects/${project.slug}`}
+            prefetch={false}
             className="inline-flex items-center gap-2 border border-foreground px-5 py-2.5 text-sm font-medium text-foreground transition-all duration-200 hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2"
           >
             {ctaLabel}
@@ -209,21 +210,23 @@ function ProjectRow({
 
         {/* Title + category */}
         <div className="min-w-0 flex-1">
-          <Typography
-            variant="h4"
-            as="h3"
-            id={`project-title-${index}`}
-            className="mb-0.5 truncate font-semibold transition-colors duration-200"
-          >
-            {project.title}
-          </Typography>
-          <Typography
-            variant="caption"
-            as="p"
-            className="text-subtle-foreground"
-          >
-            {project.category}
-          </Typography>
+          <div className="min-w-0">
+            <Typography
+              variant="h4"
+              as="h3"
+              id={`project-title-${index}`}
+              className="mb-0.5 truncate font-semibold transition-colors duration-200"
+            >
+              {project.title}
+            </Typography>
+            <Typography
+              variant="caption"
+              as="p"
+              className="text-subtle-foreground"
+            >
+              {project.category}
+            </Typography>
+          </div>
         </div>
 
         {/* Tech preview — hidden on xs, shown sm+ */}
@@ -302,6 +305,7 @@ function ProjectRow({
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <Link
               href={`/projects/${project.slug}`}
+              prefetch={false}
               className={TYPOGRAPHY_STYLES.linkPrimary}
             >
               {ctaLabel} →

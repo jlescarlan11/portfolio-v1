@@ -307,6 +307,7 @@ export default async function ProjectPage({ params }: ProjectPageProps): Promise
             <div className="mb-12 flex items-center justify-between border-b border-surface pb-6">
               <Link
                 href="/#work"
+                prefetch={false}
                 className="group flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.15em] text-foreground transition-colors hover:text-muted-foreground"
               >
                 <span aria-hidden="true" className="transition-transform group-hover:-translate-x-1">←</span>
@@ -448,6 +449,7 @@ export default async function ProjectPage({ params }: ProjectPageProps): Promise
             <div className="flex items-center justify-between">
               <Link
                 href="/#work"
+                prefetch={false}
                 className={`${TYPOGRAPHY_STYLES.linkPrimary} inline-flex items-center gap-2`}
               >
                 <span aria-hidden="true">←</span>

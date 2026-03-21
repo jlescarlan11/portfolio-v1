@@ -18,5 +18,5 @@ export const contactContent: ContactContent = {
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'jlescarlan11@gmail.com',
   primaryCtaLabel: 'Send Email',
   resumeLabel: 'View Resume',
-  resumeHref: '/John_Lester_Escarlan_Software_Resume.pdf'
+  resumeHref: '/John_Lester_Escarlan_Resume.pdf'
 };
