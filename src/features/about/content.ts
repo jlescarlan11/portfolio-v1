@@ -146,7 +146,7 @@ export const aboutContent: AboutContent = {
     {
       id: 'exp-pc-software-engineer',
       title: 'Software Engineer',
-      company: 'Pharmacy & Acute Care University (PACU) — Remote',
+      company: 'Pharmacy & Acute Care University (PACU) — Contract',
       startDate: '2026-02',
       endDate: null,
       isCurrent: true,

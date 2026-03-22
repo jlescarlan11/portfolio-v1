@@ -8,6 +8,7 @@
 //   NEXT_PUBLIC_GITHUB_USERNAME=jlescarlan11
 
 import { Typography } from '@/shared/components/Typography';
+import { ScrollableContainer } from './ScrollableContainer';
 
 interface ContributionDay {
   date: string;
@@ -139,7 +140,7 @@ export default async function ContributionGraph({
       </div>
 
       {/* Scrollable graph — full width, larger cells */}
-      <div className="overflow-x-auto no-scrollbar">
+      <ScrollableContainer>
         <div style={{ minWidth: `${WEEKS_TO_SHOW * 15}px` }}>
 
           {/* Month labels — width must equal cell(13) + gap(2) = 15px */}
@@ -190,7 +191,7 @@ export default async function ContributionGraph({
             <span className="text-[9px] text-foreground/50 ml-0.5">More</span>
           </div>
         </div>
-      </div>
+      </ScrollableContainer>
     </div>
   );
 }
