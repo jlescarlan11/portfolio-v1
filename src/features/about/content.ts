@@ -143,25 +143,37 @@ export const aboutContent: AboutContent = {
   ],
 
   experience: [
+    // {
+    //   id: 'exp-pc-software-engineer',
+    //   title: 'Software Engineer',
+    //   company: 'Pharmacy & Acute Care University (PACU) — Remote',
+    //   startDate: '2026-02',
+    //   endDate: null,
+    //   isCurrent: true,
+    //   responsibilities: [
+    //     'Shipped backend features end-to-end on a live healthcare education platform used in production.',
+    //     'Reduced manual overhead by building automated pipelines for deployment, testing, and content generation.',
+    //     'Improved long-term codebase health by leading refactors that increased maintainability and cut technical debt.'
+    //   ]
+    // },
+    // {
+    //   id: 'exp-codevf-software-engineer',
+    //   title: 'Software Engineer',
+    //   company: 'CodeVF — Remote',
+    //   startDate: '2026-01',
+    //   endDate: '2026-03',
+    //   responsibilities: [
+    //     'Diagnosed and resolved production-blocking issues under time pressure, directly restoring system workflows for end users.',
+    //     'Strengthened internal developer experience by overhauling automation tooling, cutting repetitive manual steps for the engineering team.'
+    //   ]
+    // },
     {
-      id: 'exp-pc-software-engineer',
-      title: 'Software Engineer',
-      company: 'Pharmacy & Acute Care University (PACU) — Contract',
-      startDate: '2026-02',
+      id: 'exp-freelance-software-engineer',
+      title: 'Freelance Software Engineer',
+      company: 'Remote',
+      startDate: '2026-01',
       endDate: null,
       isCurrent: true,
-      responsibilities: [
-        'Shipped backend features end-to-end on a live healthcare education platform used in production.',
-        'Reduced manual overhead by building automated pipelines for deployment, testing, and content generation.',
-        'Improved long-term codebase health by leading refactors that increased maintainability and cut technical debt.'
-      ]
-    },
-    {
-      id: 'exp-codevf-software-engineer',
-      title: 'Software Engineer',
-      company: 'CodeVF — Contract',
-      startDate: '2026-01',
-      endDate: '2026-03',
       responsibilities: [
         'Diagnosed and resolved production-blocking issues under time pressure, directly restoring system workflows for end users.',
         'Strengthened internal developer experience by overhauling automation tooling, cutting repetitive manual steps for the engineering team.'
@@ -172,7 +184,7 @@ export const aboutContent: AboutContent = {
       title: 'Software Monitoring Engineer',
       company: "Wind's Gate Philippines — Cebu City",
       startDate: '2025-06',
-      endDate: '2026-02',
+      endDate: '2026-01',
       responsibilities: [
         'Own uptime visibility for distributed production systems, catching and escalating incidents before they impact end users.',
         'Traced root causes from raw logs and alerts, turning ambiguous system noise into actionable incident reports for engineering teams.'
@@ -185,7 +197,7 @@ export const aboutContent: AboutContent = {
       startDate: '2025-06',
       endDate: '2025-07',
       responsibilities: [
-        "Delivered features that passed production code review standards at one of the Philippines' largest software firms — as a first-year CS student."
+        "Delivered features that passed production code review standards at one of the Philippines' largest software firms."
       ]
     },
     {
