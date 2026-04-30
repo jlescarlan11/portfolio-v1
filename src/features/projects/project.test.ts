@@ -9,6 +9,7 @@ import {
   formatMonthYear,
   isRenderableExternalUrl
 } from '../../shared/lib/project.ts';
+import { aboutContent } from '../../features/about/content.ts';
 
 test('project slugs are unique', () => {
   const slugs = getProjectSlugs();
@@ -38,4 +39,23 @@ test('isRenderableExternalUrl rejects placeholders and unsupported protocols', (
 test('formatMonthYear formats to short and long month strings', () => {
   assert.equal(formatMonthYear('2026-03'), 'Mar 2026');
   assert.equal(formatMonthYear('2026-03', 'long'), 'March 2026');
+});
+
+test('freelance experience entry has metric-rich bullets from resume', () => {
+  const freelance = aboutContent.experience.find(e => e.id === 'exp-freelance-software-engineer');
+  assert.ok(freelance, 'freelance entry should exist');
+  assert.ok(
+    freelance.responsibilities.some(r => r.includes('12+')),
+    'should mention 12+ bugs resolved'
+  );
+  assert.ok(
+    freelance.responsibilities.some(r => r.includes('15+')),
+    'should mention 15+ manual steps cut'
+  );
+});
+
+test('skills include Dart and Flutter from resume', () => {
+  const all = aboutContent.techCategories.flatMap(c => c.items.map(i => i.label));
+  assert.ok(all.includes('Dart'), 'Dart should be in skills');
+  assert.ok(all.includes('Flutter'), 'Flutter should be in skills');
 });

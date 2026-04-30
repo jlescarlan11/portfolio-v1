@@ -73,7 +73,13 @@ export const aboutContent: AboutContent = {
         { label: 'JavaScript' },
         { label: 'Python' },
         { label: 'Java' },
-        { label: 'C#' }
+        { label: 'Dart' },
+        { label: 'C#' },
+        { label: 'Go' },
+        { label: 'C' },
+        { label: 'C++' },
+        { label: 'SQL' },
+        { label: 'Bash' }
       ]
     },
     {
@@ -83,12 +89,16 @@ export const aboutContent: AboutContent = {
         { label: 'React' },
         { label: 'Next.js' },
         { label: 'React Native' },
+        { label: 'Flutter' },
         { label: 'Node.js' },
         { label: 'Express.js' },
         { label: 'Spring Boot' },
         { label: 'ASP.NET' },
         { label: 'Tailwind CSS' },
         { label: 'TanStack Query' },
+        { label: 'Redux' },
+        { label: 'Riverpod' },
+        { label: 'Drift' },
         { label: 'Vite' },
         { label: 'Vitest' },
         { label: 'JWT/OAuth2 Authentication' }
@@ -100,9 +110,11 @@ export const aboutContent: AboutContent = {
       items: [
         { label: 'PostgreSQL' },
         { label: 'PostGIS' },
+        { label: 'MySQL' },
         { label: 'MongoDB' },
         { label: 'SQLite' },
         { label: 'Redis' },
+        { label: 'Elasticsearch' },
         { label: 'Drizzle ORM' },
         { label: 'Prisma ORM' },
         { label: 'Docker' },
@@ -111,6 +123,8 @@ export const aboutContent: AboutContent = {
         { label: 'AWS' },
         { label: 'Vercel' },
         { label: 'Supabase' },
+        { label: 'Mapbox' },
+        { label: 'Figma' },
         { label: 'Git' }
       ]
     }
@@ -143,40 +157,18 @@ export const aboutContent: AboutContent = {
   ],
 
   experience: [
-    // {
-    //   id: 'exp-pc-software-engineer',
-    //   title: 'Software Engineer',
-    //   company: 'Pharmacy & Acute Care University (PACU) — Remote',
-    //   startDate: '2026-02',
-    //   endDate: null,
-    //   isCurrent: true,
-    //   responsibilities: [
-    //     'Shipped backend features end-to-end on a live healthcare education platform used in production.',
-    //     'Reduced manual overhead by building automated pipelines for deployment, testing, and content generation.',
-    //     'Improved long-term codebase health by leading refactors that increased maintainability and cut technical debt.'
-    //   ]
-    // },
-    // {
-    //   id: 'exp-codevf-software-engineer',
-    //   title: 'Software Engineer',
-    //   company: 'CodeVF — Remote',
-    //   startDate: '2026-01',
-    //   endDate: '2026-03',
-    //   responsibilities: [
-    //     'Diagnosed and resolved production-blocking issues under time pressure, directly restoring system workflows for end users.',
-    //     'Strengthened internal developer experience by overhauling automation tooling, cutting repetitive manual steps for the engineering team.'
-    //   ]
-    // },
     {
       id: 'exp-freelance-software-engineer',
       title: 'Freelance Software Engineer',
-      company: 'Remote',
+      company: 'Upwork — Remote',
       startDate: '2026-01',
       endDate: null,
       isCurrent: true,
       responsibilities: [
-        'Diagnosed and resolved production-blocking issues under time pressure, directly restoring system workflows for end users.',
-        'Strengthened internal developer experience by overhauling automation tooling, cutting repetitive manual steps for the engineering team.'
+        'Resolved 12+ production-blocking bugs with average turnaround under 24 hours, restoring client workflows fast.',
+        'Rebuilt internal release automation, cutting 15+ manual steps and reclaiming roughly 4 engineering hours per week for the team.',
+        'Shipped 3 client-facing features end-to-end across React, TypeScript, and Node.js stacks, scoping requirements directly with non-technical stakeholders before writing a line of code.',
+        'Wrote technical documentation and API specs for client handoff, reducing onboarding time for new contributors from 1 week to 2 days.'
       ]
     },
     {
@@ -186,8 +178,9 @@ export const aboutContent: AboutContent = {
       startDate: '2025-06',
       endDate: '2026-01',
       responsibilities: [
-        'Own uptime visibility for distributed production systems, catching and escalating incidents before they impact end users.',
-        'Traced root causes from raw logs and alerts, turning ambiguous system noise into actionable incident reports for engineering teams.'
+        'Caught and escalated 25+ incidents across 8 production services before they reached end users, owning live uptime visibility for the team.',
+        'Traced incidents from raw logs to root cause and redesigned the team\'s incident report format, cutting average triage time by 30%.',
+        'Authored 8+ runbooks documenting recovery procedures for recurring incidents, enabling on-call engineers to resolve Tier 1 issues without escalation.'
       ]
     },
     {
@@ -197,7 +190,9 @@ export const aboutContent: AboutContent = {
       startDate: '2025-06',
       endDate: '2025-07',
       responsibilities: [
-        "Delivered features that passed production code review standards at one of the Philippines' largest software firms."
+        "Delivered 5 production features into live client codebases at one of the Philippines' largest software firms.",
+        'Worked across the full stack using C# and ASP.NET MVC on enterprise applications used by thousands of daily users.',
+        'Participated in code reviews, pair programming, and agile ceremonies with senior engineers.'
       ]
     },
     {
@@ -207,7 +202,9 @@ export const aboutContent: AboutContent = {
       startDate: '2024-09',
       endDate: '2024-11',
       responsibilities: [
-        'Applied mathematics-informed thinking to identify and fix N+1 query patterns and schema inefficiencies, measurably improving backend response performance.'
+        'Diagnosed N+1 query patterns and schema bottlenecks, cutting API response time from 800ms to 150ms on top-traffic endpoints.',
+        'Built 10+ REST API endpoints using Node.js and Express to power a new analytics dashboard feature.',
+        'Wrote reusable React components with TypeScript and Tailwind CSS, speeding up feature delivery for downstream teams.'
       ]
     }
   ],
