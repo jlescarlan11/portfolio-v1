@@ -1,13 +1,15 @@
 import type { Metadata } from 'next';
-import { Poppins } from 'next/font/google';
+import { Playfair_Display } from 'next/font/google';
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import WelcomeOverlay from '@/shared/components/WelcomeOverlay';
 import { siteConfig } from '@/shared/site/config';
 import './globals.css';
 
-const poppins = Poppins({
-  variable: '--font-poppins',
+const playfairDisplay = Playfair_Display({
+  variable: '--font-playfair',
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '900']
+  weight: ['400', '600', '700', '900']
 });
 
 export const metadata: Metadata = {
@@ -48,7 +50,9 @@ export default function RootLayout({
 }>): React.JSX.Element {
   return (
     <html lang="en">
-      <body className={`${poppins.variable} antialiased`}>
+      <body
+        className={`${playfairDisplay.variable} ${GeistSans.variable} ${GeistMono.variable} antialiased`}
+      >
         <WelcomeOverlay />
         <a
           href="#main-content"
