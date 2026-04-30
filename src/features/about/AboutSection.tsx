@@ -1,32 +1,40 @@
+'use client';
+
 import type { JSX } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { FaJava } from 'react-icons/fa6';
 import {
   SiAmazonwebservices,
+  SiDart,
   SiDocker,
   SiDotnet,
   SiDrizzle,
-  SiElectron,
+  SiElasticsearch,
   SiExpress,
-  SiGithubactions,
+  SiFigma,
+  SiFlutter,
   SiGit,
+  SiGithubactions,
+  SiGnubash,
+  SiGo,
   SiJavascript,
-  SiJest,
   SiKubernetes,
-  SiLangchain,
+  SiMapbox,
   SiMongodb,
+  SiMysql,
   SiNextdotjs,
   SiNodedotjs,
-  SiOpenai,
   SiOpenid,
   SiPostgresql,
   SiPrisma,
   SiPython,
   SiReact,
   SiRedis,
+  SiRedux,
   SiReplit,
   SiRss,
   SiSharp,
-  SiShopify,
   SiSocketdotio,
   SiSpring,
   SiSqlite,
@@ -57,21 +65,28 @@ const getTechIcon = (label: string): JSX.Element | null => {
     JavaScript: <SiJavascript />,
     Python: <SiPython />,
     Java: <FaJava />,
+    Dart: <SiDart />,
     'C#': <SiSharp />,
+    Go: <SiGo />,
+    Bash: <SiGnubash />,
     React: <SiReact />,
     'React Native': <SiReact />,
     'Next.js': <SiNextdotjs />,
+    Flutter: <SiFlutter />,
     'Node.js': <SiNodedotjs />,
     'Express.js': <SiExpress />,
     'Spring Boot': <SiSpring />,
     'ASP.NET': <SiDotnet />,
     Vite: <SiVite />,
     'Tailwind CSS': <SiTailwindcss />,
+    Redux: <SiRedux />,
     PostgreSQL: <SiPostgresql />,
     PostGIS: <SiPostgresql />,
+    MySQL: <SiMysql />,
     SQLite: <SiSqlite />,
     MongoDB: <SiMongodb />,
     Redis: <SiRedis />,
+    Elasticsearch: <SiElasticsearch />,
     'Drizzle ORM': <SiDrizzle />,
     Prisma: <SiPrisma />,
     'Prisma ORM': <SiPrisma />,
@@ -80,11 +95,12 @@ const getTechIcon = (label: string): JSX.Element | null => {
     AWS: <SiAmazonwebservices />,
     Vercel: <SiVercel />,
     Supabase: <SiSupabase />,
+    Mapbox: <SiMapbox />,
+    Figma: <SiFigma />,
     'Replit Object Storage': <SiReplit />,
     'GitHub CI/CD': <SiGithubactions />,
     'GitHub Actions': <SiGithubactions />,
     'Stripe API': <SiStripe />,
-    'Shopify Integration': <SiShopify />,
     OAuth2: <SiOpenid />,
     'OpenID Connect': <SiOpenid />,
     'JWT/OAuth2 Authentication': <SiOpenid />,
@@ -92,13 +108,8 @@ const getTechIcon = (label: string): JSX.Element | null => {
     WebAuthn: <SiWebauthn />,
     'Socket.io': <SiSocketdotio />,
     'WebSocket (Socket.io)': <SiSocketdotio />,
-    'OpenAI API': <SiOpenai />,
-    LangChain: <SiLangchain />,
-    Electron: <SiElectron />,
-    Git: <SiGit />,
-    Vitest: <SiJest />,
-    Playwright: <SiJest />,
     'TanStack Query': <SiReact />,
+    Git: <SiGit />,
     'RSS Parsing': <SiRss />
   };
   return techIcons[label] ?? null;
@@ -125,7 +136,7 @@ function SkillChip({ label, icon }: SkillChipProps) {
   return (
     <li>
       <span
-        className={`inline-flex items-center gap-2 border ${SURFACE.hairline} px-2.5 py-1.5 transition-colors duration-200 hover:border-foreground/20 hover:text-foreground`}
+        className="inline-flex items-center gap-2 border border-foreground/[0.08] px-3 py-2 transition-colors duration-150 hover:border-foreground/[0.24] hover:text-foreground"
       >
         <span
           className="flex-shrink-0 text-muted-foreground [&>svg]:h-3.5 [&>svg]:w-3.5"
@@ -152,25 +163,52 @@ interface TimelineRowProps {
   endDate?: string | null;
   isCurrent?: boolean;
   bullets: string[];
+  staggerDelay?: number;
 }
 
-function TimelineRow({ title, subtitle, startDate, endDate, isCurrent, bullets }: TimelineRowProps) {
+function TimelineRow({ title, subtitle, startDate, endDate, isCurrent, bullets, staggerDelay = 0 }: TimelineRowProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLLIElement>(null);
   const start = formatMonthYear(startDate);
 
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <li className="group relative py-7 first:pt-0 last:pb-0">
+    <li ref={ref} className="group relative py-7 first:pt-0 last:pb-0">
       <span
         className="absolute left-0 top-7 bottom-7 w-px bg-foreground/0 transition-all duration-300 group-hover:bg-foreground/10"
         aria-hidden="true"
       />
-      <div className="pl-0 transition-all duration-300 group-hover:pl-4">
+      <div
+        className={[
+          'pl-0 transition-all duration-300 group-hover:pl-4',
+          isVisible ? 'animate-enter' : 'opacity-0'
+        ].join(' ')}
+        style={isVisible ? ({ '--enter-delay': `${staggerDelay}ms` } as CSSProperties) : {}}
+      >
         <div className="mb-1 flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
           <Typography
             variant="h4"
             as="h4"
             className="font-semibold leading-snug transition-colors duration-200 group-hover:text-foreground"
           >
-            {title}
+            <span className="relative inline-block after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-full after:bg-foreground/30 after:origin-left after:scale-x-0 after:transition-transform after:duration-200 group-hover:after:scale-x-100">
+              {title}
+            </span>
           </Typography>
           <Typography
             variant="caption"
@@ -233,7 +271,7 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
     >
       <div className="space-y-14">
 
-        {/* ── SKILLS + CONTRIBUTION GRAPH ────────────────────────── */}
+        {/* ── SKILLS + CONTRIBUTION GRAPH ── */}
         {iconCategories.length > 0 && (
           <FadeIn
             delay={100}
@@ -242,8 +280,6 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
             aria-labelledby="skills-heading"
           >
             <SectionLabel>Skills</SectionLabel>
-
-            {/* Chip groups — three categories stacked */}
             <div className="mb-10 space-y-7">
               {iconCategories.map(({ category, items }) => (
                 <div key={category}>
@@ -264,8 +300,6 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
                 </div>
               ))}
             </div>
-
-            {/* Contribution graph — full width below all chip groups */}
             {contributionSlot && (
               <div className={`border-t ${SURFACE.hairline} pt-8`}>
                 {contributionSlot}
@@ -283,23 +317,21 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
             aria-labelledby="credentials-heading"
           >
             <SectionLabel>Credentials</SectionLabel>
-            <CertificationsList 
-              certifications={certifications} 
-              initialVisibleCount={content.certificationsVisibleCount} 
+            <CertificationsList
+              certifications={certifications}
+              initialVisibleCount={content.certificationsVisibleCount}
             />
           </FadeIn>
         )}
 
         {/* ── EXPERIENCE ── */}
-        <FadeIn
-          delay={300}
-          as="section"
+        <section
           className={`border-t ${SURFACE.hairline} pt-10`}
           aria-labelledby="experience-heading"
         >
           <SectionLabel>Experience</SectionLabel>
           <ul className="divide-y divide-foreground/5">
-            {experience.map((item) => (
+            {experience.map((item, index) => (
               <TimelineRow
                 key={item.id}
                 title={item.title}
@@ -308,21 +340,20 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
                 endDate={item.endDate}
                 isCurrent={item.isCurrent}
                 bullets={item.responsibilities}
+                staggerDelay={index * 60}
               />
             ))}
           </ul>
-        </FadeIn>
+        </section>
 
         {/* ── EDUCATION ── */}
-        <FadeIn
-          delay={400}
-          as="section"
+        <section
           className={`border-t ${SURFACE.hairline} pt-10`}
           aria-labelledby="education-heading"
         >
           <SectionLabel>Education</SectionLabel>
           <ul className="divide-y divide-foreground/5">
-            {education.map((item) => (
+            {education.map((item, index) => (
               <TimelineRow
                 key={item.id}
                 title={item.degree}
@@ -331,10 +362,11 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
                 endDate={item.endDate}
                 isCurrent={item.isCurrent}
                 bullets={item.achievements ?? []}
+                staggerDelay={index * 60}
               />
             ))}
           </ul>
-        </FadeIn>
+        </section>
 
       </div>
     </SectionFrame>
