@@ -14,6 +14,7 @@ export default function NavigationBar({
 }: NavigationBarProps): React.JSX.Element {
   const [isVisible, setIsVisible] = useState(true);
   const [isPastHero, setIsPastHero] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>('');
   const lastScrollY = useRef(0);
   const isClicked = useRef(false);
 
@@ -36,6 +37,29 @@ export default function NavigationBar({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    const sectionIds = items
+      .map((item) => item.href.replace('#', ''))
+      .filter(Boolean);
+
+    const observers = sectionIds.map((id) => {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setActiveSection(id);
+        },
+        { threshold: 0.4 }
+      );
+      observer.observe(el);
+      return observer;
+    });
+
+    return () => {
+      observers.forEach((obs) => obs?.disconnect());
+    };
+  }, [items]);
+
   const pillBase = [
     'flex items-center gap-1',
     'border px-2 py-1.5 sm:px-3 sm:py-2',
@@ -57,31 +81,46 @@ export default function NavigationBar({
       ].join(' ')}
     >
       <ul className={pillBase}>
-        {items.map((item) => (
-          <li key={item.name}>
-            <Link
-              href={item.href}
-              onClick={() => {
-                isClicked.current = true;
-                setIsVisible(true);
-              }}
-              className={[
-                'group block px-4 py-2 sm:py-1.5',
-                'transition-colors duration-200',
-                'hover:bg-surface-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20',
-                'active:bg-surface-tint-strong'
-              ].join(' ')}
-            >
-              <Typography
-                variant="label"
-                as="span"
-                className="text-[13px] text-muted-foreground transition-colors duration-200 group-hover:text-foreground"
+        {items.map((item) => {
+          const sectionId = item.href.replace('#', '');
+          const isActive = sectionId === activeSection;
+
+          return (
+            <li key={item.name}>
+              <Link
+                href={item.href}
+                onClick={() => {
+                  isClicked.current = true;
+                  setIsVisible(true);
+                }}
+                className={[
+                  'group block px-4 py-2 sm:py-1.5',
+                  'transition-colors duration-200',
+                  'hover:bg-surface-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20',
+                  'active:bg-surface-tint-strong'
+                ].join(' ')}
               >
-                {item.name}
-              </Typography>
-            </Link>
-          </li>
-        ))}
+                <span className="relative inline-block">
+                  <Typography
+                    variant="label"
+                    as="span"
+                    className="text-[13px] text-muted-foreground transition-colors duration-200 group-hover:text-foreground"
+                  >
+                    {item.name}
+                  </Typography>
+                  <span
+                    className={[
+                      'absolute -bottom-0.5 left-0 h-px w-full bg-foreground origin-left',
+                      'transition-transform duration-200',
+                      isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                    ].join(' ')}
+                    aria-hidden="true"
+                  />
+                </span>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );
