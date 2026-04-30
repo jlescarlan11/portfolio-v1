@@ -49,7 +49,7 @@ export default function NavigationBar({
         ([entry]) => {
           if (entry.isIntersecting) setActiveSection(id);
         },
-        { threshold: 0.4 }
+        { rootMargin: '-40% 0px -40% 0px', threshold: 0 }
       );
       observer.observe(el);
       return observer;
