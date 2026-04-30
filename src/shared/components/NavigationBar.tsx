@@ -39,7 +39,7 @@ export default function NavigationBar({
 
   useEffect(() => {
     const sectionIds = items
-      .map((item) => item.href.replace('#', ''))
+      .map((item) => item.href.split('#')[1] ?? '')
       .filter(Boolean);
 
     const observers = sectionIds.map((id) => {
@@ -82,11 +82,11 @@ export default function NavigationBar({
     >
       <ul className={pillBase}>
         {items.map((item) => {
-          const sectionId = item.href.replace('#', '');
+          const sectionId = item.href.split('#')[1] ?? '';
           const isActive = sectionId === activeSection;
 
           return (
-            <li key={item.name}>
+            <li key={item.href}>
               <Link
                 href={item.href}
                 onClick={() => {
