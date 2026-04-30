@@ -14,6 +14,32 @@ export const projectsSectionContent: ProjectsSectionContent = {
 export const projects: ProjectRecord[] = [
   // ─── ACTIVE / NOT ARCHIVED ────────────────────────────────────────────────
   {
+    slug: 'firecheck',
+    title: 'FireCheck',
+    category: 'Mobile Application / GIS & Field Survey',
+    description:
+      'An offline-first Android field survey app replacing 2 legacy paper-and-tablet workflows — built with Flutter, an outbox-pattern sync engine, and WorkManager retry/backoff.',
+    logo: '',
+    technologies: ['Flutter', 'Dart', 'Riverpod', 'Drift', 'Mapbox SDK', 'Supabase', 'WorkManager'],
+    completedAt: '2026-04',
+    links: {
+      githubUrl: 'https://github.com/jlescarlan11/firecheck'
+    },
+    caseStudy: {
+      summary:
+        'A production Android tool engineered to replace paper-and-tablet field workflows with a single offline-first app.',
+      overview: [
+        'FireCheck was shipped across 7 release phases as sole developer. The core challenge was reliable data sync in environments with intermittent connectivity — solved with an outbox-pattern sync engine, two-phase photo upload, and WorkManager retry/backoff.',
+        'The 409 bundle-export fallback ensures no field data is lost even when sync conflicts occur. Two legacy workflows were replaced by a single Android tool.'
+      ],
+      highlights: [
+        'Outbox-pattern sync engine with two-phase photo upload and WorkManager retry/backoff.',
+        'Shipped across 7 release phases as sole developer.',
+        'Replaced 2 legacy paper-and-tablet workflows with a single offline-first Android tool.'
+      ]
+    }
+  },
+  {
     slug: 'kaizen',
     title: 'Kaizen',
     category: 'Web Application / Personal Finance',
@@ -44,7 +70,7 @@ export const projects: ProjectRecord[] = [
     title: 'PriceCraft',
     category: 'Web Application / Productivity Tool',
     description:
-      'A web-based calculator that helps small food businesses in the Philippines determine profitable selling prices for their products.',
+      'A live profit pricing calculator for small-business operators — edge-case-hardened (zero-cost, negative margins, rounding) so non-technical users get correct prices on the first try.',
     logo: '/project/pricecraft.svg',
     technologies: ['TypeScript', 'React', 'Vite', 'Tailwind CSS'],
     completedAt: '2026-01', // last pushed 2026-01-10
@@ -54,7 +80,7 @@ export const projects: ProjectRecord[] = [
     },
     caseStudy: {
       summary:
-        'A product-minded pricing workspace for small Filipino food businesses — modeling margins, labor, and overhead before those assumptions leak into operations.',
+        'A pricing tool engineered around the edge cases that break generic calculators — zero-cost inputs, negative margins, and rounding — for small Filipino food businesses.',
       overview: [
         'PriceCraft was built to make pricing decisions legible for small food entrepreneurs. Instead of burying cost assumptions in spreadsheets, the app surfaces margin, labor, and overhead tradeoffs in one clear workflow.',
         'The build focused on practical usability, fast calculation feedback, and a responsive layout that works in low-resource environments.'
@@ -100,7 +126,7 @@ export const projects: ProjectRecord[] = [
     title: 'HEALTH',
     category: 'Mobile Application',
     description:
-      'A mobile application that solves hospital overcrowding by guiding residents to the right healthcare facility — built for the 1st Naga City Mayoral Hackathon.',
+      'An AI-assisted triage and offline care guide — Semi-Finalist (top 15 of 200+ teams) at the 1st Naga City Mayoral Hackathon, built for reliable use in low-connectivity areas.',
     logo: '/project/health.svg',
     technologies: ['TypeScript', 'React Native', 'Expo', 'Node.js', 'Prisma', 'PostgreSQL', 'SQLite'],
     completedAt: '2026-02', // last pushed 2026-02-03
@@ -109,15 +135,15 @@ export const projects: ProjectRecord[] = [
     },
     caseStudy: {
       summary:
-        'A mobile guide for matching people to the right healthcare path even when connectivity is unreliable.',
+        'A civic health app that safety-gates AI triage through deterministic logic and keeps 100% of core features usable offline.',
       overview: [
         'HEALTH combined local-first mobile behavior with healthcare decision support so residents could still navigate care options without depending on a stable network connection.',
         'The project centered on practical usability: facility discovery, enrollment guidance, and language that helped users move from uncertainty to the next action.'
       ],
       highlights: [
-        'Designed for offline-first access patterns in low-connectivity areas.',
-        'Mapped healthcare facilities and triage guidance into one flow.',
-        'Hackathon project: 1st Naga City Mayoral Hackathon (Team MatCs, Project Lead).'
+        'Led a 5-man team to Semi-Finalist (top 15 of 200+ teams) at the 1st Naga City Mayoral Hackathon.',
+        'Safety-gates AI triage through deterministic logic — AI suggestions never bypass hard clinical rules.',
+        '100% of core features usable offline via SQLite local persistence.'
       ]
     }
   },

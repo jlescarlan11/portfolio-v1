@@ -59,3 +59,30 @@ test('skills include Dart and Flutter from resume', () => {
   assert.ok(all.includes('Dart'), 'Dart should be in skills');
   assert.ok(all.includes('Flutter'), 'Flutter should be in skills');
 });
+
+test('firecheck is the first project in the array', () => {
+  assert.equal(projects[0].slug, 'firecheck');
+  assert.equal(projects[0].title, 'FireCheck');
+  assert.ok(
+    projects[0].technologies.includes('Flutter'),
+    'FireCheck should list Flutter as a technology'
+  );
+});
+
+test('HEALTH description references AI triage', () => {
+  const health = projects.find(p => p.slug === 'health');
+  assert.ok(health, 'health project should exist');
+  assert.ok(
+    health.description.toLowerCase().includes('ai'),
+    'HEALTH description should mention AI triage'
+  );
+});
+
+test('PriceCraft description mentions edge cases', () => {
+  const pricecraft = projects.find(p => p.slug === 'pricecraft');
+  assert.ok(pricecraft, 'pricecraft should exist');
+  assert.ok(
+    pricecraft.description.includes('edge-case'),
+    'PriceCraft description should mention edge cases'
+  );
+});
