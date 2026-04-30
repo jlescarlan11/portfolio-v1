@@ -57,7 +57,7 @@ export default function HeroSection({
           <h1
             id="hero-heading"
             className="font-black leading-[1.0] tracking-tight font-serif"
-            style={{ fontSize: 'clamp(2.5rem, 6.5vw, 4.5rem)' }}
+            style={{ fontSize: 'clamp(1.75rem, 4.5vw, 3.25rem)' }}
           >
             {nameWords.map((word, i) => (
               <span
