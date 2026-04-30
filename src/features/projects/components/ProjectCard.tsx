@@ -27,7 +27,7 @@ export function ProjectCard({
         </Typography>
       </div>
 
-      <div className="flex aspect-square w-full items-center justify-center overflow-hidden bg-surface transition-all duration-500">
+      <div className="flex aspect-square w-full items-center justify-center overflow-hidden bg-surface transition-all duration-200 group-hover:-translate-y-0.5">
         <div className="relative h-full w-full">
           <Image
             src={project.logo}

@@ -178,7 +178,7 @@ export default function WelcomeOverlay(): React.JSX.Element | null {
           closing ? '-translate-y-2 opacity-0' : ''
         ].join(' ')}
       >
-        <Typography variant="h1" as="h1">
+        <Typography variant="h1" as="h1" className="font-serif">
           {siteConfig.overlay.title}
         </Typography>
         <div className="space-y-2" aria-live="polite">

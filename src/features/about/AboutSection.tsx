@@ -229,8 +229,8 @@ function TimelineRow({ title, subtitle, startDate, endDate, isCurrent, bullets, 
         </Typography>
         {bullets.length > 0 && (
           <ul className="flex flex-col gap-2.5">
-            {bullets.map((bullet) => (
-              <li key={bullet} className="flex gap-3">
+            {bullets.map((bullet, i) => (
+              <li key={`${i}-${bullet}`} className="flex gap-3">
                 <span
                   aria-hidden="true"
                   className="mt-[9px] h-1 w-1 flex-shrink-0 bg-foreground/20 transition-colors duration-300 group-hover:bg-foreground/40"
