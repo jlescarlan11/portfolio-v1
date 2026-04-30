@@ -17,7 +17,7 @@ export function FadeIn({
   as: Component = 'div'
 }: FadeInProps): React.JSX.Element {
   const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLElement>(null);
   const delayValue = typeof delay === 'number' ? `${delay}ms` : delay;
 
   useEffect(() => {
