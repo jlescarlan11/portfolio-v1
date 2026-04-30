@@ -22,7 +22,10 @@ export default function HeroSection({
     scroll: 700
   };
 
-  const shortTagline = tagline.split(/[.!?]/)[0].trim();
+  const taglineMatch = tagline.match(/^([^.!?]+)([.!?])/);
+  const shortTagline = taglineMatch
+    ? taglineMatch[1].trim() + taglineMatch[2]
+    : tagline.split(/[.!?]/)[0].trim() + '.';
   const nameWords = name.split(' ');
 
   return (
@@ -92,7 +95,7 @@ export default function HeroSection({
               as="p"
               className="max-w-lg leading-relaxed text-muted-foreground"
             >
-              {shortTagline}.
+              {shortTagline}
             </Typography>
           </FadeIn>
 
@@ -149,7 +152,8 @@ export default function HeroSection({
           <span
             className="block h-full w-full bg-foreground/20 origin-top"
             style={{
-              animation: 'draw-down 1.2s ease-out 0.7s both'
+              animation: 'draw-down 1.2s ease-out 0.7s both',
+              transformOrigin: 'top'
             }}
           />
         </span>

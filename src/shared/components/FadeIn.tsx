@@ -1,12 +1,11 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
 
-interface FadeInProps {
+interface FadeInProps extends Omit<HTMLAttributes<HTMLElement>, 'style'> {
   children: ReactNode;
   delay?: number | string;
-  className?: string;
   as?: React.ElementType;
 }
 
@@ -14,7 +13,8 @@ export function FadeIn({
   children,
   delay = 0,
   className = '',
-  as: Component = 'div'
+  as: Component = 'div',
+  ...rest
 }: FadeInProps): React.JSX.Element {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLElement>(null);
@@ -40,6 +40,7 @@ export function FadeIn({
 
   return (
     <Component
+      {...rest}
       ref={ref}
       className={isVisible ? `animate-enter ${className}`.trim() : `opacity-0 ${className}`.trim()}
       style={isVisible ? ({ '--enter-delay': delayValue } as CSSProperties) : undefined}
