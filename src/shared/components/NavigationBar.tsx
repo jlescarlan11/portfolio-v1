@@ -42,22 +42,19 @@ export default function NavigationBar({
       .map((item) => item.href.split('#')[1] ?? '')
       .filter(Boolean);
 
-    const observers = sectionIds.map((id) => {
-      const el = document.getElementById(id);
-      if (!el) return null;
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) setActiveSection(id);
-        },
-        { rootMargin: '-40% 0px -40% 0px', threshold: 0 }
-      );
-      observer.observe(el);
-      return observer;
-    });
-
-    return () => {
-      observers.forEach((obs) => obs?.disconnect());
+    const updateActive = (): void => {
+      const mid = window.innerHeight / 2;
+      let active = '';
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= mid) active = id;
+      }
+      setActiveSection(active);
     };
+
+    window.addEventListener('scroll', updateActive, { passive: true });
+    updateActive();
+    return () => window.removeEventListener('scroll', updateActive);
   }, [items]);
 
   const pillBase = [
