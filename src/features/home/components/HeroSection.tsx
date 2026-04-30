@@ -1,5 +1,6 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import type { HeroContent } from '@/features/home/content';
 import ProfileImage from '@/features/home/components/ProfileImage';
 import SocialLinks from '@/features/home/components/SocialLinks';
@@ -13,18 +14,16 @@ export default function HeroSection({
   profileImage: { src, alt },
   socialLinks
 }: HeroContent): React.JSX.Element {
-  // Stagger delays — name anchors first, everything else follows
   const d = {
-    name: 0,
-    role: 100,
-    tagline: 220,
-    social: 360,
+    role: 320,
+    tagline: 440,
+    social: 560,
     image: 80,
-    scroll: 600
+    scroll: 700
   };
 
-  // Trim tagline to first sentence for above-the-fold punch
   const shortTagline = tagline.split(/[.!?]/)[0].trim();
+  const nameWords = name.split(' ');
 
   return (
     <section
@@ -32,13 +31,12 @@ export default function HeroSection({
       className="relative min-h-screen overflow-hidden bg-surface"
       aria-labelledby="hero-heading"
     >
-      {/* Grid texture — fades toward bottom so it doesn't compete with content below */}
       <div
         className="surface-grid-mask pointer-events-none-safe absolute inset-0"
         aria-hidden="true"
+        style={{ '--surface-border-dim': 'rgba(var(--foreground-rgb), 0.14)' } as CSSProperties}
       />
 
-      {/* ── Main grid ── */}
       <div
         className={[
           'relative z-10 mx-auto grid min-h-screen w-full max-w-5xl',
@@ -52,23 +50,27 @@ export default function HeroSection({
         {/* ── Left: text content ── */}
         <div className="order-2 flex flex-col gap-7 lg:order-1 lg:justify-center lg:pr-12">
 
-          {/* Name — always lands first, fluid size */}
-          <FadeIn delay={d.name}>
-            <Typography
-              variant="display"
-              as="h1"
-              id="hero-heading"
-              className="font-black leading-[1.0] tracking-tight"
-              style={{ fontSize: 'clamp(2.5rem, 6.5vw, 4.5rem)' }}
-            >
-              {name}
-            </Typography>
-          </FadeIn>
+          {/* Name — word-by-word entrance */}
+          <h1
+            id="hero-heading"
+            className="font-black leading-[1.0] tracking-tight font-serif"
+            style={{ fontSize: 'clamp(2.5rem, 6.5vw, 4.5rem)' }}
+          >
+            {nameWords.map((word, i) => (
+              <span
+                key={i}
+                className="inline-block animate-enter"
+                style={{ '--enter-delay': `${i * 80}ms` } as CSSProperties}
+              >
+                {word}
+                {i < nameWords.length - 1 && <>&nbsp;</>}
+              </span>
+            ))}
+          </h1>
 
-          {/* Role — pill tag treatment, not plain eyebrow */}
+          {/* Role */}
           <FadeIn delay={d.role}>
             <span className="inline-flex items-center gap-2.5">
-              {/* Animated availability dot */}
               <span className="relative flex h-2 w-2 flex-shrink-0" aria-hidden="true">
                 <span className="absolute inline-flex h-full w-full animate-ping bg-foreground opacity-20" />
                 <span className="relative inline-flex h-2 w-2 bg-foreground/40" />
@@ -83,12 +85,12 @@ export default function HeroSection({
             </span>
           </FadeIn>
 
-          {/* Tagline — first sentence only, comfortable reading width */}
+          {/* Tagline */}
           <FadeIn delay={d.tagline}>
             <Typography
               variant="body-lg"
               as="p"
-              className="max-w-md leading-relaxed text-muted-foreground"
+              className="max-w-lg leading-relaxed text-muted-foreground"
             >
               {shortTagline}.
             </Typography>
@@ -100,28 +102,23 @@ export default function HeroSection({
           </FadeIn>
         </div>
 
-        {/* ── Right: profile image ── */}
+        {/* ── Right: profile image with corner brackets ── */}
         <FadeIn
           delay={d.image}
           className="relative order-1 flex items-center justify-start lg:order-2 lg:justify-end"
         >
-          {/*
-            Architectural offset border — a single square border displaced
-            by 12px down-right. Feels considered, not decorative.
-          */}
           <div className="relative">
-            {/* Offset border — sits behind the image */}
-            <div
-              className="absolute border border-surface-border"
-              style={{
-                inset: 0,
-                transform: 'translate(12px, 12px)',
-                zIndex: 0
-              }}
+            {/* Top-left corner bracket */}
+            <span
+              className="absolute -top-2 -left-2 z-20 h-5 w-5 border-l border-t border-foreground/40 pointer-events-none"
+              aria-hidden="true"
+            />
+            {/* Bottom-right corner bracket */}
+            <span
+              className="absolute -bottom-2 -right-2 z-20 h-5 w-5 border-r border-b border-foreground/40 pointer-events-none"
               aria-hidden="true"
             />
 
-            {/* Image container — sits above the border */}
             <div
               className="relative z-10 overflow-hidden bg-surface-muted"
               style={{ width: 'clamp(160px, 28vw, 300px)', aspectRatio: '1/1' }}
@@ -145,14 +142,18 @@ export default function HeroSection({
         >
           scroll
         </Typography>
-        {/* Animated line — draws down on load */}
         <span
-          className="block w-px bg-foreground/20 animate-enter"
-          style={{ height: '48px', '--enter-delay': '700ms' } as React.CSSProperties}
-        />
+          className="block w-px overflow-hidden"
+          style={{ height: '48px' }}
+        >
+          <span
+            className="block h-full w-full bg-foreground/20 origin-top"
+            style={{
+              animation: 'draw-down 1.2s ease-out 0.7s both'
+            }}
+          />
+        </span>
       </FadeIn>
-
-    
     </section>
   );
 }
