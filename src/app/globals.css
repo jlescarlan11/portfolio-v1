@@ -23,8 +23,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-poppins);
-  --font-mono: var(--font-poppins);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-playfair);
 }
 
 html {
@@ -34,7 +35,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-poppins), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -87,22 +88,22 @@ body {
     pointer-events: none;
   }
   .display {
-    @apply text-4xl md:text-5xl font-semibold tracking-tight leading-tight text-foreground;
+    @apply font-serif text-4xl md:text-5xl font-semibold tracking-tight leading-tight text-foreground;
   }
   .h1 {
-    @apply text-3xl md:text-4xl font-semibold tracking-tight leading-tight text-foreground;
+    @apply font-serif text-3xl md:text-4xl font-semibold tracking-tight leading-tight text-foreground;
   }
   .h2 {
-    @apply text-2xl md:text-3xl font-semibold tracking-tight leading-snug text-foreground;
+    @apply font-serif text-2xl md:text-3xl font-semibold tracking-tight leading-snug text-foreground;
   }
   .h3 {
-    @apply text-xl md:text-2xl font-semibold tracking-tight leading-snug text-foreground;
+    @apply font-serif text-xl md:text-2xl font-semibold tracking-tight leading-snug text-foreground;
   }
   .h4 {
-    @apply text-lg md:text-xl font-medium leading-snug text-foreground;
+    @apply font-serif text-lg md:text-xl font-medium leading-snug text-foreground;
   }
   .body-lg {
-    @apply text-lg leading-7;
+    @apply text-lg leading-[1.8];
     color: var(--text-muted-foreground);
   }
   .body {
@@ -113,14 +114,14 @@ body {
     color: var(--text-muted-foreground);
   }
   .label {
-    @apply text-sm font-medium leading-none text-foreground;
+    @apply font-sans text-sm font-medium leading-none text-foreground;
   }
   .caption {
-    @apply text-xs leading-5;
+    @apply font-mono text-xs leading-5;
     color: var(--text-muted-foreground);
   }
   .code {
-    @apply text-sm font-mono leading-6 text-foreground;
+    @apply font-mono text-sm leading-6 text-foreground;
   }
   .surface-grid-mask {
     background-image:
@@ -156,11 +157,15 @@ body {
     opacity: 0;
     transform: translateY(16px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes draw-down {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
