@@ -13,6 +13,7 @@
     "test:ui": "vitest run"
   },
   "dependencies": {
+    "@mlc-ai/web-llm": "^0.2.83",
     "geist": "^1.7.0",
     "next": "15.5.9",
     "react": "19.1.0",
