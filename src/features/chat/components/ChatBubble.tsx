@@ -14,23 +14,24 @@ export function ChatBubble() {
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-      {/* Keep ChatWindow mounted after first open so the model stays loaded */}
       {hasOpened && (
         <div data-testid="chat-window-wrapper" className={isOpen ? 'block' : 'hidden'}>
           <ChatWindow onClose={() => setIsOpen(false)} />
         </div>
       )}
       {!isOpen && (
-        <span className="rounded-lg border border-zinc-700/50 bg-zinc-900/90 px-3 py-1.5 text-xs text-zinc-400 backdrop-blur-sm">
-          Ask me about John ✨
+        <span className="border border-surface bg-background/90 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-subtle-foreground backdrop-blur-md">
+          Ask me about John
         </span>
       )}
       <button
         onClick={toggle}
         aria-label="Open AI chat"
-        className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-xl text-white shadow-lg shadow-indigo-500/30 transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-zinc-950"
+        className="relative flex h-11 w-11 items-center justify-center border border-surface bg-background/90 backdrop-blur-md transition-colors duration-300 hover:border-foreground/40 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
       >
-        💬
+        <span className="absolute left-[3px] top-[3px] h-2.5 w-2.5 border-l border-t border-foreground/30" aria-hidden="true" />
+        <span className="absolute bottom-[3px] right-[3px] h-2.5 w-2.5 border-b border-r border-foreground/30" aria-hidden="true" />
+        <span className="font-mono text-[11px] font-medium uppercase tracking-widest text-muted-foreground">AI</span>
       </button>
     </div>
   );

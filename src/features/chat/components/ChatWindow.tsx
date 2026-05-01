@@ -35,48 +35,56 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
   }
 
   return (
-    <div className="flex h-[480px] w-80 flex-col rounded-t-xl border border-zinc-700/50 bg-zinc-900 shadow-2xl sm:w-96">
+    <div className="relative flex h-[520px] w-80 flex-col overflow-hidden border border-surface bg-background shadow-2xl sm:w-96">
+      {/* corner brackets */}
+      <span className="pointer-events-none absolute left-2 top-2 z-10 h-4 w-4 border-l border-t border-foreground/20" aria-hidden="true" />
+      <span className="pointer-events-none absolute bottom-2 right-2 z-10 h-4 w-4 border-b border-r border-foreground/20" aria-hidden="true" />
+
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
+      <div className="relative z-10 flex items-center justify-between border-b border-surface px-4 py-3">
         <div>
-          <p className="text-sm font-semibold text-zinc-100">John&apos;s AI Assistant</p>
-          <p className="text-xs">
-            {status === 'ready' && <span className="text-emerald-400">● Ready</span>}
-            {status === 'loading' && (
-              <span className="text-zinc-500">Loading model...</span>
-            )}
-            {status === 'unsupported' && (
-              <span className="text-zinc-500">Not available</span>
-            )}
-            {status === 'error' && <span className="text-red-400">Error</span>}
-            {status === 'idle' && <span className="text-zinc-500">Offline AI</span>}
+          <p className="font-serif text-sm font-semibold tracking-tight text-foreground">
+            John&apos;s AI Assistant
+          </p>
+          <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.12em]">
+            {status === 'ready' && <span className="text-foreground/50">● Online</span>}
+            {status === 'loading' && <span className="text-subtle-foreground">Downloading...</span>}
+            {status === 'unsupported' && <span className="text-subtle-foreground">Not available</span>}
+            {status === 'error' && <span className="text-foreground/50">Error</span>}
+            {status === 'idle' && <span className="text-subtle-foreground">Offline AI</span>}
           </p>
         </div>
         <button
           onClick={onClose}
           aria-label="Close chat"
-          className="text-zinc-500 hover:text-zinc-300"
+          className="font-mono text-xs text-subtle-foreground transition-colors hover:text-foreground"
         >
           ✕
         </button>
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="relative z-10 flex flex-1 flex-col overflow-hidden">
+
         {status === 'idle' && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
-            <span className="text-4xl">🤖</span>
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-zinc-200">Run AI in your browser</p>
-              <p className="text-xs text-zinc-400">
-                This downloads a <strong className="text-zinc-300">~2.4 GB</strong> AI model to your device.
-                It runs fully offline — nothing is sent to a server.
+          <div className="flex flex-1 flex-col items-center justify-center gap-6 p-8 text-center">
+            <div className="space-y-3">
+              <p className="font-serif text-base font-semibold tracking-tight text-foreground">
+                Run AI in your browser
               </p>
-              <p className="text-xs text-zinc-600">Cached after the first download.</p>
+              <p className="font-mono text-[11px] leading-relaxed text-muted-foreground">
+                Downloads a{' '}
+                <span className="text-foreground">~2.4 GB</span> model to your device.
+                <br />
+                Fully offline — nothing sent to a server.
+              </p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-subtle-foreground/50">
+                Cached after first download
+              </p>
             </div>
             <button
               onClick={initialize}
-              className="rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600"
+              className="border border-surface px-5 py-2 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground transition-colors duration-200 hover:border-foreground/40 hover:text-foreground"
             >
               Download &amp; Start
             </button>
@@ -84,17 +92,19 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
         )}
 
         {status === 'unsupported' && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-            <span className="text-3xl">⚠️</span>
-            <p className="text-sm text-zinc-400">
-              This feature requires{' '}
-              <strong className="text-zinc-200">WebGPU</strong>. Please open in{' '}
-              <strong className="text-zinc-200">Chrome</strong> or{' '}
-              <strong className="text-zinc-200">Edge</strong> to chat.
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
+            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-subtle-foreground">
+              WebGPU required
+            </p>
+            <p className="font-serif text-sm text-muted-foreground">
+              Open in{' '}
+              <span className="text-foreground">Chrome</span> or{' '}
+              <span className="text-foreground">Edge</span>{' '}
+              to use this feature.
             </p>
             <button
               onClick={() => navigator.clipboard.writeText(window.location.href)}
-              className="rounded-md border border-zinc-700 px-3 py-1.5 text-xs text-indigo-400 hover:border-indigo-500"
+              className="border border-surface px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-subtle-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
             >
               Copy link →
             </button>
@@ -102,35 +112,39 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
         )}
 
         {status === 'loading' && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-            <span className="text-4xl">🤖</span>
-            <div className="w-full space-y-2">
-              <p className="text-center text-xs text-zinc-500">
-                Downloading AI model
-                <br />
-                <span className="text-zinc-600">First visit only — cached after this</span>
+          <div className="flex flex-1 flex-col items-center justify-center gap-6 p-8">
+            <div className="w-full space-y-4">
+              <p className="text-center font-mono text-[10px] uppercase tracking-[0.12em] text-subtle-foreground">
+                Downloading model
               </p>
               <div
                 role="progressbar"
                 aria-valuenow={progress}
                 aria-valuemin={0}
                 aria-valuemax={100}
-                className="h-1 w-full overflow-hidden rounded-full bg-zinc-800"
+                className="h-px w-full bg-foreground/10"
               >
                 <div
-                  className="h-full bg-indigo-500 transition-all duration-300"
+                  className="h-full bg-foreground/60 transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <p className="text-center text-xs text-zinc-600">{progressText}</p>
+              <p className="truncate text-center font-mono text-[10px] text-subtle-foreground/50">
+                {progressText}
+              </p>
+              <p className="text-center font-mono text-[10px] uppercase tracking-[0.1em] text-subtle-foreground/40">
+                First visit only — cached after this
+              </p>
             </div>
           </div>
         )}
 
         {status === 'error' && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-            <span className="text-3xl">❌</span>
-            <p className="text-sm text-zinc-400">
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
+            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-subtle-foreground">
+              Error
+            </p>
+            <p className="font-serif text-sm text-muted-foreground">
               Failed to load the AI model. Please refresh and try again.
             </p>
           </div>
@@ -138,7 +152,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
 
         {status === 'ready' && (
           <>
-            <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-3">
+            <div className="no-scrollbar flex flex-1 flex-col gap-4 overflow-y-auto p-4">
               {messages.map((msg, i) => (
                 <ChatMessage key={i} role={msg.role} content={msg.content} />
               ))}
@@ -146,7 +160,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
             </div>
             <form
               onSubmit={handleSubmit}
-              className="flex gap-2 border-t border-zinc-800 p-3"
+              className="flex items-center gap-3 border-t border-surface px-4 py-3"
             >
               <input
                 type="text"
@@ -154,12 +168,12 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
                 onChange={e => setInput(e.target.value)}
                 placeholder="Ask a question..."
                 disabled={isStreaming}
-                className="flex-1 rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-indigo-500 focus:outline-none disabled:opacity-50"
+                className="flex-1 bg-transparent font-mono text-[12px] text-foreground placeholder:text-white/25 focus:outline-none disabled:opacity-40"
               />
               <button
                 type="submit"
                 disabled={isStreaming || !input.trim()}
-                className="rounded-md bg-indigo-500 px-3 py-2 text-sm text-white hover:bg-indigo-600 disabled:opacity-50"
+                className="font-mono text-sm text-subtle-foreground transition-colors hover:text-foreground disabled:opacity-30"
               >
                 →
               </button>

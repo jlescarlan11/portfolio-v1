@@ -13,11 +13,11 @@ describe('ChatMessage', () => {
 
   it('right-aligns user messages', () => {
     const { container } = render(<ChatMessage role="user" content="Hello" />);
-    expect(container.firstElementChild?.className).toContain('justify-end');
+    expect(container.firstElementChild?.className).toContain('flex-row-reverse');
   });
 
   it('left-aligns assistant messages', () => {
     const { container } = render(<ChatMessage role="assistant" content="Hi" />);
-    expect(container.firstElementChild?.className).toContain('justify-start');
+    expect(container.firstElementChild?.className).toContain('flex-row');
   });
 });
