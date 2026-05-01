@@ -168,7 +168,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
                 onChange={e => setInput(e.target.value)}
                 placeholder="Ask a question..."
                 disabled={isStreaming}
-                className="flex-1 bg-transparent font-mono text-[12px] text-foreground placeholder:text-white/25 focus:outline-none disabled:opacity-40"
+                className="flex-1 bg-transparent font-mono text-[12px] text-foreground placeholder:text-foreground/40 focus:outline-none disabled:opacity-40"
               />
               <button
                 type="submit"
