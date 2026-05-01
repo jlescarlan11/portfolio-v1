@@ -29,10 +29,10 @@ describe('ChatBubble', () => {
     expect(getByText("John's AI Assistant")).toBeTruthy();
   });
 
-  it('unmounts ChatWindow when close button is triggered', () => {
-    const { getByRole, getByLabelText, queryByText } = render(<ChatBubble />);
+  it('hides ChatWindow when close button is triggered', () => {
+    const { getByRole, getByLabelText, getByTestId } = render(<ChatBubble />);
     fireEvent.click(getByRole('button', { name: /open ai chat/i }));
     fireEvent.click(getByLabelText('Close chat'));
-    expect(queryByText("John's AI Assistant")).toBeNull();
+    expect(getByTestId('chat-window-wrapper').className).toContain('hidden');
   });
 });
