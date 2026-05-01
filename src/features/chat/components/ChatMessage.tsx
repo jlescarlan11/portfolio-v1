@@ -43,9 +43,10 @@ export const ChatMessage = memo(function ChatMessage({ role, content, isThinking
         isUser ? 'bg-surface-tint px-3 py-2 font-mono text-[12px] text-foreground' : 'text-muted-foreground'
       }`}>
         {isThinking ? (
-          <span className="flex items-center gap-1" aria-label="Thinking">
+          <span className="flex items-center gap-2" aria-label="Thinking">
+            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-foreground/40 animate-pulse">thinking</span>
             {THINKING_DELAYS.map((delay, i) => (
-              <span key={i} className="h-1.5 w-1.5 animate-pulse rounded-full bg-current opacity-40" style={{ animationDelay: `${delay}ms` }} />
+              <span key={i} className="h-1 w-1 animate-pulse rounded-full bg-current opacity-30" style={{ animationDelay: `${delay}ms` }} />
             ))}
           </span>
         ) : isUser ? (
