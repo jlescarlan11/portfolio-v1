@@ -154,7 +154,12 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
           <>
             <div className="no-scrollbar flex flex-1 flex-col gap-4 overflow-y-auto p-4">
               {messages.map((msg, i) => (
-                <ChatMessage key={i} role={msg.role} content={msg.content} />
+                <ChatMessage
+                  key={i}
+                  role={msg.role}
+                  content={msg.content}
+                  isThinking={isStreaming && i === messages.length - 1 && msg.role === 'assistant' && msg.content === ''}
+                />
               ))}
               <div ref={bottomRef} />
             </div>

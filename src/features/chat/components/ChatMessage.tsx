@@ -6,9 +6,10 @@ import Markdown from 'react-markdown';
 interface ChatMessageProps {
   role: 'user' | 'assistant';
   content: string;
+  isThinking?: boolean;
 }
 
-export function ChatMessage({ role, content }: ChatMessageProps) {
+export function ChatMessage({ role, content, isThinking }: ChatMessageProps) {
   const isUser = role === 'user';
   return (
     <div className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -26,7 +27,17 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
             : 'text-muted-foreground'
         }`}
       >
-        {isUser ? (
+        {isThinking ? (
+          <span className="flex items-center gap-1" aria-label="Thinking">
+            {[0, 160, 320].map((delay, i) => (
+              <span
+                key={i}
+                className="h-1.5 w-1.5 rounded-full bg-current opacity-40"
+                style={{ animation: `pulse 1.2s ease-in-out ${delay}ms infinite` }}
+              />
+            ))}
+          </span>
+        ) : isUser ? (
           content
         ) : (
           <Markdown
