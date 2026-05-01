@@ -93,7 +93,8 @@ export function useWebLLM(): UseWebLLMResult {
       const chunks = await engineRef.current.chat.completions.create({
         messages: [{ role: 'system', content: buildSystemPrompt() }, ...context],
         stream: true,
-        temperature: 0.3
+        temperature: 0.3,
+        stop: ['<|user|>', '<|assistant|>', '<|system|>', '<|end|>']
       });
 
       let buffer = '';
