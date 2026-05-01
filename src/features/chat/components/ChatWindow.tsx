@@ -37,7 +37,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
         <div>
-          <p className="text-sm font-semibold text-zinc-100">John's AI Assistant</p>
+          <p className="text-sm font-semibold text-zinc-100">John&apos;s AI Assistant</p>
           <p className="text-xs">
             {status === 'ready' && <span className="text-emerald-400">● Ready</span>}
             {status === 'loading' && (
@@ -105,7 +105,16 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
           </div>
         )}
 
-        {(status === 'ready' || status === 'error') && (
+        {status === 'error' && (
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+            <span className="text-3xl">❌</span>
+            <p className="text-sm text-zinc-400">
+              Failed to load the AI model. Please refresh and try again.
+            </p>
+          </div>
+        )}
+
+        {status === 'ready' && (
           <>
             <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-3">
               {messages.map((msg, i) => (

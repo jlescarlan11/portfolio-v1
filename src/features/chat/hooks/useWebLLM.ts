@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { buildSystemPrompt } from '../content';
+import type { MLCEngine } from '@mlc-ai/web-llm';
 
 export type ChatStatus = 'idle' | 'unsupported' | 'loading' | 'ready' | 'error';
 
@@ -37,7 +38,7 @@ export function useWebLLM(): UseWebLLMResult {
   const [progressText, setProgressText] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const engineRef = useRef<any>(null);
+  const engineRef = useRef<MLCEngine | null>(null);
   const initStarted = useRef(false);
   const isStreamingRef = useRef(false);
 
@@ -52,8 +53,8 @@ export function useWebLLM(): UseWebLLMResult {
 
     setStatus('loading');
     try {
-      const { MLCEngine } = await import('@mlc-ai/web-llm');
-      const engine = new MLCEngine();
+      const { MLCEngine: MLCEngineClass } = await import('@mlc-ai/web-llm');
+      const engine = new MLCEngineClass();
       engine.setInitProgressCallback((report: { progress: number; text: string }) => {
         setProgress(Math.round(report.progress * 100));
         setProgressText(report.text);
@@ -94,6 +95,15 @@ export function useWebLLM(): UseWebLLMResult {
           });
         }
       }
+    } catch {
+      setMessages(prev => {
+        const updated = [...prev];
+        updated[updated.length - 1] = {
+          role: 'assistant',
+          content: 'Something went wrong. Please try again.'
+        };
+        return updated;
+      });
     } finally {
       isStreamingRef.current = false;
       setIsStreaming(false);
