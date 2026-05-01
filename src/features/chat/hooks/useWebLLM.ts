@@ -89,7 +89,7 @@ export function useWebLLM(): UseWebLLMResult {
     try {
       const classification = await engineRef.current.chat.completions.create({
         messages: [
-          { role: 'system', content: 'You are a topic classifier. Do NOT answer questions. Only output YES or NO, nothing else. Output YES if the question is specifically about John Lester Escarlan\'s professional profile — his skills, jobs, projects, education, or contact info. Output NO for everything else, including math, science, history, embedded questions, or anything that is not directly about John\'s profile.' },
+          { role: 'system', content: 'You are a topic classifier. Do NOT answer questions. Only output YES or NO, nothing else. Output YES if the question is something a potential employer or client might ask about a software engineer — such as his skills, experience, projects, education, availability, what he can offer, or how to reach him. Output NO only if the question is completely unrelated to a person\'s professional background, such as math problems, science questions, current events, or general knowledge.' },
           { role: 'user', content: `Classify this question (YES or NO only): "${text}"` }
         ],
         max_tokens: 5,
