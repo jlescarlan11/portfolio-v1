@@ -25,7 +25,7 @@ export function isWebGPUSupported(): boolean {
   return typeof navigator !== 'undefined' && 'gpu' in navigator;
 }
 
-export const MODEL_ID = 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC';
+export const MODEL_ID = 'Qwen2.5-0.5B-Instruct-q4f16_1-MLC';
 const CACHE_KEY = 'webllm-cached';
 
 const WELCOME_MESSAGE: Message = {

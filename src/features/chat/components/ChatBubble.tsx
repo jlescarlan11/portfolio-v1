@@ -7,6 +7,7 @@ import { ChatWindow } from './ChatWindow';
 export function ChatBubble() {
   const [isOpen, setIsOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
+  const [labelVisible, setLabelVisible] = useState(true);
 
   function toggle() {
     if (!hasOpened) setHasOpened(true);
@@ -18,6 +19,20 @@ export function ChatBubble() {
       {hasOpened && (
         <div data-testid="chat-window-wrapper" className={isOpen ? 'block' : 'hidden'}>
           <ChatWindow onClose={() => setIsOpen(false)} />
+        </div>
+      )}
+      {!isOpen && labelVisible && (
+        <div className="flex items-center gap-1.5 border border-surface bg-background/90 pl-3 pr-1.5 py-1.5 backdrop-blur-md">
+          <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-subtle-foreground">
+            Ask me about John
+          </span>
+          <button
+            onClick={() => setLabelVisible(false)}
+            aria-label="Dismiss"
+            className="font-mono text-[10px] text-subtle-foreground/50 transition-colors hover:text-foreground leading-none"
+          >
+            ✕
+          </button>
         </div>
       )}
       <button
