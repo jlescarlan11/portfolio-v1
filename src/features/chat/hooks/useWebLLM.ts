@@ -61,11 +61,14 @@ export function useWebLLM(): UseWebLLMResult {
         setProgressText(report.text);
       });
       await engine.reload(MODEL_ID);
-      // Warm up the GPU shader pipeline so the first real query doesn't freeze
+      // Warm up GPU shaders using the real system prompt so all kernel variants are compiled
       setProgressText('Warming up...');
       await engine.chat.completions.create({
-        messages: [{ role: 'user', content: 'hi' }],
-        max_tokens: 1,
+        messages: [
+          { role: 'system', content: buildSystemPrompt() },
+          { role: 'user', content: 'What are John\'s skills?' }
+        ],
+        max_tokens: 30,
         stream: false
       });
       engineRef.current = engine;
