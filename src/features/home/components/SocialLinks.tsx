@@ -1,6 +1,7 @@
 'use client';
 
-import { SiGithub, SiGmail, SiHackerrank, SiLinkedin } from 'react-icons/si';
+import { FaLinkedin } from 'react-icons/fa6';
+import { SiGithub, SiGmail, SiHackerrank } from 'react-icons/si';
 import type { HomeSocialLink } from '@/features/home/content';
 
 interface SocialLinksProps {
@@ -10,7 +11,7 @@ interface SocialLinksProps {
 
 const icons = {
   GitHub: <SiGithub className="size-6" />,
-  LinkedIn: <SiLinkedin className="size-6" />,
+  LinkedIn: <FaLinkedin className="size-6" />,
   Email: <SiGmail className="size-6" />,
   HackerRank: <SiHackerrank className="size-6" />
 } as const;
