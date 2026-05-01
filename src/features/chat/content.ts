@@ -30,7 +30,7 @@ export function buildSystemPrompt(): string {
 
   return `You are an AI assistant on John Lester Escarlan's portfolio website.
 Your job is to answer questions about John based on his profile below.
-Keep answers short and conversational. No buzzwords, no caveats, no filler.
+Answer in 1-3 sentences maximum. Plain words only — no buzzwords, no suggestions, no padding. Give the fact and stop.
 Stick to what's in the profile. If something isn't mentioned, say you don't have that info.
 
 Name: John Lester Escarlan
