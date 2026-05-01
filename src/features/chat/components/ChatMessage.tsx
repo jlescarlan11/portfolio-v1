@@ -29,11 +29,11 @@ export function ChatMessage({ role, content, isThinking }: ChatMessageProps) {
       >
         {isThinking ? (
           <span className="flex items-center gap-1" aria-label="Thinking">
-            {[0, 160, 320].map((delay, i) => (
+            {[0, 150, 300].map((delay, i) => (
               <span
                 key={i}
-                className="h-1.5 w-1.5 rounded-full bg-current opacity-40"
-                style={{ animation: `pulse 1.2s ease-in-out ${delay}ms infinite` }}
+                className="h-1.5 w-1.5 animate-pulse rounded-full bg-current opacity-40"
+                style={{ animationDelay: `${delay}ms` }}
               />
             ))}
           </span>
