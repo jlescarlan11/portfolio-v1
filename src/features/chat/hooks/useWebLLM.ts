@@ -39,6 +39,7 @@ export function useWebLLM(): UseWebLLMResult {
   const [isStreaming, setIsStreaming] = useState(false);
   const engineRef = useRef<any>(null);
   const initStarted = useRef(false);
+  const isStreamingRef = useRef(false);
 
   const initialize = useCallback(async () => {
     if (initStarted.current) return;
@@ -67,10 +68,11 @@ export function useWebLLM(): UseWebLLMResult {
   }, []);
 
   const send = useCallback(async (text: string) => {
-    if (!engineRef.current || isStreaming) return;
+    if (!engineRef.current || isStreamingRef.current) return;
 
     const userMessage: Message = { role: 'user', content: text };
     setMessages(prev => [...prev, userMessage, { role: 'assistant', content: '' }]);
+    isStreamingRef.current = true;
     setIsStreaming(true);
 
     const context = [...messages.slice(-5), userMessage];
@@ -93,9 +95,10 @@ export function useWebLLM(): UseWebLLMResult {
         }
       }
     } finally {
+      isStreamingRef.current = false;
       setIsStreaming(false);
     }
-  }, [messages, isStreaming]);
+  }, [messages]);
 
   return { status, progress, progressText, messages, send, initialize, isStreaming };
 }
