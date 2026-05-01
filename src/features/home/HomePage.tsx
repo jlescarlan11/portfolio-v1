@@ -7,7 +7,6 @@ import { contactContent } from '@/features/contact/content';
 import { FooterSection, HeroSection, heroContent } from '@/features/home';
 import { ProjectsSection, projects, projectsSectionContent } from '@/features/projects';
 import NavigationBar from '@/shared/components/NavigationBar';
-import AvailabilityBadge from '@/shared/components/AvailabilityBadge';
 import { siteConfig } from '@/shared/site/config';
 
 export default function HomePage(): React.JSX.Element {
@@ -39,7 +38,6 @@ export default function HomePage(): React.JSX.Element {
         copyrightName={siteConfig.footer.copyrightName}
       />
 
-      <AvailabilityBadge />
     </>
   );
 }

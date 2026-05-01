@@ -3,6 +3,7 @@ import { Playfair_Display } from 'next/font/google';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import WelcomeOverlay from '@/shared/components/WelcomeOverlay';
+import { ChatBubble } from '@/features/chat';
 import { siteConfig } from '@/shared/site/config';
 import './globals.css';
 
@@ -54,6 +55,7 @@ export default function RootLayout({
         className={`${playfairDisplay.variable} ${GeistSans.variable} ${GeistMono.variable} antialiased`}
       >
         <WelcomeOverlay />
+        <ChatBubble />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:border focus:border-surface-strong focus:bg-surface focus:px-3 focus:py-2 focus:text-foreground"
