@@ -89,7 +89,7 @@ export function useWebLLM(): UseWebLLMResult {
     try {
       const classification = await engineRef.current.chat.completions.create({
         messages: [
-          { role: 'system', content: 'You are a classifier. Reply YES if the question is about a person named John Lester Escarlan (his skills, work, projects, education, or contact info). Reply NO for everything else. Answer with a single word only.' },
+          { role: 'system', content: 'You are a classifier. Reply NO only if the question is clearly unrelated to a person — such as math, science, history, current events, or general knowledge. Reply YES if the question could be asking about a person\'s background, skills, experience, projects, education, contact, or availability. When in doubt, reply YES. Answer with a single word only.' },
           { role: 'user', content: text }
         ],
         max_tokens: 5,
