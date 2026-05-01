@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { RiSparklingLine } from 'react-icons/ri';
+import { RiRobot2Line } from 'react-icons/ri';
 import { ChatWindow } from './ChatWindow';
 
 export function ChatBubble() {
@@ -32,7 +32,7 @@ export function ChatBubble() {
       >
         <span className="absolute left-[3px] top-[3px] h-2.5 w-2.5 border-l border-t border-foreground/30" aria-hidden="true" />
         <span className="absolute bottom-[3px] right-[3px] h-2.5 w-2.5 border-b border-r border-foreground/30" aria-hidden="true" />
-        <RiSparklingLine className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+        <RiRobot2Line className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
       </button>
     </div>
   );
