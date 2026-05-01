@@ -87,6 +87,28 @@ export function useWebLLM(): UseWebLLMResult {
 
     const context = [...messages.slice(-5), userMessage];
     try {
+      const classification = await engineRef.current.chat.completions.create({
+        messages: [
+          { role: 'system', content: 'You are a classifier. Reply YES if the question is about a person named John Lester Escarlan (his skills, work, projects, education, or contact info). Reply NO for everything else. Answer with a single word only.' },
+          { role: 'user', content: text }
+        ],
+        max_tokens: 5,
+        temperature: 0,
+        stream: false
+      });
+      const verdict = classification.choices[0]?.message?.content?.trim().toUpperCase() ?? 'NO';
+      if (!verdict.startsWith('YES')) {
+        setMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            role: 'assistant',
+            content: "I can only answer questions about John. Try asking about his skills, experience, or projects!"
+          };
+          return updated;
+        });
+        return;
+      }
+
       const chunks = await engineRef.current.chat.completions.create({
         messages: [{ role: 'system', content: buildSystemPrompt() }, ...context],
         stream: true,
