@@ -6,7 +6,8 @@ import { ChatWindow } from './ChatWindow';
 afterEach(cleanup);
 
 vi.mock('../hooks/useWebLLM', () => ({
-  useWebLLM: vi.fn()
+  useWebLLM: vi.fn(),
+  MODEL_ID: 'test-model'
 }));
 
 import { useWebLLM } from '../hooks/useWebLLM';

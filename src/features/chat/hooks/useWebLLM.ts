@@ -25,7 +25,8 @@ export function isWebGPUSupported(): boolean {
   return typeof navigator !== 'undefined' && 'gpu' in navigator;
 }
 
-const MODEL_ID = 'Phi-3.5-mini-instruct-q4f16_1-MLC';
+export const MODEL_ID = 'Phi-3.5-mini-instruct-q4f16_1-MLC';
+const CACHE_KEY = 'webllm-cached';
 
 const WELCOME_MESSAGE: Message = {
   role: 'assistant',
@@ -61,6 +62,7 @@ export function useWebLLM(): UseWebLLMResult {
       });
       await engine.reload(MODEL_ID);
       engineRef.current = engine;
+      localStorage.setItem(CACHE_KEY, MODEL_ID);
       setStatus('ready');
       setMessages([WELCOME_MESSAGE]);
     } catch {

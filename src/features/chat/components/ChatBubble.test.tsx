@@ -14,7 +14,8 @@ vi.mock('../hooks/useWebLLM', () => ({
     send: vi.fn(),
     initialize: vi.fn(),
     isStreaming: false
-  })
+  }),
+  MODEL_ID: 'test-model'
 }));
 
 describe('ChatBubble', () => {

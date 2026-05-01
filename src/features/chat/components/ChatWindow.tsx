@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState, FormEvent } from 'react';
-import { useWebLLM } from '../hooks/useWebLLM';
+import { useWebLLM, MODEL_ID } from '../hooks/useWebLLM';
 import { ChatMessage } from './ChatMessage';
 
 interface ChatWindowProps {
@@ -14,6 +14,11 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (localStorage.getItem('webllm-cached') === MODEL_ID) {
+      initialize();
+    }
+  }, [initialize]);
 
   useEffect(() => {
     if (bottomRef.current?.scrollIntoView) {
