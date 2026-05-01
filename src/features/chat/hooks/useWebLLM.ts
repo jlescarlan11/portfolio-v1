@@ -83,7 +83,7 @@ export function useWebLLM(): UseWebLLMResult {
       const chunks = await engineRef.current.chat.completions.create({
         messages: [{ role: 'system', content: buildSystemPrompt() }, ...context],
         stream: true,
-        max_tokens: 200,
+        max_tokens: 350,
         temperature: 0.3
       });
 
