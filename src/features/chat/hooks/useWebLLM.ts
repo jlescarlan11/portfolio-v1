@@ -82,19 +82,35 @@ export function useWebLLM(): UseWebLLMResult {
         messages: [{ role: 'system', content: buildSystemPrompt() }, ...context],
         stream: true
       });
+
+      let buffer = '';
+      let rafId: number | null = null;
+
+      const flush = () => {
+        if (!buffer) return;
+        const toAppend = buffer;
+        buffer = '';
+        setMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            role: 'assistant',
+            content: updated[updated.length - 1].content + toAppend
+          };
+          return updated;
+        });
+        rafId = null;
+      };
+
       for await (const chunk of chunks) {
         const delta = chunk.choices[0]?.delta?.content ?? '';
         if (delta) {
-          setMessages(prev => {
-            const updated = [...prev];
-            updated[updated.length - 1] = {
-              role: 'assistant',
-              content: updated[updated.length - 1].content + delta
-            };
-            return updated;
-          });
+          buffer += delta;
+          if (!rafId) rafId = requestAnimationFrame(flush);
         }
       }
+
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      flush();
     } catch {
       setMessages(prev => {
         const updated = [...prev];
