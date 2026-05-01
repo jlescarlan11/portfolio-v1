@@ -12,7 +12,11 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
   const isUser = role === 'user';
   return (
     <div className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-      <span className="mt-[3px] shrink-0 font-mono text-[9px] uppercase tracking-widest text-subtle-foreground/50">
+      <span className={`flex h-6 w-6 shrink-0 items-center justify-center border font-mono text-[9px] uppercase tracking-widest ${
+        isUser
+          ? 'border-foreground/20 bg-foreground/10 text-foreground/70'
+          : 'border-foreground/15 bg-foreground/[0.06] text-foreground/50'
+      }`}>
         {isUser ? 'You' : 'AI'}
       </span>
       <div
