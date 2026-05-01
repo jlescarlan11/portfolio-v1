@@ -113,7 +113,7 @@ export function useWebLLM(): UseWebLLMResult {
         messages: [{ role: 'system', content: buildSystemPrompt() }, ...context],
         stream: true,
         temperature: 0.3,
-        max_tokens: 120
+        max_tokens: 250
       });
 
       let buffer = '';
