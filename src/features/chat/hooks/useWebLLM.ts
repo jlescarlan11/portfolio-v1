@@ -25,7 +25,7 @@ export function isWebGPUSupported(): boolean {
   return typeof navigator !== 'undefined' && 'gpu' in navigator;
 }
 
-const MODEL_ID = 'Llama-3.2-1B-Instruct-q4f32_1-MLC';
+const MODEL_ID = 'Phi-3.5-mini-instruct-q4f16_1-MLC';
 
 const WELCOME_MESSAGE: Message = {
   role: 'assistant',
