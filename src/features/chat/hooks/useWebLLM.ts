@@ -61,6 +61,13 @@ export function useWebLLM(): UseWebLLMResult {
         setProgressText(report.text);
       });
       await engine.reload(MODEL_ID);
+      // Warm up the GPU shader pipeline so the first real query doesn't freeze
+      setProgressText('Warming up...');
+      await engine.chat.completions.create({
+        messages: [{ role: 'user', content: 'hi' }],
+        max_tokens: 1,
+        stream: false
+      });
       engineRef.current = engine;
       localStorage.setItem(CACHE_KEY, MODEL_ID);
       setStatus('ready');
