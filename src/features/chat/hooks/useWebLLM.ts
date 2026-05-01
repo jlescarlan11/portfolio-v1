@@ -90,7 +90,7 @@ export function useWebLLM(): UseWebLLMResult {
       const classification = await engineRef.current.chat.completions.create({
         messages: [
           { role: 'system', content: 'You are a topic classifier. Do NOT answer questions. Only output YES or NO, nothing else. Output YES if the question is something a potential employer or client might ask about a software engineer — such as his skills, experience, projects, education, availability, what he can offer, or how to reach him. Output NO only if the question is completely unrelated to a person\'s professional background, such as math problems, science questions, current events, or general knowledge.' },
-          { role: 'user', content: `Classify this question (YES or NO only): "${text}"` }
+          { role: 'user', content: `${messages.length > 0 ? `Conversation so far: ${messages.slice(-2).map(m => `${m.role}: ${m.content}`).join(' | ')}\n\n` : ''}Classify this question (YES or NO only): "${text}"` }
         ],
         max_tokens: 5,
         temperature: 0,
