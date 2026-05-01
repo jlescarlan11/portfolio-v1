@@ -25,7 +25,7 @@ export function isWebGPUSupported(): boolean {
   return typeof navigator !== 'undefined' && 'gpu' in navigator;
 }
 
-export const MODEL_ID = 'Phi-3.5-mini-instruct-q4f16_1-MLC';
+export const MODEL_ID = 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC';
 const CACHE_KEY = 'webllm-cached';
 
 const WELCOME_MESSAGE: Message = {
@@ -89,7 +89,7 @@ export function useWebLLM(): UseWebLLMResult {
         messages: [{ role: 'system', content: buildSystemPrompt() }, ...context],
         stream: true,
         temperature: 0.3,
-        stop: ['<|user|>', '<|assistant|>', '<|system|>', '<|end|>']
+        stop: ['<|im_end|>', '<|im_start|>']
       });
 
       let buffer = '';

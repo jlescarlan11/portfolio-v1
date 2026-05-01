@@ -77,7 +77,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
               </p>
               <p className="font-mono text-[11px] leading-relaxed text-muted-foreground">
                 Downloads a{' '}
-                <span className="text-foreground">~2.4 GB</span> model to your device.
+                <span className="text-foreground">~1.0 GB</span> model to your device.
                 <br />
                 Fully offline — nothing sent to a server.
               </p>

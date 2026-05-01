@@ -20,11 +20,6 @@ export function ChatBubble() {
           <ChatWindow onClose={() => setIsOpen(false)} />
         </div>
       )}
-      {!isOpen && (
-        <span className="border border-surface bg-background/90 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-subtle-foreground backdrop-blur-md">
-          Ask me about John
-        </span>
-      )}
       <button
         onClick={toggle}
         aria-label="Open AI chat"
