@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { buildSystemPrompt } from '../content';
-import type { MLCEngine } from '@mlc-ai/web-llm';
+import type { MLCEngineInterface } from '@mlc-ai/web-llm';
 
 export type ChatStatus = 'idle' | 'unsupported' | 'loading' | 'ready' | 'error';
 
@@ -33,13 +33,14 @@ const WELCOME_MESSAGE: Message = {
   content: "Hi! I'm John's AI assistant. Ask me anything about his work, skills, or experience."
 };
 
+
 export function useWebLLM(): UseWebLLMResult {
   const [status, setStatus] = useState<ChatStatus>('idle');
   const [progress, setProgress] = useState(0);
   const [progressText, setProgressText] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const engineRef = useRef<MLCEngine | null>(null);
+  const engineRef = useRef<MLCEngineInterface | null>(null);
   const initStarted = useRef(false);
   const isStreamingRef = useRef(false);
 
@@ -54,22 +55,16 @@ export function useWebLLM(): UseWebLLMResult {
 
     setStatus('loading');
     try {
-      const { MLCEngine: MLCEngineClass } = await import('@mlc-ai/web-llm');
-      const engine = new MLCEngineClass();
-      engine.setInitProgressCallback((report: { progress: number; text: string }) => {
-        setProgress(Math.round(report.progress * 100));
-        setProgressText(report.text);
-      });
-      await engine.reload(MODEL_ID);
-      // Warm up GPU shaders using the real system prompt so all kernel variants are compiled
-      setProgressText('Warming up...');
-      await engine.chat.completions.create({
-        messages: [
-          { role: 'system', content: buildSystemPrompt() },
-          { role: 'user', content: 'What are John\'s skills?' }
-        ],
-        max_tokens: 30,
-        stream: false
+      const { CreateWebWorkerMLCEngine } = await import('@mlc-ai/web-llm');
+      const worker = new Worker(
+        new URL('../workers/llm-worker.ts', import.meta.url),
+        { type: 'module' }
+      );
+      const engine = await CreateWebWorkerMLCEngine(worker, MODEL_ID, {
+        initProgressCallback: (report: { progress: number; text: string }) => {
+          setProgress(Math.round(report.progress * 100));
+          setProgressText(report.text);
+        }
       });
       engineRef.current = engine;
       localStorage.setItem(CACHE_KEY, MODEL_ID);

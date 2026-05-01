@@ -20,11 +20,14 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
     }
   }, [initialize]);
 
+  const prevMsgCount = useRef(messages.length);
   useEffect(() => {
-    if (bottomRef.current?.scrollIntoView) {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
+    if (!bottomRef.current) return;
+    const newMessage = messages.length !== prevMsgCount.current;
+    prevMsgCount.current = messages.length;
+    // Use instant during streaming to avoid stacking compositor frames on top of GPU inference
+    bottomRef.current.scrollIntoView({ behavior: newMessage || !isStreaming ? 'smooth' : 'instant' });
+  }, [messages, isStreaming]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
