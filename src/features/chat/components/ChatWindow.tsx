@@ -14,9 +14,6 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
 
   useEffect(() => {
     if (bottomRef.current?.scrollIntoView) {
@@ -47,7 +44,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
               <span className="text-zinc-500">Not available</span>
             )}
             {status === 'error' && <span className="text-red-400">Error</span>}
-            {status === 'idle' && <span className="text-zinc-500">Starting...</span>}
+            {status === 'idle' && <span className="text-zinc-500">Offline AI</span>}
           </p>
         </div>
         <button
@@ -61,6 +58,26 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
 
       {/* Body */}
       <div className="flex flex-1 flex-col overflow-hidden">
+        {status === 'idle' && (
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
+            <span className="text-4xl">🤖</span>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-zinc-200">Run AI in your browser</p>
+              <p className="text-xs text-zinc-400">
+                This downloads a <strong className="text-zinc-300">~2.4 GB</strong> AI model to your device.
+                It runs fully offline — nothing is sent to a server.
+              </p>
+              <p className="text-xs text-zinc-600">Cached after the first download.</p>
+            </div>
+            <button
+              onClick={initialize}
+              className="rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600"
+            >
+              Download &amp; Start
+            </button>
+          </div>
+        )}
+
         {status === 'unsupported' && (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
             <span className="text-3xl">⚠️</span>
