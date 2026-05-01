@@ -102,7 +102,7 @@ export function useWebLLM(): UseWebLLMResult {
           const updated = [...prev];
           updated[updated.length - 1] = {
             role: 'assistant',
-            content: "I can only answer questions about John. Try asking about his skills, experience, or projects!"
+            content: "I only have info on John's professional background — try asking about his skills, experience, or projects."
           };
           return updated;
         });
