@@ -5,6 +5,9 @@ import { ChatWindow } from './ChatWindow';
 
 afterEach(cleanup);
 
+// jsdom doesn't implement scrollIntoView
+window.HTMLElement.prototype.scrollIntoView = vi.fn();
+
 vi.mock('../hooks/useWebLLM', () => ({
   useWebLLM: vi.fn(),
   MODEL_ID: 'test-model'

@@ -54,6 +54,23 @@ interface ProjectHeroProps {
 
 function ProjectHero({ src, title, isLogo }: ProjectHeroProps) {
   if (isLogo) {
+    if (!src) {
+      return (
+        <div
+          className={`relative flex w-full items-center justify-center overflow-hidden border ${SURFACE.hairline} bg-surface-tint`}
+          style={{ aspectRatio: '16/9' }}
+        >
+          <div className="surface-grid-mask absolute inset-0 opacity-50" aria-hidden="true" />
+          <span
+            aria-hidden="true"
+            className="relative z-10 select-none font-black leading-none tracking-tighter text-foreground/[0.06]"
+            style={{ fontSize: 'clamp(3.5rem, 14vw, 9rem)' }}
+          >
+            {title}
+          </span>
+        </div>
+      );
+    }
     return (
       <div
         className={`relative flex w-full items-center justify-center overflow-hidden border ${SURFACE.hairline} bg-surface-tint`}

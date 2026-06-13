@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
+/* ── Design tokens ──────────────────────────────────────────────────────────
+   Two base RGB values drive the entire palette. Flip them to flip the theme.
+   All surface / text / border tokens derive from these two.
+────────────────────────────────────────────────────────────────────────── */
+
 :root {
   --background-rgb: 0, 0, 0;
   --foreground-rgb: 255, 255, 255;
+  color-scheme: dark;
+
   --background: rgb(var(--background-rgb));
   --foreground: rgb(var(--foreground-rgb));
   --surface-border: rgba(var(--foreground-rgb), 0.16);
@@ -20,6 +27,29 @@
   --motion-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
+/* ── System light preference (no manual override) ─────────────────────── */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --background-rgb: 255, 255, 255;
+    --foreground-rgb: 0, 0, 0;
+    color-scheme: light;
+  }
+}
+
+/* ── Manual overrides via data-theme on <html> ────────────────────────── */
+:root[data-theme="light"] {
+  --background-rgb: 255, 255, 255;
+  --foreground-rgb: 0, 0, 0;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --background-rgb: 0, 0, 0;
+  --foreground-rgb: 255, 255, 255;
+  color-scheme: dark;
+}
+
+/* ── Tailwind v4 theme bridge ─────────────────────────────────────────── */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -28,6 +58,7 @@
   --font-serif: var(--font-playfair);
 }
 
+/* ── Base ─────────────────────────────────────────────────────────────── */
 html {
   scroll-behavior: smooth;
 }
@@ -40,20 +71,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --background-rgb: 255, 255, 255;
-    --foreground-rgb: 0, 0, 0;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background-rgb: 0, 0, 0;
-    --foreground-rgb: 255, 255, 255;
-  }
-}
-
 :where(a, button, [role="button"], input, textarea, summary):focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
@@ -64,6 +81,7 @@ body {
   color: var(--foreground);
 }
 
+/* ── Utilities ────────────────────────────────────────────────────────── */
 @layer utilities {
   .text-foreground { color: var(--text-foreground); }
   .text-muted-foreground { color: var(--text-muted-foreground); }
@@ -77,6 +95,7 @@ body {
   .bg-surface-divider { background-color: var(--surface-divider); }
   .bg-surface-tint { background-color: var(--surface-tint); }
   .bg-surface-tint-strong { background-color: var(--surface-tint-strong); }
+  .bg-surface-strong { background-color: var(--surface-border); }
   .border-surface { border-color: var(--surface-border); }
   .border-surface-subtle { border-color: rgba(var(--foreground-rgb), 0.06); }
   .border-surface-strong { border-color: var(--surface-border-strong); }
@@ -87,6 +106,8 @@ body {
   .pointer-events-none-safe {
     pointer-events: none;
   }
+
+  /* ── Type scale ─────────────────────────────────────────────────────── */
   .display {
     @apply font-serif text-4xl md:text-5xl font-semibold tracking-tight leading-tight text-foreground;
   }
@@ -123,6 +144,8 @@ body {
   .code {
     @apply font-mono text-sm leading-6 text-foreground;
   }
+
+  /* ── Decorative ─────────────────────────────────────────────────────── */
   .surface-grid-mask {
     background-image:
       linear-gradient(var(--surface-border-dim) 1px, transparent 1px),
@@ -131,6 +154,8 @@ body {
     mask-image: radial-gradient(ellipse 100% 70% at 50% 40%, black 20%, transparent 100%);
     -webkit-mask-image: radial-gradient(ellipse 100% 70% at 50% 40%, black 20%, transparent 100%);
   }
+
+  /* ── FadeIn animation ───────────────────────────────────────────────── */
   .animate-enter {
     opacity: 0;
     transform: translateY(16px);
@@ -140,9 +165,11 @@ body {
   }
 }
 
+/* ── Scrollbar ────────────────────────────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* ── Keyframes ────────────────────────────────────────────────────────── */
 @keyframes infinite-scroll {
   0% { transform: translateX(0); }
   100% { transform: translateX(-33.333%); }
@@ -168,7 +195,17 @@ body {
   to { transform: scaleY(1); }
 }
 
+/* ── Reduced motion ───────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
+  .animate-enter,
+  .animate-ping {
+    animation: none !important;
+  }
+
+  .opacity-0 {
+    opacity: 1 !important;
+  }
+
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;

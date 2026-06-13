@@ -22,7 +22,7 @@ export const heroContent: HeroContent = {
   // Trimmed to one clear sentence — the component further trims to first sentence
   // so keep this punchy and direct. No filler phrases.
   tagline:
-    'I build web and mobile products with a backend-first focus, keeping reliability in production through clean architecture and thoughtful decisions.',
+    'I build full-stack products and AI automation pipelines — from solo-architected marketplaces to LLM-powered workflows, with reliability and end-to-end delivery as the constant.',
 
   profileImage: {
     src: '/hero-image.svg',
