@@ -3,9 +3,8 @@
 import type { JSX } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { FaJava } from 'react-icons/fa6';
+import { FaAws, FaJava } from 'react-icons/fa6';
 import {
-  SiAmazonwebservices,
   SiDart,
   SiDocker,
   SiDotnet,
@@ -92,7 +91,7 @@ const getTechIcon = (label: string): JSX.Element | null => {
     'Prisma ORM': <SiPrisma />,
     Docker: <SiDocker />,
     Kubernetes: <SiKubernetes />,
-    AWS: <SiAmazonwebservices />,
+    AWS: <FaAws />,
     Vercel: <SiVercel />,
     Supabase: <SiSupabase />,
     Mapbox: <SiMapbox />,

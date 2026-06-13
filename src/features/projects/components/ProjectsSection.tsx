@@ -1,354 +1,290 @@
 'use client';
 
+import { useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useState } from 'react';
-import type {
-  ProjectRecord,
-  ProjectsSectionContent
-} from '@/features/projects/types';
 import SectionFrame from '@/shared/components/SectionFrame';
 import { Typography } from '@/shared/components/Typography';
 import { FadeIn } from '@/shared/components/FadeIn';
 import { formatMonthYear, isRenderableExternalUrl } from '@/shared/lib/project';
 import { SURFACE, TYPOGRAPHY_STYLES } from '@/shared/styles/shared';
+import type { ProjectRecord, ProjectsSectionContent } from '@/features/projects/types';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface ProjectsSectionProps {
   projects: ProjectRecord[];
   content: ProjectsSectionContent;
 }
 
-interface FeaturedProjectCardProps {
+// ─── LiveBadge ────────────────────────────────────────────────────────────────
+
+interface LiveBadgeProps {
+  url: string;
+  projectTitle: string;
+}
+
+function LiveBadge({ url, projectTitle }: LiveBadgeProps) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`Live site for ${projectTitle} (opens in new tab)`}
+      className="inline-flex items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
+    >
+      <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
+        <span className="absolute inline-flex h-full w-full animate-ping bg-foreground opacity-20" />
+        <span className="relative inline-flex h-1.5 w-1.5 bg-foreground/70" />
+      </span>
+      <span className="caption uppercase tracking-[0.14em] text-foreground">Live</span>
+    </a>
+  );
+}
+
+// ─── CategoryPill ─────────────────────────────────────────────────────────────
+
+interface CategoryPillProps {
+  category: string;
+}
+
+function CategoryPill({ category }: CategoryPillProps) {
+  const label = category.split(' / ')[0];
+  return (
+    <span className={`inline-block border ${SURFACE.hairline} px-2 py-0.5`}>
+      <span className="caption uppercase tracking-[0.12em] text-subtle-foreground">{label}</span>
+    </span>
+  );
+}
+
+// ─── CaseFileCard (featured / full-width) ─────────────────────────────────────
+
+interface CaseFileCardProps {
   project: ProjectRecord;
   ctaLabel: string;
 }
 
-interface ProjectRowProps {
-  project: ProjectRecord;
-  index: number;
-  ctaLabel: string;
-}
-
-// ─── Featured card: first project gets a full-width showcase treatment ─────────
-function FeaturedProjectCard({
-  project,
-  ctaLabel
-}: FeaturedProjectCardProps): React.JSX.Element {
-  const safeLiveUrl = isRenderableExternalUrl(project.links.liveUrl)
-    ? project.links.liveUrl
-    : undefined;
-  const safeGithubUrl = isRenderableExternalUrl(project.links.githubUrl)
-    ? project.links.githubUrl
-    : undefined;
-  const displayDate = formatMonthYear(project.completedAt, 'long');
-  const visibleTechnologies = project.technologies.slice(0, 6);
-  const remainingCount = Math.max(0, project.technologies.length - visibleTechnologies.length);
+function CaseFileCard({ project, ctaLabel }: CaseFileCardProps) {
+  const { slug, title, category, technologies, completedAt, links, caseStudy } = project;
+  const hasLive = isRenderableExternalUrl(links.liveUrl);
 
   return (
     <FadeIn
       as="article"
-      delay={120}
-      className="group relative mb-2 border border-surface overflow-hidden transition-all duration-500 hover:border-foreground/20"
-      aria-labelledby="featured-project-title"
+      delay={80}
+      aria-labelledby="case-file-featured-title"
+      className="pl-5 pr-6 pt-5 pb-5 bg-surface"
     >
-      {/* Ghost index number — large watermark behind content */}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-4 -top-6 select-none text-[clamp(7rem,20vw,14rem)] font-black leading-none tracking-tighter text-foreground/[0.04] transition-all duration-700 group-hover:text-foreground/[0.07]"
-      >
-        01
-      </span>
-
-      <div className="relative z-10 p-6 sm:p-8 md:p-10">
-        {/* Top row: eyebrow + date */}
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <span className="inline-flex items-center gap-2">
-            <span className="h-px w-6 bg-foreground/30" aria-hidden="true" />
-            <Typography
-              variant="caption"
-              as="span"
-              className="text-xs font-semibold uppercase tracking-widest text-subtle-foreground"
-            >
-              Featured · {project.category}
-            </Typography>
-          </span>
+      {/* Header row */}
+      <header className="flex flex-wrap items-start justify-between gap-3 mb-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <span className="caption font-mono tabular-nums text-subtle-foreground tracking-[0.14em]">
+              No.&nbsp;01
+            </span>
+            {hasLive && <LiveBadge url={links.liveUrl!} projectTitle={title} />}
+          </div>
           <Typography
-            variant="caption"
-            as="time"
-            dateTime={project.completedAt}
-            className="tabular-nums text-subtle-foreground"
+            variant="h3"
+            as="h3"
+            id="case-file-featured-title"
+            className="text-foreground leading-tight"
           >
-            {displayDate}
+            {title}
           </Typography>
         </div>
 
-        {/* Title */}
-        <Typography
-          variant="display"
-          as="h3"
-          id="featured-project-title"
-          className="mb-4 text-[clamp(2rem,6vw,3.5rem)] font-black leading-[1.05] tracking-tight transition-colors duration-300"
-        >
-          {project.title}
-        </Typography>
+        <div className="text-right space-y-1 shrink-0">
+          <p className="caption text-subtle-foreground uppercase tracking-[0.12em]">
+            {category.split(' / ')[1] ?? category}
+          </p>
+          <p className="caption font-mono tabular-nums text-subtle-foreground">
+            {formatMonthYear(completedAt, 'short')}
+          </p>
+        </div>
+      </header>
 
-        {/* Description — first sentence only for scannability */}
-        <Typography
-          variant="body-lg"
-          as="p"
-          className="mb-6 max-w-xl text-muted-foreground"
-        >
-          {project.description.split(/(?<=\.)\s+/)[0]}
-        </Typography>
+      {/* Pull-quote */}
+      <blockquote className="border-l border-foreground/40 pl-4 mb-5" aria-label="Project summary">
+        <p className="body text-muted-foreground">{caseStudy.summary}</p>
+      </blockquote>
 
-        {/* Tech stack pills */}
-        <ul
-          className="mb-8 flex flex-wrap gap-2"
-          aria-label={`${project.title} technology stack`}
-        >
-          {visibleTechnologies.map((tech) => (
-            <li key={tech}>
-              <Typography
-                variant="caption"
-                as="span"
-                className={`inline-flex items-center border ${SURFACE.hairline} px-2.5 py-1 text-muted-foreground transition-all duration-300 group-hover:border-foreground/20 group-hover:text-foreground`}
-              >
-                {tech}
-              </Typography>
+      {/* Highlights */}
+      {caseStudy.highlights.length > 0 && (
+        <ul className="grid grid-cols-1 gap-y-2 mb-6" aria-label="Project highlights">
+          {caseStudy.highlights.map((h) => (
+            <li key={h} className="flex items-start gap-2">
+              <span className="mt-[0.5em] w-1.5 h-px bg-foreground/40 shrink-0" aria-hidden="true" />
+              <span className="body-sm text-muted-foreground">{h}</span>
             </li>
           ))}
-          {remainingCount > 0 && (
-            <li>
-              <Typography
-                variant="caption"
-                as="span"
-                className="inline-flex items-center px-1 py-1 text-subtle-foreground"
-              >
-                +{remainingCount}
-              </Typography>
-            </li>
-          )}
         </ul>
+      )}
 
-        {/* CTAs */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-surface pt-6">
+      {/* Footer: tech stack + CTA */}
+      <footer className={`flex flex-wrap items-center justify-between gap-4 pt-4 border-t ${SURFACE.hairline}`}>
+        <ul className="flex flex-wrap gap-1.5" aria-label={`${title} technology stack`}>
+          {technologies.map((tech) => (
+            <li key={tech}>
+              <span className={`caption font-mono px-2 py-0.5 border ${SURFACE.hairline} text-subtle-foreground whitespace-nowrap`}>
+                {tech}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <nav aria-label={`Links for ${title}`}>
           <Link
-            href={`/projects/${project.slug}`}
-            prefetch={false}
-            className="inline-flex items-center gap-2 border border-foreground px-5 py-2.5 text-sm font-medium text-foreground transition-all duration-200 hover:bg-foreground hover:text-background focus-visible:outline-2 focus-visible:outline-offset-2"
+            href={`/projects/${slug}`}
+            className={TYPOGRAPHY_STYLES.linkPrimary}
+            aria-label={`${ctaLabel}: ${title}`}
           >
-            {ctaLabel}
-            <span aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+            {ctaLabel} →
           </Link>
-
-          {safeLiveUrl && (
-            <a
-              href={safeLiveUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={TYPOGRAPHY_STYLES.linkSecondary}
-            >
-              Live ↗
-            </a>
-          )}
-          {safeGithubUrl && (
-            <a
-              href={safeGithubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={TYPOGRAPHY_STYLES.linkSecondary}
-            >
-              GitHub ↗
-            </a>
-          )}
-        </div>
-      </div>
+        </nav>
+      </footer>
     </FadeIn>
   );
 }
 
-// ─── Secondary row: compact numbered list for remaining projects ───────────────
-function ProjectRow({
-  project,
-  index,
-  ctaLabel
-}: ProjectRowProps): React.JSX.Element {
-  const [expanded, setExpanded] = useState(false);
-  const visibleTechnologies = project.technologies.slice(0, 4);
-  const remainingCount = Math.max(0, project.technologies.length - visibleTechnologies.length);
-  const safeLiveUrl = isRenderableExternalUrl(project.links.liveUrl)
-    ? project.links.liveUrl
-    : undefined;
-  const safeGithubUrl = isRenderableExternalUrl(project.links.githubUrl)
-    ? project.links.githubUrl
-    : undefined;
-  const displayDate = formatMonthYear(project.completedAt, 'short');
-  // Display index offset by 1 because FeaturedProjectCard takes index 0
-  const displayIndex = String(index + 2).padStart(2, '0');
+// ─── DossierTile (compact grid card) ──────────────────────────────────────────
+
+interface DossierTileProps {
+  project: ProjectRecord;
+  tileIndex: number;
+  ctaLabel: string;
+}
+
+function DossierTile({ project, tileIndex, ctaLabel }: DossierTileProps) {
+  const { slug, title, category, technologies, completedAt, links, caseStudy } = project;
+  const fileNumber = String(tileIndex + 1).padStart(2, '0');
+  const hasLive = isRenderableExternalUrl(links.liveUrl);
+  const delay = tileIndex * 80 + 80;
+
+  const measureRef = useRef<HTMLDivElement>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const [visibleCount, setVisibleCount] = useState(technologies.length);
+
+  useLayoutEffect(() => {
+    const measure = measureRef.current;
+    const row = rowRef.current;
+    if (!measure || !row) return;
+
+    const recalc = () => {
+      const rowWidth = row.offsetWidth;
+      const gap = 6; // gap-1.5
+
+      const pillEls = Array.from(measure.querySelectorAll<HTMLElement>('[data-pill]'));
+      const plusEl = measure.querySelector<HTMLElement>('[data-plus]');
+      const dateEl = measure.querySelector<HTMLElement>('[data-date]');
+
+      if (!pillEls.length) return;
+
+      const pillWidths = pillEls.map((el) => el.offsetWidth);
+      const plusWidth = plusEl?.offsetWidth ?? 36;
+      const dateWidth = (dateEl?.offsetWidth ?? 0) + gap;
+
+      let available = rowWidth - dateWidth;
+      let fit = 0;
+
+      for (let i = 0; i < pillWidths.length; i++) {
+        const isLast = i === pillWidths.length - 1;
+        const pillCost = pillWidths[i] + gap;
+        const plusCost = isLast ? 0 : plusWidth + gap;
+
+        if (available < pillCost + plusCost) break;
+        available -= pillCost;
+        fit++;
+        if (isLast) break;
+      }
+
+      setVisibleCount(Math.max(1, fit));
+    };
+
+    recalc();
+    const observer = new ResizeObserver(recalc);
+    observer.observe(row);
+    return () => observer.disconnect();
+  }, [technologies]);
+
+  const overflowCount = technologies.length - visibleCount;
+  const pillClass = `caption font-mono px-2 py-0.5 border ${SURFACE.hairline} text-subtle-foreground whitespace-nowrap`;
 
   return (
     <FadeIn
       as="article"
-      delay={180 + index * 70}
-      className="group border-b border-surface last:border-b-0"
-      aria-labelledby={`project-title-${index}`}
+      delay={delay}
+      aria-labelledby={`dossier-tile-title-${tileIndex}`}
+      className="relative flex flex-col bg-surface h-full"
     >
-      {/* ── Collapsed header row ─────────────────────────────── */}
-      <button
-        type="button"
-        onClick={() => setExpanded((v) => !v)}
-        className="flex w-full items-start gap-4 py-5 text-left transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 sm:items-center sm:gap-6"
-        aria-expanded={expanded}
-        aria-controls={`project-body-${index}`}
-      >
-        {/* Ghost number */}
-        <span
-          aria-hidden="true"
-          className="w-8 flex-shrink-0 font-mono text-xs font-semibold tabular-nums text-foreground/20 transition-colors duration-300 group-hover:text-foreground/50 sm:text-sm"
-        >
-          {displayIndex}
-        </span>
+      <div className="px-4 pt-4 pb-0">
+        <CategoryPill category={category} />
+      </div>
 
-        {/* Title + category */}
-        <div className="min-w-0 flex-1">
-          <div className="min-w-0">
-            <Typography
-              variant="h4"
-              as="h3"
-              id={`project-title-${index}`}
-              className="mb-0.5 truncate font-semibold transition-colors duration-200"
-            >
-              {project.title}
-            </Typography>
-            <Typography
-              variant="caption"
-              as="p"
-              className="text-subtle-foreground"
-            >
-              {project.category}
-            </Typography>
+      <div className="flex flex-col flex-1 px-4 pt-3 pb-4">
+        <div className="flex items-center gap-3 mb-1">
+          <span className="caption font-mono tabular-nums text-subtle-foreground/60 tracking-[0.12em]">
+            No.&nbsp;{fileNumber}
+          </span>
+          {hasLive && <LiveBadge url={links.liveUrl!} projectTitle={title} />}
+        </div>
+
+        <Typography
+          variant="h4"
+          as="h3"
+          id={`dossier-tile-title-${tileIndex}`}
+          className="text-foreground leading-snug mb-3"
+        >
+          {title}
+        </Typography>
+
+        <p className="body-sm text-muted-foreground flex-1 mb-4">
+          {caseStudy.highlights[0] ?? caseStudy.summary}
+        </p>
+
+        {/* Hidden measurement layer — all pills rendered at full width for sampling */}
+        <div className="h-0 overflow-hidden" aria-hidden="true">
+          <div ref={measureRef} className="flex gap-1.5">
+            {technologies.map((tech) => (
+              <span key={tech} data-pill className={pillClass}>{tech}</span>
+            ))}
+            <span data-plus className={pillClass}>+99</span>
+            <span data-date className="caption font-mono tabular-nums whitespace-nowrap">
+              {formatMonthYear(completedAt, 'short')}
+            </span>
           </div>
         </div>
 
-        {/* Tech preview — hidden on xs, shown sm+ */}
-        <ul className="hidden flex-shrink-0 flex-wrap justify-end gap-1.5 sm:flex" aria-hidden="true">
-          {visibleTechnologies.map((tech) => (
-            <li key={tech}>
-              <span
-                className={`inline-flex items-center border ${SURFACE.hairline} px-2 py-0.5 text-xs text-muted-foreground transition-colors duration-300 group-hover:border-foreground/20`}
-              >
-                {tech}
-              </span>
-            </li>
+        <div ref={rowRef} className={`flex items-center gap-1.5 mb-4 pt-3 border-t ${SURFACE.hairline}`}>
+          {technologies.slice(0, visibleCount).map((tech) => (
+            <span key={tech} className={pillClass}>{tech}</span>
           ))}
-          {remainingCount > 0 && (
-            <li>
-              <span className="inline-flex items-center px-1 py-0.5 text-xs text-subtle-foreground">
-                +{remainingCount}
-              </span>
-            </li>
+          {overflowCount > 0 && (
+            <span className={pillClass}>+{overflowCount}</span>
           )}
-        </ul>
-
-        {/* Date + expand toggle */}
-        <div className="flex flex-shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-4">
-          <Typography
-            variant="caption"
-            as="time"
-            dateTime={project.completedAt}
-            className="whitespace-nowrap tabular-nums text-subtle-foreground"
-          >
-            {displayDate}
-          </Typography>
-          <span
-            aria-hidden="true"
-            className={`text-foreground/30 transition-all duration-300 group-hover:text-foreground/60 ${expanded ? 'rotate-45' : ''}`}
-          >
-            +
+          <span className="ml-auto caption font-mono tabular-nums text-subtle-foreground/60 shrink-0 whitespace-nowrap">
+            {formatMonthYear(completedAt, 'short')}
           </span>
         </div>
-      </button>
 
-      {/* ── Expanded body ────────────────────────────────────── */}
-      {/* Using inline max-height trick for smooth accordion without JS height calc */}
-      <div
-        id={`project-body-${index}`}
-        className={`overflow-hidden transition-all duration-400 ease-in-out ${expanded ? 'max-h-[600px] pb-6 opacity-100' : 'max-h-0 opacity-0'}`}
-        aria-hidden={!expanded}
-      >
-        <div className="ml-12 sm:ml-14">
-          {/* Tech pills for mobile (visible only below sm) */}
-          <ul
-            className="mb-4 flex flex-wrap gap-1.5 sm:hidden"
-            aria-label={`${project.title} technology stack`}
+        <nav aria-label={`Links for ${title}`}>
+          <Link
+            href={`/projects/${slug}`}
+            className={TYPOGRAPHY_STYLES.linkPrimary}
+            aria-label={`${ctaLabel}: ${title}`}
           >
-            {project.technologies.map((tech) => (
-              <li key={tech}>
-                <span
-                  className={`inline-flex items-center border ${SURFACE.hairline} px-2 py-1 text-xs text-muted-foreground`}
-                >
-                  {tech}
-                </span>
-              </li>
-            ))}
-          </ul>
-
-          {/* Description */}
-          <Typography
-            variant="body-sm"
-            as="p"
-            className="mb-5 text-muted-foreground"
-          >
-            {project.description}
-          </Typography>
-
-          {/* CTAs */}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <Link
-              href={`/projects/${project.slug}`}
-              prefetch={false}
-              className={TYPOGRAPHY_STYLES.linkPrimary}
-            >
-              {ctaLabel} →
-            </Link>
-            {(safeLiveUrl || safeGithubUrl) && (
-              <span className="hidden h-3 w-px bg-surface-divider sm:block" aria-hidden="true" />
-            )}
-            {safeLiveUrl && (
-              <a
-                href={safeLiveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={TYPOGRAPHY_STYLES.linkSecondary}
-              >
-                Live ↗
-              </a>
-            )}
-            {safeGithubUrl && (
-              <a
-                href={safeGithubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={TYPOGRAPHY_STYLES.linkSecondary}
-              >
-                GitHub ↗
-              </a>
-            )}
-          </div>
-        </div>
+            {ctaLabel} →
+          </Link>
+        </nav>
       </div>
     </FadeIn>
   );
 }
 
 // ─── Main section ──────────────────────────────────────────────────────────────
-export default function ProjectsSection({
-  projects,
-  content
-}: ProjectsSectionProps): React.JSX.Element {
-  const [visible, setVisible] = useState(content.initialCount);
+
+export default function ProjectsSection({ projects, content }: ProjectsSectionProps) {
+  if (!projects || projects.length === 0) return null;
+
   const [featured, ...rest] = projects;
-  const visibleRest = rest.slice(0, Math.max(0, visible - 1));
-  const hasMore = visible < projects.length;
 
   return (
     <SectionFrame
@@ -357,60 +293,30 @@ export default function ProjectsSection({
       eyebrow={content.eyebrow}
       title={content.title}
       intro={content.intro}
+      showTopBorder
     >
-      <div className="space-y-2">
-        {/* Featured card — always shown if projects exist */}
+      <div className={`border ${SURFACE.hairline}`}>
         {featured && (
-          <FeaturedProjectCard
-            project={featured}
-            ctaLabel={content.ctaLabel}
-          />
+          <CaseFileCard project={featured} ctaLabel={content.ctaLabel} />
         )}
 
-        {/* Secondary rows */}
-        {visibleRest.length > 0 && (
-          <div className="mt-2 divide-y divide-foreground/5">
-            {visibleRest.map((project, index) => (
-              <ProjectRow
-                key={project.slug}
-                project={project}
-                index={index}
-                ctaLabel={content.ctaLabel}
-              />
+        {rest.length > 0 && (
+          <div
+            className={`border-t ${SURFACE.hairline} bg-surface-strong grid grid-cols-1 md:grid-cols-3 gap-px`}
+            role="list"
+            aria-label="Additional projects"
+          >
+            {rest.map((project, i) => (
+              <div key={project.slug} role="listitem">
+                <DossierTile
+                  project={project}
+                  tileIndex={i + 1}
+                  ctaLabel={content.ctaLabel}
+                />
+              </div>
             ))}
           </div>
         )}
-      </div>
-
-      {/* Load more / count footer */}
-      <div className="mt-6 flex items-center gap-4">
-        <div className="h-px flex-1 bg-surface-divider/50" />
-        {hasMore ? (
-          <>
-            <Typography
-              variant="caption"
-              className="whitespace-nowrap tabular-nums text-subtle-foreground"
-            >
-              {visible} of {projects.length}
-            </Typography>
-            <button
-              type="button"
-              onClick={() =>
-                setVisible((count) =>
-                  Math.min(count + content.increment, projects.length)
-                )
-              }
-              className={`${TYPOGRAPHY_STYLES.linkSecondary} whitespace-nowrap`}
-            >
-              {content.loadMoreLabel}
-            </button>
-          </>
-        ) : (
-          <Typography variant="caption" className="whitespace-nowrap text-subtle-foreground">
-            All {projects.length} projects
-          </Typography>
-        )}
-        <div className="h-px flex-1 bg-surface-divider/50" />
       </div>
     </SectionFrame>
   );

@@ -27,8 +27,5 @@ export interface ProjectsSectionContent {
   eyebrow: string;
   title: string;
   intro: string;
-  initialCount: number;
-  increment: number;
   ctaLabel: string;
-  loadMoreLabel: string;
 }

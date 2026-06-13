@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { Typography } from '@/shared/components/Typography';
+import { ThemeToggle } from '@/shared/components/ThemeToggle';
 import type { NavItem } from '@/shared/site/config';
 
 interface NavigationBarProps {
@@ -118,6 +119,12 @@ export default function NavigationBar({
             </li>
           );
         })}
+        <li>
+          <span className="mx-1 h-3 w-px bg-surface-divider" aria-hidden="true" />
+        </li>
+        <li>
+          <ThemeToggle />
+        </li>
       </ul>
     </nav>
   );

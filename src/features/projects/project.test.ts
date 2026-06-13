@@ -60,12 +60,12 @@ test('skills include Dart and Flutter from resume', () => {
   assert.ok(all.includes('Flutter'), 'Flutter should be in skills');
 });
 
-test('firecheck is the first project in the array', () => {
-  assert.equal(projects[0].slug, 'firecheck');
-  assert.equal(projects[0].title, 'FireCheck');
+test('rent-n-roll is the first (featured) project in the array', () => {
+  assert.equal(projects[0].slug, 'rent-n-roll');
+  assert.equal(projects[0].title, 'Rent N Roll');
   assert.ok(
-    projects[0].technologies.includes('Flutter'),
-    'FireCheck should list Flutter as a technology'
+    projects[0].technologies.includes('Supabase'),
+    'Rent N Roll should list Supabase as a technology'
   );
 });
 

@@ -107,7 +107,7 @@ Total system prompt: ~1,200–1,800 tokens. Conversation history is kept to the 
 ### `useWebLLM.ts`
 - Exposes: `{ status, progress, messages, send, isStreaming }`
 - `status`: `'idle' | 'unsupported' | 'loading' | 'ready' | 'error'`
-- On first `send()` call (or when the window opens), it checks for WebGPU, then triggers the dynamic import and model load.
+- On mount (when the chat window opens), it checks for WebGPU, then immediately triggers the dynamic import and model load — so the progress bar is visible from the moment the window opens, not delayed until the first message.
 - Streams tokens back by updating the last assistant message in place.
 - Runs inference in a Web Worker to keep the UI thread unblocked.
 

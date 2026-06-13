@@ -161,7 +161,7 @@ export const aboutContent: AboutContent = {
       id: 'exp-freelance-software-engineer',
       title: 'Freelance Software Engineer',
       company: 'Upwork — Remote',
-      startDate: '2026-01',
+      startDate: '2025-01',
       endDate: null,
       isCurrent: true,
       responsibilities: [
