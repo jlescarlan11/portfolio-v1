@@ -226,8 +226,7 @@ body {
     animation: none !important;
   }
 
-  .fade-in-pending,
-  .opacity-0 {
+  .fade-in-pending {
     opacity: 1 !important;
     animation: none !important;
   }
