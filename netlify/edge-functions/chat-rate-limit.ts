@@ -1,8 +1,4 @@
 import type { Config, Context } from '@netlify/edge-functions';
-import {
-  RATE_LIMIT_REQUESTS,
-  RATE_LIMIT_WINDOW_SECONDS
-} from '../../src/features/chat/server/config';
 
 export default async function chatRateLimit(
   _request: Request,
@@ -18,7 +14,9 @@ export const config: Config = {
     action: 'rewrite',
     to: '/api/chat/rate-limited',
     aggregateBy: ['ip', 'domain'],
-    windowLimit: RATE_LIMIT_REQUESTS,
-    windowSize: RATE_LIMIT_WINDOW_SECONDS
+    // Netlify requires inline config declarations to contain static literals.
+    // The companion test guards these values against server-config drift.
+    windowLimit: 20,
+    windowSize: 60
   }
 };
