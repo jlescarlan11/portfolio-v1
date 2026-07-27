@@ -148,6 +148,13 @@ describe('ChatWindow', () => {
     expect(dialog).toHaveClass('sm:max-w-none');
   });
 
+  it('gives compact dialog controls at least a 24px pointer target', () => {
+    const { getByRole } = render(<ChatWindow onClose={vi.fn()} />);
+
+    expect(getByRole('button', { name: 'Close chat' })).toHaveClass('size-6');
+    expect(getByRole('button', { name: 'Send message' })).toHaveClass('size-6');
+  });
+
   it('trims and submits one non-empty message', () => {
     const { getByPlaceholderText, getByRole } = render(
       <ChatWindow onClose={vi.fn()} />
@@ -196,6 +203,7 @@ describe('ChatWindow', () => {
     const { getByRole } = render(<ChatWindow onClose={vi.fn()} />);
 
     fireEvent.click(getByRole('button', { name: /retry/i }));
+    expect(getByRole('button', { name: /retry/i })).toHaveClass('min-h-6');
     expect(hookResult.retry).toHaveBeenCalledOnce();
   });
 

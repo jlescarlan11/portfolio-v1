@@ -103,7 +103,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
         <button
           onClick={handleClose}
           aria-label="Close chat"
-          className="font-mono text-xs text-subtle-foreground transition-colors hover:text-foreground"
+          className="inline-flex size-6 items-center justify-center font-mono text-xs text-subtle-foreground transition-colors hover:text-foreground"
         >
           ✕
         </button>
@@ -144,7 +144,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
                 type="button"
                 onClick={() => void retry()}
                 disabled={isStreaming || retryBlocked}
-                className="shrink-0 font-mono text-[10px] uppercase tracking-[0.1em] text-foreground underline decoration-foreground/30 underline-offset-2 disabled:opacity-30"
+                className="inline-flex min-h-6 shrink-0 items-center font-mono text-[10px] uppercase tracking-[0.1em] text-foreground underline decoration-foreground/30 underline-offset-2 disabled:opacity-30"
               >
                 Retry
               </button>
@@ -169,7 +169,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
             type="submit"
             aria-label="Send message"
             disabled={isStreaming || retryBlocked || !input.trim()}
-            className="font-mono text-sm text-subtle-foreground transition-colors hover:text-foreground disabled:opacity-30"
+            className="inline-flex size-6 items-center justify-center font-mono text-sm text-subtle-foreground transition-colors hover:text-foreground disabled:opacity-30"
           >
             →
           </button>

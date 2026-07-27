@@ -39,7 +39,7 @@ export function ChatBubble() {
           <button
             onClick={() => setLabelVisible(false)}
             aria-label="Dismiss"
-            className="font-mono text-[10px] text-subtle-foreground/50 transition-colors hover:text-foreground leading-none"
+            className="inline-flex size-6 items-center justify-center font-mono text-[10px] leading-none text-subtle-foreground/50 transition-colors hover:text-foreground"
           >
             ✕
           </button>

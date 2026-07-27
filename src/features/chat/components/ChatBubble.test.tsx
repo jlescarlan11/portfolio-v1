@@ -30,6 +30,16 @@ describe('ChatBubble', () => {
     expect(getByRole('button', { name: /open ai chat/i })).toBeTruthy();
   });
 
+  it('gives compact chat controls at least a 24px pointer target', () => {
+    const { getByRole } = render(<ChatBubble />);
+
+    expect(getByRole('button', { name: 'Dismiss' })).toHaveClass('size-6');
+    expect(getByRole('button', { name: /open ai chat/i })).toHaveClass(
+      'h-11',
+      'w-11'
+    );
+  });
+
   it('mounts ChatWindow when button is clicked', async () => {
     const { getByRole } = render(<ChatBubble />);
     const launcher = getByRole('button', { name: /open ai chat/i });
