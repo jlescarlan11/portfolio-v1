@@ -21,6 +21,15 @@ describe('ChatMessage', () => {
     expect(container.firstElementChild?.className).toContain('flex-row');
   });
 
+  it('keeps assistant identity and progress labels readable', () => {
+    const { getByText } = render(
+      <ChatMessage role="assistant" content="" isThinking />
+    );
+
+    expect(getByText('AI')).toHaveClass('text-subtle-foreground');
+    expect(getByText('thinking')).toHaveClass('text-subtle-foreground');
+  });
+
   it('does not render model-provided remote images', () => {
     const { getByText, queryByRole } = render(
       <ChatMessage

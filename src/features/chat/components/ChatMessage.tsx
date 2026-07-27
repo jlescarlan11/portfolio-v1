@@ -39,7 +39,7 @@ export const ChatMessage = memo(function ChatMessage({ role, content, isThinking
       <span className={`flex h-6 w-6 shrink-0 items-center justify-center border font-mono text-[9px] uppercase tracking-widest ${
         isUser
           ? 'border-foreground/20 bg-foreground/10 text-foreground/70'
-          : 'border-foreground/15 bg-foreground/[0.06] text-foreground/50'
+          : 'border-foreground/15 bg-foreground/[0.06] text-subtle-foreground'
       }`}>
         {isUser ? 'You' : 'AI'}
       </span>
@@ -48,7 +48,7 @@ export const ChatMessage = memo(function ChatMessage({ role, content, isThinking
       }`}>
         {isThinking ? (
           <span className="flex items-center gap-2" aria-label="Thinking">
-            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-foreground/40 animate-pulse">thinking</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-subtle-foreground animate-pulse">thinking</span>
             {THINKING_DELAYS.map((delay, i) => (
               <span key={i} className="h-1 w-1 animate-pulse rounded-full bg-current opacity-30" style={{ animationDelay: `${delay}ms` }} />
             ))}
