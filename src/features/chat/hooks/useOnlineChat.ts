@@ -194,7 +194,7 @@ async function readApiErrorCode(response: Response): Promise<string | undefined>
   if (!response.body) return undefined;
 
   const reader = response.body.getReader();
-  const decoder = new TextDecoder();
+  const decoder = new TextDecoder('utf-8', { fatal: true });
   let receivedBytes = 0;
   let text = '';
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -229,6 +229,7 @@ async function readApiErrorCode(response: Response): Promise<string | undefined>
     const body = JSON.parse(text) as ApiErrorBody;
     return typeof body.error?.code === 'string' ? body.error.code : undefined;
   } catch {
+    void reader.cancel().catch(() => undefined);
     return undefined;
   } finally {
     if (timeoutId !== undefined) globalThis.clearTimeout(timeoutId);

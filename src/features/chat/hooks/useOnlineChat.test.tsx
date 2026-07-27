@@ -386,6 +386,37 @@ describe('useOnlineChat', () => {
     expect(cancelBody).toHaveBeenCalledOnce();
   });
 
+  it('rejects invalid UTF-8 inside an API error body', async () => {
+    const encoder = new TextEncoder();
+    const prefix = encoder.encode(
+      '{"error":{"code":"RATE_LIMITED","message":"'
+    );
+    const suffix = encoder.encode('"}}');
+    const body = new Uint8Array(prefix.length + suffix.length + 1);
+    body.set(prefix);
+    body[prefix.length] = 0xff;
+    body.set(suffix, prefix.length + 1);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(body, {
+            status: 418,
+            headers: { 'Content-Type': 'application/json; charset=utf-8' }
+          })
+      )
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'unavailable' })
+    );
+  });
+
   it('rejects an oversized declared API error without reading its body', async () => {
     const response = errorResponse(418, 'RATE_LIMITED');
     response.headers.set(
