@@ -6,6 +6,14 @@ import { ChatMessage } from './ChatMessage';
 import { CHAT_WINDOW_ID } from './chat-window-contract';
 
 const CHAT_WINDOW_TITLE_ID = 'portfolio-chat-window-title';
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window.matchMedia !== 'function' ||
+    window.matchMedia(REDUCED_MOTION_QUERY).matches
+  );
+}
 
 interface ChatWindowProps {
   onClose: () => void;
@@ -32,7 +40,10 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
     prevMsgCount.current = messages.length;
     if (!bottom || typeof bottom.scrollIntoView !== 'function') return;
     bottom.scrollIntoView({
-      behavior: newMessage || !isStreaming ? 'smooth' : 'auto'
+      behavior:
+        prefersReducedMotion() || (!newMessage && isStreaming)
+          ? 'auto'
+          : 'smooth'
     });
   }, [messages, isStreaming]);
 

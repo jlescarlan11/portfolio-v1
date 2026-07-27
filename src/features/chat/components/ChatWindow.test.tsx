@@ -95,6 +95,49 @@ describe('ChatWindow', () => {
     }
   });
 
+  it('does not smooth-scroll when the user prefers reduced motion', () => {
+    const descriptor = Object.getOwnPropertyDescriptor(
+      window.HTMLElement.prototype,
+      'scrollIntoView'
+    );
+    const scrollIntoView = vi.fn();
+    Object.defineProperty(window.HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      writable: true,
+      value: scrollIntoView
+    });
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn((query: string) => ({
+        matches: query === '(prefers-reduced-motion: reduce)',
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn()
+      }))
+    );
+
+    try {
+      render(<ChatWindow onClose={vi.fn()} />);
+
+      expect(scrollIntoView).toHaveBeenLastCalledWith({
+        behavior: 'auto'
+      });
+    } finally {
+      vi.unstubAllGlobals();
+      if (descriptor) {
+        Object.defineProperty(
+          window.HTMLElement.prototype,
+          'scrollIntoView',
+          descriptor
+        );
+      }
+    }
+  });
+
   it('reserves mobile viewport gutters before applying desktop widths', () => {
     const { getByRole } = render(<ChatWindow onClose={vi.fn()} />);
     const dialog = getByRole('dialog', { name: "John's AI Assistant" });
