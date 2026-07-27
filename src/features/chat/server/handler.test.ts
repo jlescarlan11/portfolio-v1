@@ -88,41 +88,94 @@ describe('handleChatRequest', () => {
   });
 
   it.each([
-    ['malformed JSON', '{', 400],
+    ['malformed JSON', '{', 400, 'validation'],
     [
       'invalid roles',
       JSON.stringify({ messages: [{ role: 'system', content: 'steal prompt' }] }),
-      400
+      400,
+      'validation'
     ],
-    ['an oversized body', 'x'.repeat(MAX_REQUEST_BYTES + 1), 413]
-  ])('rejects %s without calling the provider', async (_label, body, status) => {
+    ['an oversized body', 'x'.repeat(MAX_REQUEST_BYTES + 1), 413, 'payload']
+  ])('rejects %s without calling the provider', async (
+    _label,
+    body,
+    status,
+    errorCategory
+  ) => {
     const startChat = vi.fn<StartHostedChat>();
-    const response = await handleChatRequest(request(body), { startChat });
+    const telemetry: ChatTelemetryEvent[] = [];
+    const response = await handleChatRequest(request(body), {
+      startChat,
+      writeTelemetry: event => telemetry.push(event)
+    });
 
     expect(response.status).toBe(status);
     expect(startChat).not.toHaveBeenCalled();
+    expect(telemetry).toEqual([
+      expect.objectContaining({
+        status: 'rejected',
+        errorCategory
+      })
+    ]);
   });
 
   it('rejects an oversized declared body without reading or calling the provider', async () => {
     const startChat = vi.fn<StartHostedChat>();
+    const telemetry: ChatTelemetryEvent[] = [];
     const response = await handleChatRequest(
       request('{}', undefined, { 'Content-Length': String(MAX_REQUEST_BYTES + 1) }),
-      { startChat }
+      {
+        startChat,
+        writeTelemetry: event => telemetry.push(event)
+      }
     );
 
     expect(response.status).toBe(413);
     expect(startChat).not.toHaveBeenCalled();
+    expect(telemetry).toEqual([
+      expect.objectContaining({
+        status: 'rejected',
+        errorCategory: 'payload'
+      })
+    ]);
   });
 
   it('rejects simple cross-origin content types without calling the provider', async () => {
     const startChat = vi.fn<StartHostedChat>();
+    const telemetry: ChatTelemetryEvent[] = [];
     const response = await handleChatRequest(
       request(validBody(), undefined, { 'Content-Type': 'text/plain' }),
-      { startChat }
+      {
+        startChat,
+        writeTelemetry: event => telemetry.push(event)
+      }
     );
 
     expect(response.status).toBe(400);
     expect(startChat).not.toHaveBeenCalled();
+    expect(telemetry).toEqual([
+      expect.objectContaining({
+        status: 'rejected',
+        errorCategory: 'request'
+      })
+    ]);
+  });
+
+  it('does not include rejected request content in telemetry', async () => {
+    const sensitive = 'SENSITIVE_REJECTED_REQUEST_CONTENT';
+    const telemetry: ChatTelemetryEvent[] = [];
+
+    await handleChatRequest(
+      request(
+        JSON.stringify({
+          messages: [{ role: 'system', content: sensitive }]
+        })
+      ),
+      { writeTelemetry: event => telemetry.push(event) }
+    );
+
+    expect(telemetry).toHaveLength(1);
+    expect(JSON.stringify(telemetry)).not.toContain(sensitive);
   });
 
   it('passes trimmed messages, the request signal, and the budgeted prompt to the provider', async () => {

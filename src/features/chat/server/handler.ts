@@ -366,11 +366,15 @@ export async function handleChatRequest(
 
   const requestText = await readRequestText(request);
   if (requestText instanceof Response) {
+    emitOutcome('rejected', {
+      errorCategory: requestText.status === 413 ? 'payload' : 'request'
+    });
     return requestText;
   }
 
   const validation = validateChatRequestText(requestText);
   if (!validation.ok) {
+    emitOutcome('rejected', { errorCategory: 'validation' });
     return jsonError(
       validation.status,
       validation.code,
@@ -383,6 +387,7 @@ export async function handleChatRequest(
     messages = prepareChatContext(CHAT_SYSTEM_PROMPT, messages).messages;
   } catch (error: unknown) {
     if (error instanceof CurrentMessageTooLargeError) {
+      emitOutcome('rejected', { errorCategory: 'context_budget' });
       return jsonError(
         413,
         'PAYLOAD_TOO_LARGE',

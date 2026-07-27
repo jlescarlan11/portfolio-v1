@@ -3,6 +3,7 @@ import { HOSTED_CHAT_MODEL } from './config';
 export type ChatTelemetryStatus =
   | 'success'
   | 'failed'
+  | 'rejected'
   | 'cancelled'
   | 'output_limit'
   | 'provider_quota'
