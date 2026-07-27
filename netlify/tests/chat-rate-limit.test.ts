@@ -6,7 +6,7 @@ import {
 import chat, { config } from '../functions/chat.mts';
 
 describe('chat Netlify function', () => {
-  it('declares a distributed IP-and-domain rule with the documented boundary', () => {
+  it('declares one distributed IP rule across every site domain', () => {
     expect(config).toEqual({
       path: '/api/*',
       excludedPath: '/api/chat/rate-limited',
@@ -14,7 +14,7 @@ describe('chat Netlify function', () => {
       rateLimit: {
         action: 'rewrite',
         to: '/api/chat/rate-limited',
-        aggregateBy: ['ip', 'domain'],
+        aggregateBy: ['ip'],
         windowLimit: RATE_LIMIT_REQUESTS,
         windowSize: RATE_LIMIT_WINDOW_SECONDS
       }

@@ -27,7 +27,7 @@ export const config = {
   rateLimit: {
     action: 'rewrite',
     to: '/api/chat/rate-limited',
-    aggregateBy: ['ip', 'domain'],
+    aggregateBy: ['ip'],
     // Netlify requires inline config declarations to contain static literals.
     // windowLimit is the maximum permitted count, so 20 allows request 20 and
     // applies the rewrite starting with request 21.

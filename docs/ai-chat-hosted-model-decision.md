@@ -72,24 +72,26 @@ The model and request budgets are application-owned constants:
   oldest turns before calling the provider
 - Maximum output: 256 tokens
 - Provider timeout: 25 seconds
-- Anonymous rate limit: 20 POST requests per IP and domain per 60 seconds
+- Anonymous rate limit: 20 POST requests per client IP across every site domain
+  per 60 seconds
 - Rate-limit retry interval: 60 seconds
 
 Netlify begins blocking after its configured `windowLimit` is exceeded. The
-deployed rule therefore uses the static platform value `19`, which the live
+deployed rule therefore uses the static platform value `20`, which the live
 boundary verifier confirms as 20 allowed requests followed by a blocked request
-21 for sequential traffic. Because enforcement runs on Netlify's distributed
-edge, requests already in flight at the boundary can briefly overshoot the
-nominal threshold before the counter converges. The live verifier races two
-boundary requests, requires enforcement after propagation, waits for the
-advertised retry window, and confirms that traffic is accepted again. Treat the
-20-request limit as abuse protection rather than an exact account-budget
-control. Netlify's current `gpt-5-nano` account limits are 300,000 TPM on Free,
-600,000 TPM on Personal, and 900,000 TPM on Pro, with both input and output
-tokens counting toward the limit. The application budgets up to 165,120
-estimated tokens per minute for 20 sequential worst-case requests from one
-client, so a small number of independent clients can still exhaust the
-account-level allowance.
+21 for sequential traffic. The counter aggregates by client IP only, so the
+custom domain and Netlify default domain do not grant separate allowances.
+Because enforcement runs on Netlify's distributed edge, requests already in
+flight at the boundary can briefly overshoot the nominal threshold before the
+counter converges. The live verifier races two boundary requests, requires
+enforcement after propagation, waits for the advertised retry window, and
+confirms that traffic is accepted again. Treat the 20-request limit as abuse
+protection rather than an exact account-budget control. Netlify's current
+`gpt-5-nano` account limits are 300,000 TPM on Free, 600,000 TPM on Personal,
+and 900,000 TPM on Pro, with both input and output tokens counting toward the
+limit. The application budgets up to 165,120 estimated tokens per minute for
+20 sequential worst-case requests from one client, so a small number of
+independent clients can still exhaust the account-level allowance.
 
 Netlify's AI Credit Usage Limit is an Agent Runner control and does not stop AI
 Gateway traffic on self-serve plans. Netlify currently sends account-credit

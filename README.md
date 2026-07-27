@@ -123,8 +123,8 @@ Application limits are deliberately conservative:
 - 16 KiB body, 12 messages, and 2,000 Unicode characters in the current prompt
 - 8,000 estimated input tokens and 256 maximum output tokens
 - 25-second provider timeout
-- 20 anonymous POST requests per IP and domain in a 60-second distributed
-  Netlify rate-limit window
+- 20 anonymous POST requests per client IP across every site domain in a
+  60-second distributed Netlify rate-limit window
 
 Netlify's edge counter can admit requests that are already in flight at the
 boundary, so this is abuse protection rather than a strict billing cap. The
