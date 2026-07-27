@@ -997,6 +997,55 @@ describe('handleChatRequest', () => {
     ]);
   });
 
+  it('uses a stable hosted stream facade after validation', async () => {
+    let completionGetterReads = 0;
+    let nextCall = 0;
+    const telemetry: ChatTelemetryEvent[] = [];
+    const getCompletion = vi.fn(async () => ({
+      finishReason: 'stop',
+      inputTokens: 10,
+      outputTokens: 2
+    }));
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: () => {
+        const hostedStream = {
+          iterator: {
+            next: async () => {
+              nextCall += 1;
+              return nextCall === 1
+                ? { done: false as const, value: 'Complete' }
+                : { done: true as const, value: undefined };
+            }
+          }
+        };
+        Object.defineProperty(hostedStream, 'getCompletion', {
+          get() {
+            completionGetterReads += 1;
+            if (completionGetterReads > 1) {
+              throw new Error('transient completion getter');
+            }
+            return getCompletion;
+          }
+        });
+        return hostedStream as unknown as HostedChatStream;
+      },
+      writeTelemetry: event => telemetry.push(event)
+    });
+
+    expect(await readFrames(response)).toEqual([
+      { type: 'text-delta', delta: 'Complete' },
+      { type: 'finish', finishReason: 'stop' }
+    ]);
+    expect(completionGetterReads).toBe(1);
+    expect(getCompletion).toHaveBeenCalledOnce();
+    expect(telemetry).toEqual([
+      expect.objectContaining({
+        status: 'success',
+        finishReason: 'stop'
+      })
+    ]);
+  });
+
   it('returns a sanitized unavailable response for missing server configuration', async () => {
     const startChat = vi.fn<StartHostedChat>(() => {
       throw new ChatConfigurationError();

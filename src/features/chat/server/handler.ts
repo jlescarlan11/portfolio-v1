@@ -136,9 +136,7 @@ function parseProviderCompletion(result: unknown): ChatCompletionMetadata {
   }
 }
 
-function assertHostedChatStream(
-  result: unknown
-): asserts result is HostedChatStream {
+function parseHostedChatStream(result: unknown): HostedChatStream {
   if (typeof result !== 'object' || result === null) {
     throw new ProviderStreamProtocolError();
   }
@@ -165,6 +163,24 @@ function assertHostedChatStream(
     ) {
       throw new ProviderStreamProtocolError();
     }
+
+    const nextMethod =
+      next as HostedChatStream['iterator']['next'];
+    const returnMethod = release as Exclude<
+      HostedChatStream['iterator']['return'],
+      undefined
+    > | undefined;
+    const completionMethod =
+      getCompletion as HostedChatStream['getCompletion'];
+    return {
+      iterator: {
+        next: nextMethod.bind(iterator),
+        ...(returnMethod
+          ? { return: returnMethod.bind(iterator) }
+          : {})
+      },
+      getCompletion: completionMethod.bind(result)
+    };
   } catch (error: unknown) {
     if (error instanceof ProviderStreamProtocolError) throw error;
     throw new ProviderStreamProtocolError();
@@ -834,12 +850,13 @@ export async function handleChatRequest(
             new DOMException('Provider startup was aborted.', 'AbortError')
           );
         }
-        assertHostedChatStream(hostedStream);
+        const stableHostedStream = parseHostedChatStream(hostedStream);
+        pendingHostedStream = stableHostedStream;
         const firstChunk = parseProviderChunkResult(
-          await hostedStream.iterator.next()
+          await stableHostedStream.iterator.next()
         );
         return {
-          hostedStream,
+          hostedStream: stableHostedStream,
           firstChunk
         };
       })(),
