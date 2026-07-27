@@ -113,11 +113,12 @@ const getTechIcon = (label: string): JSX.Element | null => {
   return techIcons[label] ?? null;
 };
 
-function SectionLabel({ children }: { children: string }) {
+function SectionLabel({ children, id }: { children: string; id: string }) {
   return (
     <Typography
       variant="caption"
       as="p"
+      id={id}
       className="mb-6 text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle-foreground"
     >
       {children}
@@ -256,7 +257,7 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
             className={`border-t ${SURFACE.hairline} pt-10`}
             aria-labelledby="skills-heading"
           >
-            <SectionLabel>Skills</SectionLabel>
+            <SectionLabel id="skills-heading">Skills</SectionLabel>
             <div className="mb-10 space-y-7">
               {iconCategories.map(({ category, items }) => (
                 <div key={category}>
@@ -293,7 +294,7 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
             className={`border-t ${SURFACE.hairline} pt-10`}
             aria-labelledby="credentials-heading"
           >
-            <SectionLabel>Credentials</SectionLabel>
+            <SectionLabel id="credentials-heading">Credentials</SectionLabel>
             <CertificationsList
               certifications={certifications}
               initialVisibleCount={content.certificationsVisibleCount}
@@ -306,7 +307,7 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
           className={`border-t ${SURFACE.hairline} pt-10`}
           aria-labelledby="experience-heading"
         >
-          <SectionLabel>Experience</SectionLabel>
+          <SectionLabel id="experience-heading">Experience</SectionLabel>
           <ul className="divide-y divide-foreground/5">
             {experience.map((item, index) => (
               <TimelineRow
@@ -328,7 +329,7 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
           className={`border-t ${SURFACE.hairline} pt-10`}
           aria-labelledby="education-heading"
         >
-          <SectionLabel>Education</SectionLabel>
+          <SectionLabel id="education-heading">Education</SectionLabel>
           <ul className="divide-y divide-foreground/5">
             {education.map((item, index) => (
               <TimelineRow

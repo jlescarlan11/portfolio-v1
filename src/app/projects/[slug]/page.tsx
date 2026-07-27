@@ -293,11 +293,12 @@ function SmartGallery({ images, projectTitle }: SmartGalleryProps) {
 
 // ─── Section eyebrow label ─────────────────────────────────────────────────────
 // Consistent small-caps label style across Overview / Highlights / Gallery
-function SectionLabel({ children }: { children: string }) {
+function SectionLabel({ children, id }: { children: string; id: string }) {
   return (
     <Typography
       variant="caption"
       as="p"
+      id={id}
       className="mb-5 text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle-foreground"
     >
       {children}
@@ -407,7 +408,7 @@ export default async function ProjectPage({ params }: ProjectPageProps): Promise
             className="mb-14 md:mb-18"
             aria-labelledby="overview-heading"
           >
-            <SectionLabel>Overview</SectionLabel>
+            <SectionLabel id="overview-heading">Overview</SectionLabel>
             <div className="space-y-5">
               {project.caseStudy.overview.map((paragraph) => (
                 <Typography
@@ -429,7 +430,7 @@ export default async function ProjectPage({ params }: ProjectPageProps): Promise
             className={`mb-14 border-t ${SURFACE.hairline} pt-10 md:mb-18`}
             aria-labelledby="highlights-heading"
           >
-            <SectionLabel>Highlights</SectionLabel>
+            <SectionLabel id="highlights-heading">Highlights</SectionLabel>
             <ul className="space-y-5">
               {project.caseStudy.highlights.map((highlight, i) => (
                 <li key={highlight} className="flex gap-4">
@@ -457,8 +458,9 @@ export default async function ProjectPage({ params }: ProjectPageProps): Promise
               delay={380}
               as="section"
               className={`mb-14 border-t ${SURFACE.hairline} pt-10 md:mb-18`}
+              aria-labelledby="gallery-heading"
             >
-              <SectionLabel>Gallery</SectionLabel>
+              <SectionLabel id="gallery-heading">Gallery</SectionLabel>
               <SmartGallery
                 images={remainingGallery}
                 projectTitle={project.title}

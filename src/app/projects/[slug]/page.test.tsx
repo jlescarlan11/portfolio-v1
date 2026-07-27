@@ -30,4 +30,16 @@ describe('ProjectPage', () => {
 
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content');
   });
+
+  it('gives case-study sections their visible labels as accessible names', async () => {
+    const page = await ProjectPage({
+      params: Promise.resolve({ slug: 'rent-n-roll' })
+    });
+
+    render(page);
+
+    for (const name of ['Overview', 'Highlights', 'Gallery']) {
+      expect(screen.getByRole('region', { name })).toBeInTheDocument();
+    }
+  });
 });
