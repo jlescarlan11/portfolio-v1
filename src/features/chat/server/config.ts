@@ -23,8 +23,28 @@ export class ChatConfigurationError extends Error {
   }
 }
 
+function validateSecureBaseUrl(baseUrl: string): string {
+  try {
+    const parsed = new URL(baseUrl);
+    if (
+      parsed.protocol !== 'https:' ||
+      parsed.username ||
+      parsed.password ||
+      parsed.search ||
+      parsed.hash
+    ) {
+      throw new ChatConfigurationError();
+    }
+  } catch (error: unknown) {
+    if (error instanceof ChatConfigurationError) throw error;
+    throw new ChatConfigurationError();
+  }
+
+  return baseUrl.replace(/\/+$/, '');
+}
+
 function normalizeOpenAiCompatibleBaseUrl(baseUrl: string): string {
-  const normalized = baseUrl.replace(/\/+$/, '');
+  const normalized = validateSecureBaseUrl(baseUrl);
   return /\/v1$/i.test(normalized) ? normalized : `${normalized}/v1`;
 }
 
@@ -50,7 +70,9 @@ export function getHostedChatConfiguration(
   if (openAiApiKey) {
     return {
       apiKey: openAiApiKey,
-      baseUrl: openAiBaseUrl || DEFAULT_OPENAI_BASE_URL
+      baseUrl: openAiBaseUrl
+        ? validateSecureBaseUrl(openAiBaseUrl)
+        : DEFAULT_OPENAI_BASE_URL
     };
   }
 

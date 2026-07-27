@@ -160,6 +160,20 @@ describe('startHostedChat', () => {
     });
   });
 
+  it('rejects a plaintext provider URL before exposing the API key', () => {
+    vi.stubEnv('OPENAI_BASE_URL', 'http://gateway.invalid/v1');
+
+    expect(() =>
+      startHostedChat({
+        messages: [{ role: 'user', content: 'Hello' }],
+        signal: new AbortController().signal,
+        systemPrompt: TEST_SYSTEM_PROMPT
+      })
+    ).toThrow('Hosted chat configuration is unavailable.');
+    expect(mocks.createOpenAI).not.toHaveBeenCalled();
+    expect(mocks.streamText).not.toHaveBeenCalled();
+  });
+
   it('fails without exposing details when gateway configuration is missing', () => {
     vi.stubEnv('NETLIFY_AI_GATEWAY_KEY', '');
     vi.stubEnv('NETLIFY_AI_GATEWAY_BASE_URL', '');
