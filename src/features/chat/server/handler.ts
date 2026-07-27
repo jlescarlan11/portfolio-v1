@@ -150,6 +150,16 @@ function getHostedCompletion(
   );
 }
 
+function getNextHostedChunk(
+  hostedStream: HostedChatStream
+): Promise<IteratorResult<string>> {
+  return withTimeout(
+    hostedStream.iterator.next(),
+    PROVIDER_TIMEOUT_MS,
+    'Provider stream chunk timed out.'
+  );
+}
+
 function isNamedError(error: unknown, name: string): boolean {
   return error instanceof Error && error.name === name;
 }
@@ -389,7 +399,7 @@ function createStreamResponse(
 
           let nextChunk = firstChunk.done
             ? firstChunk
-            : await hostedStream.iterator.next();
+            : await getNextHostedChunk(hostedStream);
 
           while (!nextChunk.done) {
             if (nextChunk.value) {
@@ -398,7 +408,7 @@ function createStreamResponse(
                 return;
               }
             }
-            nextChunk = await hostedStream.iterator.next();
+            nextChunk = await getNextHostedChunk(hostedStream);
           }
 
           const completion = await getHostedCompletion(hostedStream);
