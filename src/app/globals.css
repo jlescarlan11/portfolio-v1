@@ -195,6 +195,19 @@ body {
   to { transform: scaleY(1); }
 }
 
+/* CSS-only safety net: if hydration never starts, reveal the SSR page after
+   the same bounded wait as the client readiness coordinator. */
+@keyframes initial-load-fail-open {
+  to {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+.initial-load-overlay {
+  animation: initial-load-fail-open 0s linear 10s forwards;
+}
+
 /* ── Reduced motion ───────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .animate-enter,

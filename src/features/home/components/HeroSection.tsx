@@ -1,11 +1,13 @@
 'use client';
 
+import React from 'react';
 import type { CSSProperties } from 'react';
 import type { HeroContent } from '@/features/home/content';
 import ProfileImage from '@/features/home/components/ProfileImage';
 import SocialLinks from '@/features/home/components/SocialLinks';
 import { Typography } from '@/shared/components/Typography';
 import { FadeIn } from '@/shared/components/FadeIn';
+import { useOptionalInitialLoad } from '@/shared/loading';
 
 export default function HeroSection({
   name,
@@ -14,6 +16,7 @@ export default function HeroSection({
   profileImage: { src, alt },
   socialLinks
 }: HeroContent): React.JSX.Element {
+  const initialLoad = useOptionalInitialLoad();
   const d = {
     role: 320,
     tagline: 440,
@@ -126,7 +129,15 @@ export default function HeroSection({
               className="relative z-10 overflow-hidden bg-surface-muted"
               style={{ width: 'clamp(160px, 28vw, 300px)', aspectRatio: '1/1' }}
             >
-              <ProfileImage src={src} alt={alt} />
+              <ProfileImage
+                src={src}
+                alt={alt}
+                onSettled={
+                  initialLoad
+                    ? () => initialLoad.settleMilestone('hero-image')
+                    : undefined
+                }
+              />
             </div>
           </div>
         </FadeIn>

@@ -128,3 +128,7 @@ export function useInitialLoad(): InitialLoadContextValue {
 
   return context;
 }
+
+export function useOptionalInitialLoad(): InitialLoadContextValue | null {
+  return useContext(InitialLoadContext);
+}

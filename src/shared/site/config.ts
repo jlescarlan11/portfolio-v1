@@ -15,8 +15,9 @@ export interface SeoConfig {
 
 export interface OverlayContent {
   title: string;
-  ariaLabel: string;
+  eyebrow: string;
   loadingLabel: string;
+  progressLabel: string;
 }
 
 export const siteConfig = {
@@ -49,7 +50,8 @@ export const siteConfig = {
   },
   overlay: {
     title: 'John Lester Escarlan',
-    ariaLabel: 'Welcome',
-    loadingLabel: 'Loading'
+    eyebrow: 'Portfolio',
+    loadingLabel: 'Preparing portfolio',
+    progressLabel: 'Portfolio startup progress'
   } satisfies OverlayContent
 } as const;

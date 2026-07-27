@@ -1,6 +1,7 @@
 export {
   InitialLoadProvider,
-  useInitialLoad
+  useInitialLoad,
+  useOptionalInitialLoad
 } from './InitialLoadProvider';
 export type { InitialLoadContextValue } from './InitialLoadProvider';
 export {

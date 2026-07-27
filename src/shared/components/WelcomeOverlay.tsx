@@ -2,24 +2,28 @@
 
 import React from 'react';
 import type { CSSProperties } from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Typography } from '@/shared/components/Typography';
+import { useInitialLoad } from '@/shared/loading';
 import { siteConfig } from '@/shared/site/config';
 
 const PREFER_REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
-const EXIT_DURATION = 500;
+const EXIT_DURATION = 300;
 
 function getProgressStyle(progress: number): CSSProperties {
-  return { width: `${progress}%` };
+  return { transform: `scaleX(${progress})` };
 }
 
 export default function WelcomeOverlay(): React.JSX.Element | null {
+  const {
+    status,
+    completedCount,
+    totalCount,
+    progress
+  } = useInitialLoad();
   const [visible, setVisible] = useState(true);
   const [closing, setClosing] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);
-  const rafRef = useRef<number | null>(null);
-  const startRef = useRef<number | null>(null);
   const closeTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -50,73 +54,29 @@ export default function WelcomeOverlay(): React.JSX.Element | null {
     };
   }, []);
 
-  const dismiss = useCallback((): void => {
-    if (!visible || closing) {
+  useEffect(() => {
+    if (!visible || status === 'loading') {
       return;
     }
 
-    if (reduceMotion) {
+    if (reduceMotion || status === 'timed-out') {
       setVisible(false);
       return;
     }
 
     setClosing(true);
-    if (typeof window === 'undefined') {
-      setVisible(false);
-      setClosing(false);
-      return;
-    }
-
-    if (closeTimerRef.current) {
-      window.clearTimeout(closeTimerRef.current);
-    }
-
     closeTimerRef.current = window.setTimeout(() => {
       setVisible(false);
       closeTimerRef.current = null;
     }, EXIT_DURATION);
-  }, [closing, reduceMotion, visible]);
-
-  useEffect(() => {
-    if (!visible || typeof window === 'undefined') {
-      return;
-    }
-
-    const duration = reduceMotion ? 0 : 1200;
-
-    const step = (timestamp: number): void => {
-      if (startRef.current == null) {
-        startRef.current = timestamp;
-      }
-
-      const elapsed = timestamp - startRef.current;
-      const pct = duration === 0 ? 100 : Math.min(100, Math.round((elapsed / duration) * 100));
-      setProgress(pct);
-
-      if (pct < 100) {
-        rafRef.current = window.requestAnimationFrame(step);
-      } else {
-        const exitDelay = reduceMotion ? 0 : 150;
-        window.setTimeout(() => dismiss(), exitDelay);
-      }
-    };
-
-    if (duration === 0) {
-      setProgress(100);
-      dismiss();
-      return;
-    }
-
-    rafRef.current = window.requestAnimationFrame(step);
 
     return () => {
-      if (rafRef.current) {
-        window.cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
+      if (closeTimerRef.current !== null) {
+        window.clearTimeout(closeTimerRef.current);
+        closeTimerRef.current = null;
       }
-      startRef.current = null;
     };
-  }, [dismiss, reduceMotion, visible]);
+  }, [reduceMotion, status, visible]);
 
   useEffect(() => {
     if (!visible) {
@@ -130,73 +90,83 @@ export default function WelcomeOverlay(): React.JSX.Element | null {
     };
   }, [visible]);
 
-  useEffect(() => {
-    if (!visible) {
-      return;
-    }
-
-    const onKey = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape') {
-        setProgress(100);
-        dismiss();
-      }
-    };
-
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [dismiss, visible]);
-
-  useEffect(() => {
-    return () => {
-      if (closeTimerRef.current) {
-        window.clearTimeout(closeTimerRef.current);
-      }
-    };
-  }, []);
-
   if (!visible) {
     return null;
   }
 
   return (
     <div
-      role="dialog"
-      aria-label={siteConfig.overlay.ariaLabel}
-      aria-live="polite"
+      data-testid="initial-load-overlay"
       className={[
-        'fixed inset-0 z-[9999] grid place-items-center bg-surface px-6 transition-opacity duration-500',
-        closing ? 'opacity-0' : 'opacity-100'
+        'initial-load-overlay fixed inset-0 z-[9999] grid min-h-dvh place-items-center overflow-hidden bg-surface px-6 py-10',
+        'transition-opacity duration-300',
+        closing ? 'pointer-events-none opacity-0' : 'opacity-100'
       ].join(' ')}
-      onClick={() => {
-        setProgress(100);
-        dismiss();
-      }}
     >
       <div
+        className="surface-grid-mask pointer-events-none-safe absolute inset-0 opacity-50"
+        aria-hidden="true"
+      />
+      <div
         className={[
-          'animate-enter w-full max-w-md space-y-6 text-center',
+          'relative w-full max-w-md space-y-8 text-center transition-[opacity,transform] duration-300',
           closing ? '-translate-y-2 opacity-0' : ''
         ].join(' ')}
       >
-        <Typography variant="h1" as="h1" className="font-serif">
-          {siteConfig.overlay.title}
-        </Typography>
-        <div className="space-y-2" aria-live="polite">
+        <div className="space-y-3">
+          <Typography
+            variant="caption"
+            as="p"
+            className="font-semibold uppercase tracking-[0.14em] text-subtle-foreground"
+          >
+            {siteConfig.overlay.eyebrow}
+          </Typography>
+          <Typography variant="h1" as="p" className="font-serif">
+            {siteConfig.overlay.title}
+          </Typography>
+        </div>
+
+        <div className="space-y-3">
           <div
             role="progressbar"
+            aria-label={siteConfig.overlay.progressLabel}
             aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={progress}
-            className="h-1.5 w-full overflow-hidden border border-surface bg-surface-tint"
+            aria-valuemax={totalCount}
+            aria-valuenow={completedCount}
+            aria-valuetext={`${completedCount} of ${totalCount} startup steps complete`}
+            className="h-1 w-full overflow-hidden bg-surface-tint-strong"
           >
             <div
-              className="h-full bg-foreground transition-[width] duration-200"
+              className="h-full origin-left bg-foreground transition-transform duration-300"
               style={getProgressStyle(progress)}
             />
           </div>
-          <Typography variant="caption" className="text-subtle-foreground">
-            {siteConfig.overlay.loadingLabel} {progress}%
-          </Typography>
+          <div
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="flex items-center justify-between gap-4"
+          >
+            <Typography
+              variant="caption"
+              as="span"
+              className="text-subtle-foreground"
+            >
+              {siteConfig.overlay.loadingLabel}
+            </Typography>
+            <Typography
+              variant="caption"
+              as="span"
+              aria-hidden="true"
+              className="tabular-nums text-subtle-foreground"
+            >
+              {String(completedCount).padStart(2, '0')} /{' '}
+              {String(totalCount).padStart(2, '0')}
+            </Typography>
+            <span className="sr-only">
+              {completedCount} of {totalCount} startup steps complete
+            </span>
+          </div>
         </div>
       </div>
     </div>

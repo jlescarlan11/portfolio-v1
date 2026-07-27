@@ -1,10 +1,36 @@
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen
+} from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  InitialLoadProvider,
+  useInitialLoad
+} from '@/shared/loading';
+import { INITIAL_LOAD_TIMEOUT_MS } from '@/shared/loading/initial-load-state';
 import WelcomeOverlay from './WelcomeOverlay';
+
+interface Deferred<T> {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+}
+
+function createDeferred<T>(): Deferred<T> {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+
+  return { promise, resolve };
+}
 
 function mockMatchMedia(matches: boolean): void {
   Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
     writable: true,
     value: vi.fn().mockImplementation((query: string) => ({
       matches,
@@ -19,71 +45,141 @@ function mockMatchMedia(matches: boolean): void {
   });
 }
 
+function setDocumentFonts(ready: Promise<FontFaceSet>): void {
+  Object.defineProperty(document, 'fonts', {
+    configurable: true,
+    value: { ready }
+  });
+}
+
+function HeroSettler(): React.JSX.Element {
+  const { settleMilestone } = useInitialLoad();
+  return (
+    <button onClick={() => settleMilestone('hero-image')}>
+      Settle hero
+    </button>
+  );
+}
+
+function renderOverlay(): ReturnType<typeof render> {
+  return render(
+    <InitialLoadProvider>
+      <WelcomeOverlay />
+      <HeroSettler />
+    </InitialLoadProvider>
+  );
+}
+
 describe('WelcomeOverlay', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     mockMatchMedia(false);
-    vi.stubGlobal(
-      'requestAnimationFrame',
-      vi.fn((callback: FrameRequestCallback) => window.setTimeout(() => callback(Date.now()), 16))
-    );
-    vi.stubGlobal('cancelAnimationFrame', vi.fn((id: number) => window.clearTimeout(id)));
   });
 
   afterEach(() => {
-    vi.runOnlyPendingTimers();
+    cleanup();
+    document.body.style.overflow = '';
+    Reflect.deleteProperty(document, 'fonts');
     vi.useRealTimers();
-    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
-  it('dismisses when the overlay is clicked', () => {
-    render(<WelcomeOverlay />);
+  it('shows milestone progress without fabricated percentage or dialog semantics', () => {
+    const fonts = createDeferred<FontFaceSet>();
+    setDocumentFonts(fonts.promise);
+    renderOverlay();
 
-    fireEvent.click(screen.getByRole('dialog', { name: 'Welcome' }));
+    const progress = screen.getByRole('progressbar', {
+      name: 'Portfolio startup progress'
+    });
+    expect(progress).toHaveAttribute('aria-valuemin', '0');
+    expect(progress).toHaveAttribute('aria-valuemax', '3');
+    expect(progress).toHaveAttribute('aria-valuenow', '1');
+    expect(progress).toHaveAttribute(
+      'aria-valuetext',
+      '1 of 3 startup steps complete'
+    );
+    expect(screen.queryByText(/%/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Preparing portfolio');
 
     act(() => {
-      vi.advanceTimersByTime(600);
+      vi.advanceTimersByTime(INITIAL_LOAD_TIMEOUT_MS - 1);
     });
 
-    expect(screen.queryByRole('dialog', { name: 'Welcome' })).not.toBeInTheDocument();
+    expect(progress).toHaveAttribute('aria-valuenow', '1');
+    expect(screen.getByTestId('initial-load-overlay')).toBeInTheDocument();
   });
 
-  it('dismisses on Escape', async () => {
-    render(<WelcomeOverlay />);
+  it('cannot be dismissed by click or Escape while readiness is pending', () => {
+    const fonts = createDeferred<FontFaceSet>();
+    setDocumentFonts(fonts.promise);
+    renderOverlay();
+
+    const overlay = screen.getByTestId('initial-load-overlay');
+    fireEvent.click(overlay);
+    fireEvent.keyDown(window, { key: 'Escape' });
+
+    expect(overlay).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1');
+  });
+
+  it('exits promptly after all real milestones settle and restores overflow', async () => {
+    const fonts = createDeferred<FontFaceSet>();
+    setDocumentFonts(fonts.promise);
+    document.body.style.overflow = 'clip';
+    renderOverlay();
+
+    expect(document.body.style.overflow).toBe('hidden');
+    fireEvent.click(screen.getByRole('button', { name: 'Settle hero' }));
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '2');
 
     await act(async () => {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
-      vi.advanceTimersByTime(600);
+      fonts.resolve({} as FontFaceSet);
+      await fonts.promise;
     });
 
-    expect(screen.queryByRole('dialog', { name: 'Welcome' })).not.toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '3');
+    expect(screen.getByTestId('initial-load-overlay')).toHaveClass('opacity-0');
+
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(screen.queryByTestId('initial-load-overlay')).not.toBeInTheDocument();
+    expect(document.body.style.overflow).toBe('clip');
   });
 
-  it('respects reduced motion and exits immediately', () => {
+  it('fails open immediately when the coordinator times out', () => {
+    const fonts = createDeferred<FontFaceSet>();
+    setDocumentFonts(fonts.promise);
+    renderOverlay();
+
+    act(() => {
+      vi.advanceTimersByTime(INITIAL_LOAD_TIMEOUT_MS);
+    });
+
+    expect(screen.queryByTestId('initial-load-overlay')).not.toBeInTheDocument();
+    expect(document.body.style.overflow).toBe('');
+  });
+
+  it('still waits for readiness under reduced motion and then exits without animation', async () => {
+    const fonts = createDeferred<FontFaceSet>();
+    setDocumentFonts(fonts.promise);
     mockMatchMedia(true);
-
-    render(<WelcomeOverlay />);
-
-    act(() => {
-      vi.runAllTimers();
-    });
-
-    expect(screen.queryByRole('dialog', { name: 'Welcome' })).not.toBeInTheDocument();
-  });
-
-  it('updates progress over time before dismissing', () => {
-    render(<WelcomeOverlay />);
+    renderOverlay();
 
     act(() => {
-      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(5_000);
+    });
+    expect(screen.getByTestId('initial-load-overlay')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Settle hero' }));
+    await act(async () => {
+      fonts.resolve({} as FontFaceSet);
+      await fonts.promise;
     });
 
-    expect(Number(screen.getByRole('progressbar').getAttribute('aria-valuenow'))).toBeGreaterThan(0);
-
-    act(() => {
-      vi.advanceTimersByTime(4000);
-    });
-
-    expect(screen.queryByRole('dialog', { name: 'Welcome' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('initial-load-overlay')).not.toBeInTheDocument();
   });
 });

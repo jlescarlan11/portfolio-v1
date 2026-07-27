@@ -5,13 +5,14 @@ import ContributionGraph from '@/features/about/components/ContributionGraph';
 import ContactSection from '@/features/contact/ContactSection';
 import { contactContent } from '@/features/contact/content';
 import { FooterSection, HeroSection, heroContent } from '@/features/home';
+import InitialLoadExperience from '@/features/home/components/InitialLoadExperience';
 import { ProjectsSection, projects, projectsSectionContent } from '@/features/projects';
 import NavigationBar from '@/shared/components/NavigationBar';
 import { siteConfig } from '@/shared/site/config';
 
 export default function HomePage(): React.JSX.Element {
   return (
-    <>
+    <InitialLoadExperience>
       <header>
         <NavigationBar items={siteConfig.navigation.header} />
       </header>
@@ -37,7 +38,6 @@ export default function HomePage(): React.JSX.Element {
         links={siteConfig.navigation.footer}
         copyrightName={siteConfig.footer.copyrightName}
       />
-
-    </>
+    </InitialLoadExperience>
   );
 }
