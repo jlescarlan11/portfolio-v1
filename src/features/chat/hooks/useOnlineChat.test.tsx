@@ -886,6 +886,59 @@ describe('useOnlineChat', () => {
     expect(cancelBody).toHaveBeenCalledOnce();
   });
 
+  it('aborts as soon as a stream exceeds its declared response length', async () => {
+    vi.useFakeTimers();
+    const cancelBody = vi.fn();
+    let requestSignal: AbortSignal | null | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        requestSignal = init?.signal;
+        return new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller): void {
+              controller.enqueue(new TextEncoder().encode('{}'));
+            },
+            cancel: cancelBody
+          }),
+          {
+            status: 200,
+            headers: {
+              ...STREAM_RESPONSE_HEADERS,
+              'Content-Length': '1'
+            }
+          }
+        );
+      })
+    );
+    const { result } = renderHook(() => useOnlineChat());
+    let settled = false;
+    let sendPromise: Promise<void> | undefined;
+
+    act(() => {
+      sendPromise = result.current.send('Hello').finally(() => {
+        settled = true;
+      });
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    const settledBeforeTimeout = settled;
+    if (!settled) {
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(30_000);
+        await sendPromise;
+      });
+    }
+
+    expect(settledBeforeTimeout).toBe(true);
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'protocol' })
+    );
+    expect(requestSignal?.aborted).toBe(true);
+    expect(cancelBody).toHaveBeenCalledOnce();
+  });
+
   it('aborts a chunked stream when its actual bytes exceed the transport cap', async () => {
     let requestSignal: AbortSignal | null | undefined;
     vi.stubGlobal(

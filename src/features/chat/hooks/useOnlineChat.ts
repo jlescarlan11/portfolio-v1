@@ -559,6 +559,9 @@ export function useOnlineChat(): UseOnlineChatResult {
           void response.body?.cancel().catch(() => undefined);
           throw new ChatProtocolError();
         }
+        const declaredLength = response.headers.get('content-length');
+        const declaredResponseBytes =
+          declaredLength === null ? undefined : Number(declaredLength);
 
         if (!response.body) {
           throw new ChatProtocolError();
@@ -613,7 +616,11 @@ export function useOnlineChat(): UseOnlineChatResult {
         while (true) {
           const { done, value } = await reader.read();
           receivedResponseBytes += value?.byteLength ?? 0;
-          if (receivedResponseBytes > MAX_CHAT_STREAM_RESPONSE_BYTES) {
+          if (
+            receivedResponseBytes > MAX_CHAT_STREAM_RESPONSE_BYTES ||
+            (declaredResponseBytes !== undefined &&
+              receivedResponseBytes > declaredResponseBytes)
+          ) {
             throw new ChatProtocolError();
           }
 
@@ -633,6 +640,12 @@ export function useOnlineChat(): UseOnlineChatResult {
           lines.forEach(processLine);
 
           if (done) break;
+        }
+        if (
+          declaredResponseBytes !== undefined &&
+          receivedResponseBytes !== declaredResponseBytes
+        ) {
+          throw new ChatProtocolError();
         }
 
         if (pendingLine.trim()) {
