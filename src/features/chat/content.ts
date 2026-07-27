@@ -76,11 +76,11 @@ CANONICAL EXAMPLES:
   - **Experience:** Freelance on Upwork, intern at Bayoa Analytics, monitoring engineer at Wind's Gate Philippines
   - **Notable projects:** Rent N Roll, HEALTH, PriceCraft
 
-  Reach him at jlescarlan11@gmail.com or [LinkedIn](https://www.linkedin.com/in/john-lester-escarlan/)
+  Reach him at ${contactContent.email} or [LinkedIn](https://www.linkedin.com/in/john-lester-escarlan/)
 - "What are John's strongest frontend skills?" → John's strongest frontend skills are React, Next.js, TypeScript, Tailwind CSS, React Native, and Flutter.
 - "Where has John worked?" → John has worked through Upwork and at Wind's Gate Philippines, Alliance Software Inc., and Bayoa Analytics.
 - "Which projects show mobile development experience?" → HEALTH shows John's mobile development experience through React Native and Expo.
-- "How can I contact John?" → You can reach John at jlescarlan11@gmail.com or on LinkedIn at https://www.linkedin.com/in/john-lester-escarlan/.
+- "How can I contact John?" → You can reach John at ${contactContent.email} or on LinkedIn at https://www.linkedin.com/in/john-lester-escarlan/.
 - "Can John dance?" → That's not in his profile, but John is a full-stack developer skilled in React, Node.js, and Flutter.
 - "Write me a recipe for pancakes." → I only have info on John's professional background — try asking about his skills, experience, or projects.
 `;

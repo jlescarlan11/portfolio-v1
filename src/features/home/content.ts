@@ -1,3 +1,5 @@
+import { contactContent } from '@/features/contact/content';
+
 export interface HomeSocialLink {
   platform: string;
   url: string;
@@ -46,7 +48,7 @@ export const heroContent: HeroContent = {
     },
     {
       platform: 'Email',
-      url: 'mailto:jlescarlan11@gmail.com',
+      url: `mailto:${contactContent.email}`,
       label: 'Send an email to John Lester Escarlan'
     }
   ]
