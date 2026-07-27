@@ -421,10 +421,11 @@ function createStreamResponse(
 
       void pump();
     },
-    async cancel(): Promise<void> {
+    cancel(): void {
       abortController.abort(new DOMException('Client cancelled the stream.', 'AbortError'));
       try {
-        await hostedStream.iterator.return?.();
+        const cleanup = hostedStream.iterator.return?.();
+        void cleanup?.catch(() => undefined);
       } catch {
         // Cancellation cleanup is best-effort; the abort signal is authoritative.
       } finally {

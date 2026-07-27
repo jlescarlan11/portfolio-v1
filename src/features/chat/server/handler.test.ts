@@ -627,6 +627,55 @@ describe('handleChatRequest', () => {
     });
   });
 
+  it('does not wait for provider cleanup when the response reader cancels', async () => {
+    vi.useFakeTimers();
+    try {
+      let receivedSignal: AbortSignal | undefined;
+      let emitted = false;
+      const returnUpstream = vi.fn(
+        () => new Promise<IteratorResult<string>>(() => undefined)
+      );
+      const response = await handleChatRequest(request(validBody()), {
+        startChat: ({ signal }) => {
+          receivedSignal = signal;
+          return {
+            iterator: {
+              next: async () => {
+                if (!emitted) {
+                  emitted = true;
+                  return { done: false, value: 'first' };
+                }
+                return new Promise<IteratorResult<string>>((_resolve, reject) => {
+                  signal.addEventListener(
+                    'abort',
+                    () => reject(signal.reason),
+                    { once: true }
+                  );
+                });
+              },
+              return: returnUpstream
+            },
+            getCompletion: async () => ({ finishReason: 'stop' })
+          };
+        }
+      });
+      const reader = response.body!.getReader();
+      await reader.read();
+      let cancellationSettled = false;
+      void reader.cancel().then(() => {
+        cancellationSettled = true;
+      });
+
+      await vi.advanceTimersByTimeAsync(50);
+
+      expect(cancellationSettled).toBe(true);
+      expect(receivedSignal?.aborted).toBe(true);
+      expect(returnUpstream).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('aborts upstream and records cancellation when the response reader cancels', async () => {
     let receivedSignal: AbortSignal | undefined;
     let releasePendingRead: (() => void) | undefined;
