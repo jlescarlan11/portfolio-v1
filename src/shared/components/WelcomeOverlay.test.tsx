@@ -125,6 +125,28 @@ describe('WelcomeOverlay', () => {
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '33');
   });
 
+  it('uses a safe motion default when matchMedia is unavailable', async () => {
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      writable: true,
+      value: undefined
+    });
+    const fonts = createDeferred<FontFaceSet>();
+    setDocumentFonts(fonts.promise);
+
+    renderOverlay();
+    fireEvent.click(screen.getByRole('button', { name: 'Settle hero' }));
+    await act(async () => {
+      fonts.resolve({} as FontFaceSet);
+      await fonts.promise;
+    });
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(screen.queryByTestId('initial-load-overlay')).not.toBeInTheDocument();
+  });
+
   it('exits promptly after all real milestones settle and restores overflow', async () => {
     const fonts = createDeferred<FontFaceSet>();
     setDocumentFonts(fonts.promise);

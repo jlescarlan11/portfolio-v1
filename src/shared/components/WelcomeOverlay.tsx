@@ -23,7 +23,10 @@ export default function WelcomeOverlay(): React.JSX.Element | null {
   const closeTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (
+      typeof window === 'undefined'
+      || typeof window.matchMedia !== 'function'
+    ) {
       return;
     }
 
