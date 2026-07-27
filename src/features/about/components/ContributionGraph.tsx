@@ -1,73 +1,15 @@
 // src/features/about/components/ContributionGraph.tsx
 //
-// SERVER COMPONENT — fetches from GitHub GraphQL API.
-// Revalidates every 24h via Next.js fetch cache.
+// SERVER COMPONENT — reads validated GitHub GraphQL data.
+// Revalidates every 24h through the Next.js data cache.
 //
 // Setup:
 //   GITHUB_TOKEN=ghp_xxxxx          (Settings → Developer settings → Tokens → read:user scope)
 //   NEXT_PUBLIC_GITHUB_USERNAME=jlescarlan11
 
 import { Typography } from '@/shared/components/Typography';
+import { getGitHubContributionData } from '../github-contributions';
 import { ScrollableContainer } from './ScrollableContainer';
-
-interface ContributionDay {
-  date: string;
-  contributionCount: number;
-  weekday: number;
-}
-
-interface ContributionWeek {
-  contributionDays: ContributionDay[];
-}
-
-interface GitHubContributionData {
-  totalContributions: number;
-  weeks: ContributionWeek[];
-}
-
-async function fetchContributions(username: string): Promise<GitHubContributionData | null> {
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) {
-    console.warn('GITHUB_TOKEN not set — contribution graph will not render.');
-    return null;
-  }
-
-  const query = `
-    query($username: String!) {
-      user(login: $username) {
-        contributionsCollection {
-          contributionCalendar {
-            totalContributions
-            weeks {
-              contributionDays {
-                date
-                contributionCount
-                weekday
-              }
-            }
-          }
-        }
-      }
-    }
-  `;
-
-  try {
-    const res = await fetch('https://api.github.com/graphql', {
-      method: 'POST',
-      headers: {
-        Authorization: `bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ query, variables: { username } }),
-      next: { revalidate: 86400 }
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json?.data?.user?.contributionsCollection?.contributionCalendar ?? null;
-  } catch {
-    return null;
-  }
-}
 
 function getLevel(count: number): 0 | 1 | 2 | 3 | 4 {
   if (count === 0) return 0;
@@ -99,7 +41,7 @@ interface ContributionGraphProps {
 export default async function ContributionGraph({
   username = process.env.NEXT_PUBLIC_GITHUB_USERNAME ?? 'jlescarlan11'
 }: ContributionGraphProps) {
-  const data = await fetchContributions(username);
+  const data = await getGitHubContributionData(username);
   if (!data) return null;
 
   const weeks = data.weeks.slice(-WEEKS_TO_SHOW);
