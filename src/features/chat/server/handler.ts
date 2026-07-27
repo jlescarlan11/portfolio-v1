@@ -314,9 +314,14 @@ async function readRequestText(request: Request): Promise<string | Response> {
 
   let declaredBytes: number | undefined;
   const declaredLength = request.headers.get('content-length');
+  const transferEncoding = request.headers.get('transfer-encoding');
+  if (declaredLength !== null && transferEncoding !== null) {
+    cancelUnreadRequestBody(request);
+    return jsonError(400, 'VALIDATION_ERROR', 'Send a valid chat request.');
+  }
   if (
-    declaredLength !== null &&
-    request.headers.has('transfer-encoding')
+    transferEncoding !== null &&
+    transferEncoding.trim().toLowerCase() !== 'chunked'
   ) {
     cancelUnreadRequestBody(request);
     return jsonError(400, 'VALIDATION_ERROR', 'Send a valid chat request.');
