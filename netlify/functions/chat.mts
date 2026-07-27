@@ -10,6 +10,7 @@ export default async function chat(
 
 export const config = {
   path: '/api/chat',
+  method: 'POST',
   rateLimit: {
     action: 'rewrite',
     to: '/api/chat/rate-limited',
