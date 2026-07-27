@@ -624,6 +624,35 @@ describe('useOnlineChat', () => {
     expect(requestSignal?.aborted).toBe(true);
   });
 
+  it('cancels an open response body after a malformed frame', async () => {
+    const cancelBody = vi.fn();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        const encoder = new TextEncoder();
+        return new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller): void {
+              controller.enqueue(encoder.encode('not-json\n'));
+            },
+            cancel: cancelBody
+          }),
+          { status: 200, headers: STREAM_RESPONSE_HEADERS }
+        );
+      })
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'protocol' })
+    );
+    expect(cancelBody).toHaveBeenCalledOnce();
+  });
+
   it('rejects an unexpected success media type without reading its body', async () => {
     let requestSignal: AbortSignal | null | undefined;
     const cancelBody = vi.fn();

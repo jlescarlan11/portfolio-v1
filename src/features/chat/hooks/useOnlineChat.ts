@@ -392,6 +392,9 @@ export function useOnlineChat(): UseOnlineChatResult {
       let fullAssistantResponse = '';
       let bufferedText = '';
       let animationFrameId: number | null = null;
+      let responseReader:
+        | ReadableStreamDefaultReader<Uint8Array>
+        | undefined;
 
       const flushBufferedText = (): void => {
         if (!bufferedText || operationId !== operationIdRef.current) return;
@@ -476,6 +479,7 @@ export function useOnlineChat(): UseOnlineChatResult {
         }
 
         const reader = response.body.getReader();
+        responseReader = reader;
         const decoder = new TextDecoder('utf-8', { fatal: true });
         let pendingLine = '';
         let sawFinish = false;
@@ -518,7 +522,6 @@ export function useOnlineChat(): UseOnlineChatResult {
           const { done, value } = await reader.read();
           receivedResponseBytes += value?.byteLength ?? 0;
           if (receivedResponseBytes > MAX_CHAT_STREAM_RESPONSE_BYTES) {
-            void reader.cancel().catch(() => undefined);
             throw new ChatProtocolError();
           }
 
@@ -569,6 +572,7 @@ export function useOnlineChat(): UseOnlineChatResult {
           { role: 'assistant', content: fullAssistantResponse }
         ];
       } catch (caught: unknown) {
+        void responseReader?.cancel().catch(() => undefined);
         cancelScheduledFlush();
         flushBufferedText();
 
