@@ -1,13 +1,14 @@
-import type { Config, Context } from '@netlify/edge-functions';
+import { handleChatRequest } from '../../src/features/chat/server/handler';
 
-export default async function chatRateLimit(
-  _request: Request,
-  context: Context
+export default async function chat(
+  request: Request,
+  _context: unknown
 ): Promise<Response> {
-  return context.next();
+  void _context;
+  return handleChatRequest(request);
 }
 
-export const config: Config = {
+export const config = {
   path: '/api/chat',
   rateLimit: {
     action: 'rewrite',
@@ -18,4 +19,4 @@ export const config: Config = {
     windowLimit: 20,
     windowSize: 60
   }
-};
+} as const;

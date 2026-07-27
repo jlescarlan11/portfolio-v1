@@ -1,12 +1,11 @@
-import type { Context } from '@netlify/edge-functions';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   RATE_LIMIT_REQUESTS,
   RATE_LIMIT_WINDOW_SECONDS
 } from '../../src/features/chat/server/config';
-import chatRateLimit, { config } from '../edge-functions/chat-rate-limit';
+import chat, { config } from '../functions/chat';
 
-describe('chat rate limit edge function', () => {
+describe('chat Netlify function', () => {
   it('declares a distributed IP-and-domain rule with the documented boundary', () => {
     expect(config).toEqual({
       path: '/api/chat',
@@ -20,18 +19,25 @@ describe('chat rate limit edge function', () => {
     });
   });
 
-  it('passes below-limit requests to the Next route without process-local counters', async () => {
-    const next = vi.fn(async () => new Response('ok'));
-    const context = { next } as unknown as Context;
-    const incoming = new Request('https://example.com/api/chat', { method: 'POST' });
+  it('passes below-limit requests to the shared handler without process-local counters', async () => {
+    const incoming = (): Request =>
+      new Request('https://example.com/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{'
+      });
 
     const results = await Promise.all([
-      chatRateLimit(incoming, context),
-      chatRateLimit(incoming, context)
+      chat(incoming(), {}),
+      chat(incoming(), {})
     ]);
 
-    expect(next).toHaveBeenCalledTimes(2);
-    expect(await results[0].text()).toBe('ok');
-    expect(await results[1].text()).toBe('ok');
+    expect(results.map(result => result.status)).toEqual([400, 400]);
+    expect(await results[0].json()).toEqual({
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'Check your conversation and try again.'
+      }
+    });
   });
 });
