@@ -48,9 +48,13 @@ describe('AboutSection progressive enhancement', () => {
       })
     ).toBeInTheDocument();
     for (const { category } of aboutContent.techCategories) {
-      expect(
-        screen.getByRole('heading', { level: 4, name: category })
-      ).toBeInTheDocument();
+      const heading = screen.getByRole('heading', {
+        level: 4,
+        name: category
+      });
+      expect(heading).toBeInTheDocument();
+      expect(heading).toHaveClass('text-subtle-foreground');
+      expect(heading).not.toHaveClass('text-foreground/25');
     }
   });
 

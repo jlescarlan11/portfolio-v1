@@ -261,7 +261,7 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
                   <Typography
                     variant="caption"
                     as="h4"
-                    className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-foreground/25"
+                    className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground"
                   >
                     {category}
                   </Typography>
