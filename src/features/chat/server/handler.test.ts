@@ -911,6 +911,50 @@ describe('handleChatRequest', () => {
     ]);
   });
 
+  it('treats a throwing hosted stream getter as a protocol failure', async () => {
+    let providerSignal: AbortSignal | undefined;
+    const telemetry: ChatTelemetryEvent[] = [];
+    const nextUpstream = vi.fn(async () => ({
+      done: true as const,
+      value: undefined
+    }));
+    const returnUpstream = vi.fn(async () => ({
+      done: true as const,
+      value: undefined
+    }));
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: ({ signal }) => {
+        providerSignal = signal;
+        const hostedStream = {
+          iterator: {
+            next: nextUpstream,
+            return: returnUpstream
+          }
+        };
+        Object.defineProperty(hostedStream, 'getCompletion', {
+          get(): never {
+            throw new Error('sensitive getter failure');
+          }
+        });
+        return hostedStream as unknown as HostedChatStream;
+      },
+      writeTelemetry: event => telemetry.push(event)
+    });
+    const body = await response.text();
+
+    expect(response.status).toBe(503);
+    expect(body).not.toContain('sensitive getter failure');
+    expect(nextUpstream).not.toHaveBeenCalled();
+    expect(providerSignal?.aborted).toBe(true);
+    expect(returnUpstream).toHaveBeenCalledOnce();
+    expect(telemetry).toEqual([
+      expect.objectContaining({
+        status: 'failed',
+        errorCategory: 'provider_protocol'
+      })
+    ]);
+  });
+
   it('returns a sanitized unavailable response for missing server configuration', async () => {
     const startChat = vi.fn<StartHostedChat>(() => {
       throw new ChatConfigurationError();

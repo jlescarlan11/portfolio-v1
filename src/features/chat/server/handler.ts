@@ -118,14 +118,23 @@ function assertHostedChatStream(
     } | null;
     getCompletion?: unknown;
   };
-  if (
-    typeof stream.iterator !== 'object' ||
-    stream.iterator === null ||
-    typeof stream.iterator.next !== 'function' ||
-    (stream.iterator.return !== undefined &&
-      typeof stream.iterator.return !== 'function') ||
-    typeof stream.getCompletion !== 'function'
-  ) {
+
+  try {
+    const iterator = stream.iterator;
+    const next = iterator?.next;
+    const release = iterator?.return;
+    const getCompletion = stream.getCompletion;
+    if (
+      typeof iterator !== 'object' ||
+      iterator === null ||
+      typeof next !== 'function' ||
+      (release !== undefined && typeof release !== 'function') ||
+      typeof getCompletion !== 'function'
+    ) {
+      throw new ProviderStreamProtocolError();
+    }
+  } catch (error: unknown) {
+    if (error instanceof ProviderStreamProtocolError) throw error;
     throw new ProviderStreamProtocolError();
   }
 }
