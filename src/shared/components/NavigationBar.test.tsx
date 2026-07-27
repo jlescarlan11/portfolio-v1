@@ -114,4 +114,22 @@ describe('NavigationBar visibility', () => {
 
     expect(navigation).toHaveAttribute('inert');
   });
+
+  it('recomputes hero styling when the viewport height changes', () => {
+    vi.stubGlobal('innerHeight', 800);
+    window.scrollY = 500;
+
+    render(<NavigationBar items={ITEMS} />);
+    const navigation = screen.getByRole('navigation', {
+      name: 'main navigation'
+    });
+    const pill = navigation.querySelector('ul');
+
+    expect(pill).toHaveClass('border-foreground/15');
+
+    vi.stubGlobal('innerHeight', 1_200);
+    fireEvent(window, new Event('resize'));
+
+    expect(pill).toHaveClass('border-surface');
+  });
 });

@@ -61,9 +61,11 @@ export default function NavigationBar({
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
     updateNavigation();
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
       if (
         animationFrameId !== null
         && typeof window.cancelAnimationFrame === 'function'
