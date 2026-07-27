@@ -11,8 +11,7 @@ export default async function chat(
 export const config = {
   path: '/api/chat',
   rateLimit: {
-    action: 'rewrite',
-    to: '/api/chat/rate-limited',
+    action: 'rate_limit',
     aggregateBy: ['ip', 'domain'],
     // Netlify requires inline config declarations to contain static literals.
     // The companion test guards these values against server-config drift.
