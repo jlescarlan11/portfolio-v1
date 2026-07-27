@@ -57,10 +57,22 @@ export function ThemeToggle(): React.JSX.Element {
       applyTheme(nextTheme);
     }
 
-    mediaQuery?.addEventListener('change', handleSystemThemeChange);
+    if (mediaQuery) {
+      if (typeof mediaQuery.addEventListener === 'function') {
+        mediaQuery.addEventListener('change', handleSystemThemeChange);
+      } else {
+        mediaQuery.addListener(handleSystemThemeChange);
+      }
+    }
     window.addEventListener('storage', handleStoredThemeChange);
     return () => {
-      mediaQuery?.removeEventListener('change', handleSystemThemeChange);
+      if (mediaQuery) {
+        if (typeof mediaQuery.removeEventListener === 'function') {
+          mediaQuery.removeEventListener('change', handleSystemThemeChange);
+        } else {
+          mediaQuery.removeListener(handleSystemThemeChange);
+        }
+      }
       window.removeEventListener('storage', handleStoredThemeChange);
     };
   }, []);

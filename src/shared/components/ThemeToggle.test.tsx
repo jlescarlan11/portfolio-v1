@@ -62,6 +62,27 @@ describe('ThemeToggle', () => {
     expect(screen.getByRole('button', { name: 'Switch to dark mode' })).toBeInTheDocument();
   });
 
+  it('supports the legacy media-query listener API', () => {
+    let onChange: ((event: MediaQueryListEvent) => void) | undefined;
+    const mediaQuery = {
+      matches: false,
+      addListener: vi.fn((listener: (event: MediaQueryListEvent) => void) => {
+        onChange = listener;
+      }),
+      removeListener: vi.fn()
+    };
+    vi.stubGlobal('matchMedia', vi.fn(() => mediaQuery));
+
+    render(<ThemeToggle />);
+
+    act(() => {
+      onChange?.({ matches: true } as MediaQueryListEvent);
+    });
+
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(screen.getByRole('button', { name: 'Switch to light mode' })).toBeInTheDocument();
+  });
+
   it('applies a saved theme changed in another tab', () => {
     vi.stubGlobal('matchMedia', vi.fn(() => ({
       matches: false,
