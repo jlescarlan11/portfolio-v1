@@ -48,7 +48,7 @@ export function ThemeToggle(): React.JSX.Element {
     }
 
     function handleStoredThemeChange(event: StorageEvent): void {
-      if (event.key !== 'theme') return;
+      if (event.key !== 'theme' && event.key !== null) return;
       hasManualOverride.current = false;
       const nextTheme: Theme = event.newValue === 'dark' || event.newValue === 'light'
         ? event.newValue
