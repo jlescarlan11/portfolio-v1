@@ -530,6 +530,59 @@ describe('useOnlineChat', () => {
     );
   });
 
+  it('cancels an active API error body when closed', async () => {
+    const cancelBody = vi.fn();
+    let streamController:
+      | ReadableStreamDefaultController<Uint8Array>
+      | undefined;
+    const response = new Response(
+      new ReadableStream<Uint8Array>({
+        start(controller): void {
+          streamController = controller;
+        },
+        cancel: cancelBody
+      }),
+      {
+        status: 418,
+        headers: { 'Content-Type': 'application/json; charset=utf-8' }
+      }
+    );
+    const getReader = vi.spyOn(response.body!, 'getReader');
+    let requestSignal: AbortSignal | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        requestSignal = init?.signal ?? undefined;
+        return response;
+      })
+    );
+    const { result } = renderHook(() => useOnlineChat());
+    let settled = false;
+    let sendPromise: Promise<void> | undefined;
+
+    act(() => {
+      sendPromise = result.current.send('Hello').finally(() => {
+        settled = true;
+      });
+    });
+    await waitFor(() => expect(getReader).toHaveBeenCalledOnce());
+    act(() => result.current.reset());
+    await act(async () => {
+      await Promise.resolve();
+    });
+    const settledWhenClosed = settled;
+
+    if (!settled) streamController?.close();
+    await act(async () => {
+      await sendPromise;
+    });
+
+    expect(requestSignal?.aborted).toBe(true);
+    expect(settledWhenClosed).toBe(true);
+    expect(cancelBody).toHaveBeenCalledOnce();
+    expect(result.current.messages).toEqual([WELCOME_MESSAGE]);
+  });
+
   it('distinguishes an offline fetch failure', async () => {
     vi.spyOn(window.navigator, 'onLine', 'get').mockReturnValue(false);
     vi.stubGlobal('fetch', vi.fn(async () => Promise.reject(new TypeError('failed'))));

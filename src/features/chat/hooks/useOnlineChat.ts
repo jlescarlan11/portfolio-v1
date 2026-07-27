@@ -182,7 +182,10 @@ function errorCodeFromStatus(status: number): string | undefined {
   return undefined;
 }
 
-async function readApiErrorCode(response: Response): Promise<string | undefined> {
+async function readApiErrorCode(
+  response: Response,
+  signal?: AbortSignal
+): Promise<string | undefined> {
   if (!isJsonResponse(response)) {
     void response.body?.cancel().catch(() => undefined);
     return undefined;
@@ -194,6 +197,17 @@ async function readApiErrorCode(response: Response): Promise<string | undefined>
   if (!response.body) return undefined;
 
   const reader = response.body.getReader();
+  const cancelOnAbort = (): void => {
+    void reader.cancel().catch(() => undefined);
+  };
+  if (signal?.aborted) {
+    cancelOnAbort();
+    throw (
+      signal.reason ??
+      new DOMException('The chat request was aborted.', 'AbortError')
+    );
+  }
+  signal?.addEventListener('abort', cancelOnAbort, { once: true });
   const decoder = new TextDecoder('utf-8', { fatal: true });
   let receivedBytes = 0;
   let text = '';
@@ -228,10 +242,14 @@ async function readApiErrorCode(response: Response): Promise<string | undefined>
     text += decoder.decode();
     const body = JSON.parse(text) as ApiErrorBody;
     return typeof body.error?.code === 'string' ? body.error.code : undefined;
-  } catch {
+  } catch (caught: unknown) {
     void reader.cancel().catch(() => undefined);
+    if (signal?.aborted) {
+      throw signal.reason ?? caught;
+    }
     return undefined;
   } finally {
+    signal?.removeEventListener('abort', cancelOnAbort);
     if (timeoutId !== undefined) globalThis.clearTimeout(timeoutId);
     try {
       reader.releaseLock();
@@ -241,12 +259,15 @@ async function readApiErrorCode(response: Response): Promise<string | undefined>
   }
 }
 
-async function classifyHttpError(response: Response): Promise<ChatClientError> {
+async function classifyHttpError(
+  response: Response,
+  signal?: AbortSignal
+): Promise<ChatClientError> {
   const statusCode = errorCodeFromStatus(response.status);
   if (statusCode) {
     void response.body?.cancel().catch(() => undefined);
   }
-  const code = statusCode ?? (await readApiErrorCode(response));
+  const code = statusCode ?? (await readApiErrorCode(response, signal));
 
   if (
     response.status === 413 ||
@@ -453,7 +474,10 @@ export function useOnlineChat(): UseOnlineChatResult {
         }
 
         if (!response.ok) {
-          const classified = await classifyHttpError(response);
+          const classified = await classifyHttpError(
+            response,
+            abortController.signal
+          );
           if (operationId !== operationIdRef.current) return;
           failedConversationRef.current = conversation;
           removeEmptyPendingAssistant();
