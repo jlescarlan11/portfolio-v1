@@ -874,6 +874,48 @@ describe('handleChatRequest', () => {
     ]);
   });
 
+  it('treats a throwing iterator result getter as a protocol failure', async () => {
+    let providerSignal: AbortSignal | undefined;
+    const telemetry: ChatTelemetryEvent[] = [];
+    const returnUpstream = vi.fn(async () => ({
+      done: true as const,
+      value: undefined
+    }));
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: ({ signal }) => {
+        providerSignal = signal;
+        return {
+          iterator: {
+            next: async () => {
+              const result = {};
+              Object.defineProperty(result, 'done', {
+                get(): never {
+                  throw new Error('sensitive result getter failure');
+                }
+              });
+              return result as IteratorResult<string>;
+            },
+            return: returnUpstream
+          },
+          getCompletion: async () => ({ finishReason: 'stop' })
+        };
+      },
+      writeTelemetry: event => telemetry.push(event)
+    });
+    const body = await response.text();
+
+    expect(response.status).toBe(503);
+    expect(body).not.toContain('sensitive result getter failure');
+    expect(providerSignal?.aborted).toBe(true);
+    expect(returnUpstream).toHaveBeenCalledOnce();
+    expect(telemetry).toEqual([
+      expect.objectContaining({
+        status: 'failed',
+        errorCategory: 'provider_protocol'
+      })
+    ]);
+  });
+
   it('rejects a malformed hosted stream before reading it', async () => {
     let providerSignal: AbortSignal | undefined;
     const telemetry: ChatTelemetryEvent[] = [];

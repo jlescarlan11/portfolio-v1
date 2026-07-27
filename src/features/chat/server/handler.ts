@@ -75,19 +75,34 @@ class ProviderStreamProtocolError extends Error {
   }
 }
 
-function assertProviderChunkResult(
-  result: unknown
-): asserts result is IteratorResult<string> {
+function parseProviderChunkResult(result: unknown): IteratorResult<string> {
   if (
     typeof result !== 'object' ||
-    result === null ||
-    typeof (result as { done?: unknown }).done !== 'boolean'
+    result === null
   ) {
     throw new ProviderStreamProtocolError();
   }
 
-  const chunk = result as { done: boolean; value?: unknown };
-  if (!chunk.done && typeof chunk.value !== 'string') {
+  try {
+    const chunk = result as { done?: unknown; value?: unknown };
+    const done = chunk.done;
+    if (typeof done !== 'boolean') {
+      throw new ProviderStreamProtocolError();
+    }
+    if (done) {
+      return { done: true, value: undefined };
+    }
+
+    const value = chunk.value;
+    if (typeof value !== 'string') {
+      throw new ProviderStreamProtocolError();
+    }
+
+    return { done: false, value };
+  } catch (error) {
+    if (error instanceof ProviderStreamProtocolError) {
+      throw error;
+    }
     throw new ProviderStreamProtocolError();
   }
 }
@@ -252,8 +267,7 @@ async function getNextHostedChunk(
     PROVIDER_TIMEOUT_MS,
     'Provider stream chunk timed out.'
   );
-  assertProviderChunkResult(result);
-  return result;
+  return parseProviderChunkResult(result);
 }
 
 function isNamedError(error: unknown, name: string): boolean {
@@ -805,8 +819,9 @@ export async function handleChatRequest(
           );
         }
         assertHostedChatStream(hostedStream);
-        const firstChunk: unknown = await hostedStream.iterator.next();
-        assertProviderChunkResult(firstChunk);
+        const firstChunk = parseProviderChunkResult(
+          await hostedStream.iterator.next()
+        );
         return {
           hostedStream,
           firstChunk
