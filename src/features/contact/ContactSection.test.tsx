@@ -43,6 +43,7 @@ describe('ContactSection', () => {
       expect(writeText).toHaveBeenCalledWith(contactContent.email);
     });
     expect(screen.getByRole('status')).toHaveTextContent('Email copied.');
+    expect(screen.getByRole('status')).not.toHaveClass('sr-only');
   });
 
   it('announces when clipboard access is unavailable', async () => {
@@ -59,9 +60,11 @@ describe('ContactSection', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByRole('status')).toHaveTextContent(
+      const status = screen.getByRole('status');
+      expect(status).toHaveTextContent(
         'Copy failed. Select the email address manually.'
       );
+      expect(status).not.toHaveClass('sr-only');
     });
   });
 });

@@ -43,7 +43,14 @@ export function CopyEmailButton({
       >
         {email}
       </button>
-      <span role="status" className="sr-only">
+      <span
+        role="status"
+        className={
+          status === 'idle'
+            ? 'sr-only'
+            : 'font-mono text-[10px] text-subtle-foreground'
+        }
+      >
         {statusMessage}
       </span>
     </span>
