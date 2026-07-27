@@ -127,11 +127,14 @@ function parseRetryAfter(response: Response): number {
     : DEFAULT_RETRY_AFTER_SECONDS;
 }
 
-function isChatStreamResponse(response: Response): boolean {
+function hasUtf8MediaType(
+  response: Response,
+  expectedMediaType: string
+): boolean {
   const [rawMediaType = '', ...parameters] = (
     response.headers.get('content-type') ?? ''
   ).split(';');
-  if (rawMediaType.trim().toLowerCase() !== 'application/x-ndjson') {
+  if (rawMediaType.trim().toLowerCase() !== expectedMediaType) {
     return false;
   }
 
@@ -152,12 +155,12 @@ function isChatStreamResponse(response: Response): boolean {
   });
 }
 
+function isChatStreamResponse(response: Response): boolean {
+  return hasUtf8MediaType(response, 'application/x-ndjson');
+}
+
 function isJsonResponse(response: Response): boolean {
-  return response.headers
-    .get('content-type')
-    ?.split(';', 1)[0]
-    .trim()
-    .toLowerCase() === 'application/json';
+  return hasUtf8MediaType(response, 'application/json');
 }
 
 function hasAcceptableDeclaredLength(
