@@ -748,6 +748,13 @@ export async function handleChatRequest(
           systemPrompt: CHAT_SYSTEM_PROMPT
         });
         pendingHostedStream = hostedStream as HostedChatStream;
+        if (abortController.signal.aborted) {
+          releaseHostedStream(pendingHostedStream);
+          throw (
+            abortController.signal.reason ??
+            new DOMException('Provider startup was aborted.', 'AbortError')
+          );
+        }
         assertHostedChatStream(hostedStream);
         const firstChunk: unknown = await hostedStream.iterator.next();
         assertProviderChunkResult(firstChunk);

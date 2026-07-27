@@ -639,6 +639,59 @@ describe('handleChatRequest', () => {
     }
   });
 
+  it('releases a provider stream that resolves after startup timeout', async () => {
+    vi.useFakeTimers();
+    try {
+      let providerSignal: AbortSignal | undefined;
+      let resolveStart: ((stream: HostedChatStream) => void) | undefined;
+      const telemetry: ChatTelemetryEvent[] = [];
+      const nextUpstream = vi.fn(async () => ({
+        done: true as const,
+        value: undefined
+      }));
+      const returnUpstream = vi.fn(async () => ({
+        done: true as const,
+        value: undefined
+      }));
+      let response: Response | undefined;
+      void handleChatRequest(request(validBody()), {
+        startChat: ({ signal }) => {
+          providerSignal = signal;
+          return new Promise<HostedChatStream>(resolve => {
+            resolveStart = resolve;
+          });
+        },
+        writeTelemetry: event => telemetry.push(event)
+      }).then(value => {
+        response = value;
+      });
+
+      await vi.advanceTimersByTimeAsync(PROVIDER_TIMEOUT_MS);
+      expect(response?.status).toBe(504);
+      expect(providerSignal?.aborted).toBe(true);
+
+      resolveStart?.({
+        iterator: {
+          next: nextUpstream,
+          return: returnUpstream
+        },
+        getCompletion: async () => ({ finishReason: 'stop' })
+      });
+      await vi.advanceTimersByTimeAsync(0);
+
+      expect(nextUpstream).not.toHaveBeenCalled();
+      expect(returnUpstream).toHaveBeenCalledOnce();
+      expect(telemetry).toEqual([
+        expect.objectContaining({
+          status: 'failed',
+          errorCategory: 'timeout'
+        })
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('rejects a malformed first iterator result and releases upstream', async () => {
     let providerSignal: AbortSignal | undefined;
     const telemetry: ChatTelemetryEvent[] = [];
