@@ -53,7 +53,8 @@ describe('next.config crawler and redirect wiring', () => {
       headers: [
         {
           key: 'Content-Security-Policy',
-          value: "base-uri 'self'; frame-ancestors 'none'; object-src 'none'"
+          value:
+            "base-uri 'self'; connect-src 'self'; default-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; img-src 'self' data:; media-src 'none'; object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; worker-src 'none'"
         },
         {
           key: 'Permissions-Policy',
