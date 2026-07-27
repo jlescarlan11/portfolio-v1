@@ -200,13 +200,30 @@ function DossierTile({ project, tileIndex, ctaLabel }: DossierTileProps) {
     };
 
     recalc();
-    if (typeof ResizeObserver !== 'function') {
-      return;
+    let active = true;
+    let observer: ResizeObserver | undefined;
+
+    try {
+      const fontsReady = document.fonts?.ready;
+      if (fontsReady) {
+        void Promise.resolve(fontsReady).then(
+          () => {
+            if (active) recalc();
+          },
+          () => {}
+        );
+      }
+    } catch {}
+
+    if (typeof ResizeObserver === 'function') {
+      observer = new ResizeObserver(recalc);
+      observer.observe(row);
     }
 
-    const observer = new ResizeObserver(recalc);
-    observer.observe(row);
-    return () => observer.disconnect();
+    return () => {
+      active = false;
+      observer?.disconnect();
+    };
   }, [technologies]);
 
   const overflowCount = technologies.length - visibleCount;
