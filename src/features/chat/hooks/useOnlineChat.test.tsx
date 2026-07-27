@@ -555,6 +555,42 @@ describe('useOnlineChat', () => {
     expect(cancelBody).toHaveBeenCalledOnce();
   });
 
+  it('falls back when an API error makes no byte progress', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller): void {
+              for (let index = 0; index < 64; index += 1) {
+                controller.enqueue(new Uint8Array());
+              }
+              controller.enqueue(
+                new TextEncoder().encode(
+                  JSON.stringify({ error: { code: 'RATE_LIMITED' } })
+                )
+              );
+              controller.close();
+            }
+          }),
+          {
+            status: 418,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        )
+      )
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'unavailable' })
+    );
+  });
+
   it('bounds a chunked API error body that never closes', async () => {
     const cancelBody = vi.fn();
     vi.stubGlobal(

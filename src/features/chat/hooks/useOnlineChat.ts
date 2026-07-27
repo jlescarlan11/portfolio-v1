@@ -258,6 +258,7 @@ async function readApiErrorCode(
   const decoder = new TextDecoder('utf-8', { fatal: true });
   let receivedBytes = 0;
   let text = '';
+  let consecutiveEmptyChunks = 0;
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<null>(resolve => {
     timeoutId = globalThis.setTimeout(
@@ -277,7 +278,19 @@ async function readApiErrorCode(
       const { done, value } = result;
       if (done) break;
 
-      receivedBytes += value.byteLength;
+      const chunkBytes = value.byteLength;
+      if (chunkBytes === 0) {
+        consecutiveEmptyChunks += 1;
+        if (
+          consecutiveEmptyChunks > MAX_CONSECUTIVE_EMPTY_STREAM_CHUNKS
+        ) {
+          void reader.cancel().catch(() => undefined);
+          return undefined;
+        }
+      } else {
+        consecutiveEmptyChunks = 0;
+      }
+      receivedBytes += chunkBytes;
       if (
         receivedBytes > MAX_API_ERROR_RESPONSE_BYTES ||
         (declaredResponseBytes !== undefined &&
