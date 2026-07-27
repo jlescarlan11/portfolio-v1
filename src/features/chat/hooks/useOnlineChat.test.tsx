@@ -1323,6 +1323,60 @@ describe('useOnlineChat', () => {
     expect(result.current.messages).toEqual([WELCOME_MESSAGE]);
   });
 
+  it('cancels a stale response that resolves after close', async () => {
+    const cancelBody = vi.fn();
+    let streamController:
+      | ReadableStreamDefaultController<Uint8Array>
+      | undefined;
+    const response = new Response(
+      new ReadableStream<Uint8Array>({
+        start(controller): void {
+          streamController = controller;
+        },
+        cancel: cancelBody
+      }),
+      { status: 200, headers: STREAM_RESPONSE_HEADERS }
+    );
+    const getReader = vi.spyOn(response.body!, 'getReader');
+    let requestSignal: AbortSignal | undefined;
+    let resolveFetch: ((response: Response) => void) | undefined;
+    const fetchMock = vi.fn(
+      (_input: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>(resolve => {
+          requestSignal = init?.signal ?? undefined;
+          resolveFetch = resolve;
+        })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const { result } = renderHook(() => useOnlineChat());
+    let settled = false;
+    let sendPromise: Promise<void> | undefined;
+
+    act(() => {
+      sendPromise = result.current.send('Hello').finally(() => {
+        settled = true;
+      });
+    });
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    act(() => result.current.reset());
+    await act(async () => {
+      resolveFetch?.(response);
+      await Promise.resolve();
+    });
+    const settledAfterLateResponse = settled;
+
+    if (!settled) streamController?.close();
+    await act(async () => {
+      await sendPromise;
+    });
+
+    expect(requestSignal?.aborted).toBe(true);
+    expect(settledAfterLateResponse).toBe(true);
+    expect(getReader).not.toHaveBeenCalled();
+    expect(cancelBody).toHaveBeenCalledOnce();
+    expect(result.current.messages).toEqual([WELCOME_MESSAGE]);
+  });
+
   it('aborts an active request when the hook unmounts', async () => {
     let requestSignal: AbortSignal | undefined;
     const cancelBody = vi.fn();

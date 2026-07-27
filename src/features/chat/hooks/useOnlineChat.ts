@@ -441,6 +441,17 @@ export function useOnlineChat(): UseOnlineChatResult {
           signal: abortController.signal
         });
 
+        if (
+          abortController.signal.aborted ||
+          operationId !== operationIdRef.current
+        ) {
+          void response.body?.cancel().catch(() => undefined);
+          throw (
+            abortController.signal.reason ??
+            new DOMException('The chat request is stale.', 'AbortError')
+          );
+        }
+
         if (!response.ok) {
           const classified = await classifyHttpError(response);
           if (operationId !== operationIdRef.current) return;
