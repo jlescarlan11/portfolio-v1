@@ -6,6 +6,7 @@ import type { ChatMessage, ChatStreamFrame } from '../server/contracts';
 const CHAT_ENDPOINT = '/api/chat';
 const CLIENT_TIMEOUT_MS = 30_000;
 const MAX_CONTEXT_MESSAGES = 10;
+const DEFAULT_RETRY_AFTER_SECONDS = 60;
 
 export const WELCOME_MESSAGE: ChatMessage = {
   role: 'assistant',
@@ -92,11 +93,11 @@ function parseStreamFrame(line: string): ChatStreamFrame {
   throw new ChatProtocolError();
 }
 
-function parseRetryAfter(response: Response): number | undefined {
+function parseRetryAfter(response: Response): number {
   const value = Number(response.headers.get('retry-after'));
   return Number.isFinite(value) && value > 0
     ? Math.min(Math.ceil(value), 3_600)
-    : undefined;
+    : DEFAULT_RETRY_AFTER_SECONDS;
 }
 
 async function readApiErrorCode(response: Response): Promise<string | undefined> {

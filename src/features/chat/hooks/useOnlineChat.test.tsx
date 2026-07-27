@@ -490,6 +490,32 @@ describe('useOnlineChat', () => {
     expect(result.current.error).toBeNull();
   });
 
+  it('uses a fallback cooldown when a 429 omits Retry-After', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(errorResponse(429, 'RATE_LIMITED'))
+      .mockResolvedValueOnce(successResponse('Recovered.'));
+    vi.stubGlobal('fetch', fetchMock);
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.retryBlocked).toBe(true);
+    expect(result.current.error).toEqual(
+      expect.objectContaining({
+        kind: 'rate_limit',
+        retryAfterSeconds: 60
+      })
+    );
+
+    await act(async () => {
+      await result.current.retry();
+    });
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
   it('blocks an immediate 429 retry and enables it after Retry-After', async () => {
     vi.useFakeTimers();
     const fetchMock = vi
