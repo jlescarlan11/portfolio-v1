@@ -325,6 +325,38 @@ function networkError(): ChatClientError {
   };
 }
 
+async function fetchWithAbortSignal(
+  input: RequestInfo | URL,
+  init: RequestInit,
+  signal: AbortSignal
+): Promise<Response> {
+  const abortReason = (): unknown =>
+    signal.reason ??
+    new DOMException('The chat request was aborted.', 'AbortError');
+  if (signal.aborted) throw abortReason();
+
+  const responsePromise = fetch(input, init).then(response => {
+    if (signal.aborted) {
+      void response.body?.cancel().catch(() => undefined);
+      throw abortReason();
+    }
+    return response;
+  });
+  let rejectOnAbort: (() => void) | undefined;
+  const abortPromise = new Promise<never>((_resolve, reject) => {
+    rejectOnAbort = () => reject(abortReason());
+    signal.addEventListener('abort', rejectOnAbort, { once: true });
+  });
+
+  try {
+    return await Promise.race([responsePromise, abortPromise]);
+  } finally {
+    if (rejectOnAbort) {
+      signal.removeEventListener('abort', rejectOnAbort);
+    }
+  }
+}
+
 export function useOnlineChat(): UseOnlineChatResult {
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -455,12 +487,16 @@ export function useOnlineChat(): UseOnlineChatResult {
       };
 
       try {
-        const response = await fetch(CHAT_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: conversation }),
-          signal: abortController.signal
-        });
+        const response = await fetchWithAbortSignal(
+          CHAT_ENDPOINT,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: conversation }),
+            signal: abortController.signal
+          },
+          abortController.signal
+        );
 
         if (
           abortController.signal.aborted ||

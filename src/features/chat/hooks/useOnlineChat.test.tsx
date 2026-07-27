@@ -1430,6 +1430,48 @@ describe('useOnlineChat', () => {
     expect(result.current.messages).toEqual([WELCOME_MESSAGE]);
   });
 
+  it('settles an abort-insensitive pending fetch when closed', async () => {
+    let requestSignal: AbortSignal | undefined;
+    let resolveFetch: ((response: Response) => void) | undefined;
+    const fetchMock = vi.fn(
+      (_input: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>(resolve => {
+          requestSignal = init?.signal ?? undefined;
+          resolveFetch = resolve;
+        })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const { result } = renderHook(() => useOnlineChat());
+    let settled = false;
+    let sendPromise: Promise<void> | undefined;
+
+    act(() => {
+      sendPromise = result.current.send('Hello').finally(() => {
+        settled = true;
+      });
+    });
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    act(() => result.current.reset());
+    await act(async () => {
+      await Promise.resolve();
+    });
+    const settledWhenClosed = settled;
+
+    resolveFetch?.(
+      new Response(null, {
+        status: 200,
+        headers: STREAM_RESPONSE_HEADERS
+      })
+    );
+    await act(async () => {
+      await sendPromise;
+    });
+
+    expect(requestSignal?.aborted).toBe(true);
+    expect(settledWhenClosed).toBe(true);
+    expect(result.current.messages).toEqual([WELCOME_MESSAGE]);
+  });
+
   it('aborts an active request when the hook unmounts', async () => {
     let requestSignal: AbortSignal | undefined;
     const cancelBody = vi.fn();
