@@ -957,6 +957,34 @@ describe('useOnlineChat', () => {
     });
   });
 
+  it('rejects an error finish instead of saving a successful turn', async () => {
+    let requestSignal: AbortSignal | null | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        requestSignal = init?.signal;
+        return streamResponse([
+          frame({ type: 'text-delta', delta: 'Partial answer' }),
+          frame({ type: 'finish', finishReason: 'error' })
+        ]);
+      })
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'protocol', canRetry: true })
+    );
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'assistant',
+      content: 'Partial answer'
+    });
+    expect(requestSignal?.aborted).toBe(true);
+  });
+
   it('reports output-token exhaustion instead of accepting truncated text as success', async () => {
     vi.stubGlobal(
       'fetch',

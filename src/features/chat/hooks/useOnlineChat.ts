@@ -526,6 +526,9 @@ export function useOnlineChat(): UseOnlineChatResult {
         if (!sawFinish || !fullAssistantResponse.trim()) {
           throw new ChatProtocolError();
         }
+        if (finishReason !== 'stop' && finishReason !== 'length') {
+          throw new ChatProtocolError();
+        }
 
         cancelScheduledFlush();
         flushBufferedText();
