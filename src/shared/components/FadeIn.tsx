@@ -9,6 +9,8 @@ interface FadeInProps extends Omit<HTMLAttributes<HTMLElement>, 'style'> {
   as?: React.ElementType;
 }
 
+const JS_FAIL_OPEN_MS = 9_500;
+
 export function FadeIn({
   children,
   delay = 0,
@@ -24,25 +26,38 @@ export function FadeIn({
     const el = ref.current;
     if (!el) return;
 
+    if (typeof IntersectionObserver === 'undefined') {
+      setIsVisible(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
+          window.clearTimeout(failOpenTimer);
           observer.disconnect();
         }
       },
       { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
     );
+    const failOpenTimer = window.setTimeout(() => {
+      setIsVisible(true);
+      observer.disconnect();
+    }, JS_FAIL_OPEN_MS);
 
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      window.clearTimeout(failOpenTimer);
+      observer.disconnect();
+    };
   }, []);
 
   return (
     <Component
       {...rest}
       ref={ref}
-      className={isVisible ? `animate-enter ${className}`.trim() : `opacity-0 ${className}`.trim()}
+      className={isVisible ? `animate-enter ${className}`.trim() : `fade-in-pending ${className}`.trim()}
       style={isVisible ? ({ '--enter-delay': delayValue } as CSSProperties) : undefined}
     >
       {children}

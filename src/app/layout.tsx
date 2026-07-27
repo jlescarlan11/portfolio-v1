@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Playfair_Display } from 'next/font/google';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
+import React from 'react';
 import { ChatBubble } from '@/features/chat';
 import { homepageMetadata } from '@/shared/seo/homepage-metadata';
 import './globals.css';
@@ -22,6 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <noscript>
+          <style>
+            {'.fade-in-pending{opacity:1!important;animation:none!important}'}
+          </style>
+        </noscript>
         {/* Inline script runs synchronously before paint — prevents flash of wrong theme */}
         <script
           dangerouslySetInnerHTML={{

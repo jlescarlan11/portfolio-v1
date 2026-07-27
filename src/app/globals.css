@@ -156,6 +156,11 @@ body {
   }
 
   /* ── FadeIn animation ───────────────────────────────────────────────── */
+  .fade-in-pending {
+    opacity: 0;
+    animation: fade-in-content-fail-open 0s linear 10s forwards;
+  }
+
   .animate-enter {
     opacity: 0;
     transform: translateY(16px);
@@ -190,6 +195,12 @@ body {
   }
 }
 
+@keyframes fade-in-content-fail-open {
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes draw-down {
   from { transform: scaleY(0); }
   to { transform: scaleY(1); }
@@ -215,8 +226,10 @@ body {
     animation: none !important;
   }
 
+  .fade-in-pending,
   .opacity-0 {
     opacity: 1 !important;
+    animation: none !important;
   }
 
   *, *::before, *::after {

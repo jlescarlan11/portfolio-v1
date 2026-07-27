@@ -1,4 +1,5 @@
 import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, act, cleanup } from '@testing-library/react';
 import { FadeIn } from './FadeIn';
@@ -27,6 +28,15 @@ afterEach(() => {
 });
 
 describe('FadeIn', () => {
+  it('does not ship server content with the generic invisible utility', () => {
+    const markup = renderToStaticMarkup(
+      <FadeIn><span>server content</span></FadeIn>
+    );
+
+    expect(markup).not.toContain('opacity-0');
+    expect(markup).toContain('fade-in-pending');
+  });
+
   it('renders children without animate-enter class before intersection', () => {
     const { getByText } = render(<FadeIn><span>hello</span></FadeIn>);
     const wrapper = getByText('hello').parentElement!;
@@ -63,6 +73,28 @@ describe('FadeIn', () => {
     });
 
     expect((wrapper as HTMLElement).style.getPropertyValue('--enter-delay')).toBe('200ms');
+  });
+
+  it('reveals immediately when IntersectionObserver is unavailable', () => {
+    vi.unstubAllGlobals();
+
+    const { getByText } = render(<FadeIn><span>hello</span></FadeIn>);
+
+    expect(getByText('hello').parentElement).toHaveClass('animate-enter');
+  });
+
+  it('fails open when an observer never reports an intersection', () => {
+    vi.useFakeTimers();
+    const { getByText } = render(<FadeIn><span>hello</span></FadeIn>);
+    const wrapper = getByText('hello').parentElement!;
+
+    expect(wrapper).toHaveClass('fade-in-pending');
+    act(() => {
+      vi.advanceTimersByTime(9_500);
+    });
+
+    expect(wrapper).toHaveClass('animate-enter');
+    vi.useRealTimers();
   });
 
   it('renders as a custom element when as prop is provided', () => {
