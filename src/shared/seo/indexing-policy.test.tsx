@@ -47,6 +47,12 @@ describe('getIndexingHeaderRules', () => {
 });
 
 describe('next.config crawler and redirect wiring', () => {
+  it('does not disclose the application framework in response headers', () => {
+    expect(createNextConfig('production')).toMatchObject({
+      poweredByHeader: false
+    });
+  });
+
   it('applies baseline security headers to production responses', async () => {
     await expect(createNextConfig('production').headers?.()).resolves.toContainEqual({
       source: '/:path*',

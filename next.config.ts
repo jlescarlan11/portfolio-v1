@@ -27,6 +27,7 @@ const SECURITY_HEADERS = [
 
 export function createNextConfig(context?: string): NextConfig {
   return {
+    poweredByHeader: false,
     async headers() {
       const indexingHeaders = getIndexingHeaderRules(context).flatMap(
         rule => rule.headers
