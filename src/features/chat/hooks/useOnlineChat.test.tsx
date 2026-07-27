@@ -5,6 +5,7 @@ import {
   waitFor
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { MAX_STREAM_FRAME_CHARACTERS } from '../server/contracts';
 import { useOnlineChat, WELCOME_MESSAGE } from './useOnlineChat';
 
 function frame(value: unknown): string {
@@ -329,6 +330,47 @@ describe('useOnlineChat', () => {
       role: 'user',
       content: 'Hello'
     });
+    expect(requestSignal?.aborted).toBe(true);
+  });
+
+  it('aborts an unterminated frame once its buffer exceeds the client cap', async () => {
+    let requestSignal: AbortSignal | null | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        requestSignal = init?.signal;
+        const encoder = new TextEncoder();
+        return new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller): void {
+              controller.enqueue(
+                encoder.encode('x'.repeat(MAX_STREAM_FRAME_CHARACTERS + 1))
+              );
+              requestSignal?.addEventListener(
+                'abort',
+                () => controller.error(requestSignal?.reason),
+                { once: true }
+              );
+            }
+          }),
+          { status: 200 }
+        );
+      })
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    let sendPromise: Promise<void> | undefined;
+    act(() => {
+      sendPromise = result.current.send('Hello');
+    });
+
+    await waitFor(() => {
+      expect(result.current.error?.kind).toBe('protocol');
+    });
+    await act(async () => {
+      await sendPromise;
+    });
+
     expect(requestSignal?.aborted).toBe(true);
   });
 

@@ -1,7 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ChatMessage, ChatStreamFrame } from '../server/contracts';
+import {
+  MAX_STREAM_FRAME_CHARACTERS,
+  type ChatMessage,
+  type ChatStreamFrame
+} from '../server/contracts';
 
 const CHAT_ENDPOINT = '/api/chat';
 const CLIENT_TIMEOUT_MS = 30_000;
@@ -356,6 +360,12 @@ export function useOnlineChat(): UseOnlineChatResult {
           pendingLine += decoder.decode(value, { stream: !done });
           const lines = pendingLine.split('\n');
           pendingLine = lines.pop() ?? '';
+          if (
+            pendingLine.length > MAX_STREAM_FRAME_CHARACTERS ||
+            lines.some(line => line.length > MAX_STREAM_FRAME_CHARACTERS)
+          ) {
+            throw new ChatProtocolError();
+          }
           lines.forEach(processLine);
 
           if (done) break;
