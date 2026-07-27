@@ -458,6 +458,53 @@ describe('useOnlineChat', () => {
     expect(cancelBody).toHaveBeenCalledOnce();
   });
 
+  it('skips a declared-empty API error body without waiting', async () => {
+    vi.useFakeTimers();
+    const cancelBody = vi.fn();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            cancel: cancelBody
+          }),
+          {
+            status: 418,
+            headers: {
+              'Content-Length': '0',
+              'Content-Type': 'application/json'
+            }
+          }
+        )
+      )
+    );
+    const { result } = renderHook(() => useOnlineChat());
+    let settled = false;
+    let sendPromise: Promise<void> | undefined;
+
+    act(() => {
+      sendPromise = result.current.send('Hello').finally(() => {
+        settled = true;
+      });
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    const settledBeforeTimeout = settled;
+    if (!settled) {
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(API_ERROR_RESPONSE_TIMEOUT_MS);
+        await sendPromise;
+      });
+    }
+
+    expect(settledBeforeTimeout).toBe(true);
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'unavailable' })
+    );
+    expect(cancelBody).toHaveBeenCalledOnce();
+  });
+
   it('cancels an API error as soon as it exceeds its declared length', async () => {
     vi.useFakeTimers();
     const cancelBody = vi.fn();

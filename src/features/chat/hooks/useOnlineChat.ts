@@ -198,6 +198,10 @@ async function readApiErrorCode(
   const declaredLength = response.headers.get('content-length');
   const declaredResponseBytes =
     declaredLength === null ? undefined : Number(declaredLength);
+  if (declaredResponseBytes === 0) {
+    void response.body?.cancel().catch(() => undefined);
+    return undefined;
+  }
   if (!response.body) return undefined;
 
   if (signal?.aborted) {
