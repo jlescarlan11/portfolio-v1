@@ -253,6 +253,15 @@ function linkAbortSignal(source: AbortSignal, target: AbortController): () => vo
   return () => source.removeEventListener('abort', abort);
 }
 
+function cancelUnreadRequestBody(request: Request): void {
+  try {
+    const cancellation = request.body?.cancel();
+    void cancellation?.catch(() => undefined);
+  } catch {
+    // Header-based rejection is authoritative if cleanup cannot be started.
+  }
+}
+
 async function readRequestText(request: Request): Promise<string | Response> {
   if (request.signal.aborted) return cancelledResponse();
 
@@ -262,6 +271,7 @@ async function readRequestText(request: Request): Promise<string | Response> {
     .trim()
     .toLowerCase();
   if (contentType !== 'application/json') {
+    cancelUnreadRequestBody(request);
     return jsonError(
       400,
       'VALIDATION_ERROR',
@@ -273,7 +283,7 @@ async function readRequestText(request: Request): Promise<string | Response> {
   if (declaredLength !== null) {
     const bytes = Number(declaredLength);
     if (Number.isFinite(bytes) && bytes > MAX_REQUEST_BYTES) {
-      void request.body?.cancel().catch(() => undefined);
+      cancelUnreadRequestBody(request);
       return jsonError(
         413,
         'PAYLOAD_TOO_LARGE',

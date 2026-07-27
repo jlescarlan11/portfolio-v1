@@ -310,6 +310,24 @@ describe('handleChatRequest', () => {
     ]);
   });
 
+  it('cancels an unread body with an unsupported content type', async () => {
+    const startChat = vi.fn<StartHostedChat>();
+    const cancelBody = vi.fn();
+    const inboundRequest = {
+      headers: new Headers({ 'Content-Type': 'text/plain' }),
+      body: new ReadableStream<Uint8Array>({
+        cancel: cancelBody
+      }),
+      signal: new AbortController().signal
+    } as Request;
+
+    const response = await handleChatRequest(inboundRequest, { startChat });
+
+    expect(response.status).toBe(400);
+    expect(cancelBody).toHaveBeenCalledOnce();
+    expect(startChat).not.toHaveBeenCalled();
+  });
+
   it('does not include rejected request content in telemetry', async () => {
     const sensitive = 'SENSITIVE_REJECTED_REQUEST_CONTENT';
     const telemetry: ChatTelemetryEvent[] = [];
