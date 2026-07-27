@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaSun, FaMoon } from 'react-icons/fa6';
 
 type Theme = 'dark' | 'light';
@@ -10,6 +10,7 @@ function resolveTheme(): Theme {
     const stored = localStorage.getItem('theme');
     if (stored === 'dark' || stored === 'light') return stored;
   } catch {}
+  if (typeof window.matchMedia !== 'function') return 'light';
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
