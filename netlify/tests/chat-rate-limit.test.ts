@@ -4,7 +4,7 @@ import {
   RATE_LIMIT_REQUESTS,
   RATE_LIMIT_WINDOW_SECONDS
 } from '../../src/features/chat/server/config';
-import chatRateLimit, { config } from './chat-rate-limit';
+import chatRateLimit, { config } from '../edge-functions/chat-rate-limit';
 
 describe('chat rate limit edge function', () => {
   it('declares a distributed IP-and-domain rule with the documented boundary', () => {
