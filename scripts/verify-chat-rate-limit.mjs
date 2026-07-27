@@ -12,9 +12,10 @@ if (!baseUrl) {
       body: '{"messages":['
     });
 
-  const belowLimit = await Promise.all(
-    Array.from({ length: windowLimit }, () => sendInvalidRequest())
-  );
+  const belowLimit = [];
+  for (let requestNumber = 1; requestNumber <= windowLimit; requestNumber += 1) {
+    belowLimit.push(await sendInvalidRequest());
+  }
   const unexpected = belowLimit.find(response => response.status !== 400);
 
   if (unexpected) {
