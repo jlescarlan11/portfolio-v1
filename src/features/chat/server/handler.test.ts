@@ -1,7 +1,11 @@
 import { APICallError } from 'ai';
 import { describe, expect, it, vi } from 'vitest';
 import { CHAT_SYSTEM_PROMPT } from '../content';
-import { ChatConfigurationError, MAX_REQUEST_BYTES } from './config';
+import {
+  ChatConfigurationError,
+  MAX_REQUEST_BYTES,
+  MAX_STREAM_OUTPUT_BYTES
+} from './config';
 import type {
   ChatCompletionMetadata,
   ChatMessage,
@@ -365,6 +369,51 @@ describe('handleChatRequest', () => {
         status: 'output_limit',
         finishReason: 'length',
         outputTokens: 256
+      })
+    );
+  });
+
+  it('stops provider output that exceeds the independent stream byte cap', async () => {
+    const telemetry: ChatTelemetryEvent[] = [];
+    let providerSignal: AbortSignal | undefined;
+    const returnUpstream = vi.fn(async () => ({
+      done: true as const,
+      value: undefined
+    }));
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: ({ signal }) => {
+        providerSignal = signal;
+        let emitted = false;
+        return {
+          iterator: {
+            next: async () => {
+              if (emitted) return { done: true as const, value: undefined };
+              emitted = true;
+              return {
+                done: false as const,
+                value: 'x'.repeat(MAX_STREAM_OUTPUT_BYTES + 1)
+              };
+            },
+            return: returnUpstream
+          },
+          getCompletion: async () => ({
+            finishReason: 'stop',
+            outputTokens: 1
+          })
+        };
+      },
+      writeTelemetry: event => telemetry.push(event)
+    });
+
+    expect(await readFrames(response)).toEqual([
+      { type: 'finish', finishReason: 'length' }
+    ]);
+    expect(providerSignal?.aborted).toBe(true);
+    expect(returnUpstream).toHaveBeenCalledOnce();
+    expect(telemetry[0]).toEqual(
+      expect.objectContaining({
+        status: 'output_limit',
+        finishReason: 'length'
       })
     );
   });

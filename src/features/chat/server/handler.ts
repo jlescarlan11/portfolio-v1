@@ -2,7 +2,8 @@ import { APICallError, type FinishReason } from 'ai';
 import { CHAT_SYSTEM_PROMPT } from '../content';
 import {
   ChatConfigurationError,
-  MAX_REQUEST_BYTES
+  MAX_REQUEST_BYTES,
+  MAX_STREAM_OUTPUT_BYTES
 } from './config';
 import type {
   ChatErrorBody,
@@ -45,6 +46,7 @@ const DEFAULT_DEPENDENCIES: ChatHandlerDependencies = {
 };
 
 const STREAM_ERROR_MESSAGE = 'The AI service stopped responding. Please try again.';
+const TEXT_ENCODER = new TextEncoder();
 const NO_STORE_RESPONSE_HEADERS = {
   'Cache-Control': 'no-store',
   'X-Content-Type-Options': 'nosniff'
@@ -92,7 +94,7 @@ function jsonError(
 }
 
 function encodeFrame(frame: ChatStreamFrame): Uint8Array {
-  return new TextEncoder().encode(`${JSON.stringify(frame)}\n`);
+  return TEXT_ENCODER.encode(`${JSON.stringify(frame)}\n`);
 }
 
 function isNamedError(error: unknown, name: string): boolean {
@@ -256,15 +258,43 @@ function createStreamResponse(
   ) => void
 ): Response {
   let completed = false;
+  let streamedOutputBytes = 0;
 
   const stream = new ReadableStream<Uint8Array>({
     start(controller): void {
       const pump = async (): Promise<void> => {
+        const enqueueDelta = (delta: string): boolean => {
+          const nextByteCount = streamedOutputBytes + TEXT_ENCODER.encode(delta).byteLength;
+          if (nextByteCount > MAX_STREAM_OUTPUT_BYTES) return false;
+
+          streamedOutputBytes = nextByteCount;
+          controller.enqueue(encodeFrame({ type: 'text-delta', delta }));
+          return true;
+        };
+
+        const stopAtOutputLimit = async (): Promise<void> => {
+          abortController.abort(
+            new DOMException('Provider output exceeded the response limit.', 'AbortError')
+          );
+          try {
+            await hostedStream.iterator.return?.();
+          } catch {
+            // The abort signal is authoritative for upstream cleanup.
+          }
+          emitOutcome('output_limit', { finishReason: 'length' });
+          controller.enqueue(
+            encodeFrame({ type: 'finish', finishReason: 'length' })
+          );
+          completed = true;
+          controller.close();
+        };
+
         try {
           if (!firstChunk.done && firstChunk.value) {
-            controller.enqueue(
-              encodeFrame({ type: 'text-delta', delta: firstChunk.value })
-            );
+            if (!enqueueDelta(firstChunk.value)) {
+              await stopAtOutputLimit();
+              return;
+            }
           }
 
           let nextChunk = firstChunk.done
@@ -273,9 +303,10 @@ function createStreamResponse(
 
           while (!nextChunk.done) {
             if (nextChunk.value) {
-              controller.enqueue(
-                encodeFrame({ type: 'text-delta', delta: nextChunk.value })
-              );
+              if (!enqueueDelta(nextChunk.value)) {
+                await stopAtOutputLimit();
+                return;
+              }
             }
             nextChunk = await hostedStream.iterator.next();
           }
