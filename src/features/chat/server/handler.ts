@@ -275,12 +275,26 @@ function cancelUnreadRequestBody(request: Request): void {
 async function readRequestText(request: Request): Promise<string | Response> {
   if (request.signal.aborted) return cancelledResponse();
 
-  const contentType = request.headers
-    .get('content-type')
-    ?.split(';', 1)[0]
-    .trim()
-    .toLowerCase();
-  if (contentType !== 'application/json') {
+  const [rawContentType = '', ...contentTypeParameters] = (
+    request.headers.get('content-type') ?? ''
+  ).split(';');
+  const contentType = rawContentType.trim().toLowerCase();
+  const hasUnsupportedCharset = contentTypeParameters.some(parameter => {
+    const separator = parameter.indexOf('=');
+    const name = (
+      separator === -1 ? parameter : parameter.slice(0, separator)
+    )
+      .trim()
+      .toLowerCase();
+    if (name !== 'charset') return false;
+
+    let value = separator === -1 ? '' : parameter.slice(separator + 1).trim();
+    if (value.startsWith('"') && value.endsWith('"')) {
+      value = value.slice(1, -1);
+    }
+    return value.toLowerCase() !== 'utf-8';
+  });
+  if (contentType !== 'application/json' || hasUnsupportedCharset) {
     cancelUnreadRequestBody(request);
     return jsonError(
       400,

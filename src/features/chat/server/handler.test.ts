@@ -446,6 +446,33 @@ describe('handleChatRequest', () => {
     ]);
   });
 
+  it('rejects a non-UTF-8 JSON charset before reading', async () => {
+    const body = new ReadableStream<Uint8Array>({
+      start(controller): void {
+        controller.enqueue(new TextEncoder().encode(validBody()));
+        controller.close();
+      }
+    });
+    const getReader = vi.spyOn(body, 'getReader');
+    const inboundRequest = {
+      method: 'POST',
+      headers: new Headers({
+        'Content-Type': 'application/json; charset=iso-8859-1'
+      }),
+      body,
+      signal: new AbortController().signal
+    } as Request;
+    const startChat = vi.fn<StartHostedChat>(() =>
+      createHostedStream(['should not run'])
+    );
+
+    const response = await handleChatRequest(inboundRequest, { startChat });
+
+    expect(response.status).toBe(400);
+    expect(getReader).not.toHaveBeenCalled();
+    expect(startChat).not.toHaveBeenCalled();
+  });
+
   it('cancels an unread body with an unsupported content type', async () => {
     const startChat = vi.fn<StartHostedChat>();
     const cancelBody = vi.fn();
