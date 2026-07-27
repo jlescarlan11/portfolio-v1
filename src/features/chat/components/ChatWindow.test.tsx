@@ -54,7 +54,7 @@ describe('ChatWindow', () => {
     expect(getByRole('dialog', { name: "John's AI Assistant" })).toBeTruthy();
     expect(getByText(/Hi! I'm John's AI assistant/)).toBeTruthy();
     expect(getByPlaceholderText(/ask a question/i)).toHaveFocus();
-    expect(getByText(/online/i)).toHaveClass('text-subtle-foreground');
+    expect(getByText(/ready/i)).toHaveClass('text-subtle-foreground');
     expect(queryByText(/WebGPU/i)).toBeNull();
     expect(queryByText(/Download.*Start/i)).toBeNull();
   });

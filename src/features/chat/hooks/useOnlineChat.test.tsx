@@ -63,13 +63,17 @@ describe('useOnlineChat', () => {
     vi.restoreAllMocks();
   });
 
-  it('starts with only the welcome message and no persisted session', () => {
+  it('starts locally with no persisted session or availability request', () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
     const first = renderHook(() => useOnlineChat());
     expect(first.result.current.messages).toEqual([WELCOME_MESSAGE]);
     first.unmount();
 
     const second = renderHook(() => useOnlineChat());
     expect(second.result.current.messages).toEqual([WELCOME_MESSAGE]);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('sends one request, adds the user immediately, and streams one assistant message', async () => {

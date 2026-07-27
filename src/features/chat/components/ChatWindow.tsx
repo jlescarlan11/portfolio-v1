@@ -85,7 +85,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
             ) : error ? (
               <span className="text-subtle-foreground">● Attention</span>
             ) : (
-              <span className="text-subtle-foreground">● Online</span>
+              <span className="text-subtle-foreground">● Ready</span>
             )}
           </p>
         </div>
