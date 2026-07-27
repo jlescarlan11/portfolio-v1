@@ -42,12 +42,13 @@ describe('ChatWindow', () => {
   });
 
   it('opens ready with the welcome message and input on a non-WebGPU browser', () => {
-    const { getByText, getByPlaceholderText, queryByText } = render(
+    const { getByRole, getByText, getByPlaceholderText, queryByText } = render(
       <ChatWindow onClose={vi.fn()} />
     );
 
+    expect(getByRole('dialog', { name: "John's AI Assistant" })).toBeTruthy();
     expect(getByText(/Hi! I'm John's AI assistant/)).toBeTruthy();
-    expect(getByPlaceholderText(/ask a question/i)).toBeTruthy();
+    expect(getByPlaceholderText(/ask a question/i)).toHaveFocus();
     expect(getByText(/online/i)).toBeTruthy();
     expect(queryByText(/WebGPU/i)).toBeNull();
     expect(queryByText(/Download.*Start/i)).toBeNull();
@@ -99,6 +100,16 @@ describe('ChatWindow', () => {
     const { getByLabelText } = render(<ChatWindow onClose={onClose} />);
 
     fireEvent.click(getByLabelText(/close chat/i));
+    expect(hookResult.reset).toHaveBeenCalledOnce();
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it('resets and closes when Escape is pressed inside the chat', () => {
+    const onClose = vi.fn();
+    const { getByRole } = render(<ChatWindow onClose={onClose} />);
+
+    fireEvent.keyDown(getByRole('dialog'), { key: 'Escape' });
+
     expect(hookResult.reset).toHaveBeenCalledOnce();
     expect(onClose).toHaveBeenCalledOnce();
   });

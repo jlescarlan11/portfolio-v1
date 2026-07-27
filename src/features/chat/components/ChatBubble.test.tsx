@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, fireEvent, cleanup } from '@testing-library/react';
+import { render, fireEvent, cleanup, screen } from '@testing-library/react';
 import { ChatBubble } from './ChatBubble';
 
 afterEach(cleanup);
@@ -32,8 +32,22 @@ describe('ChatBubble', () => {
 
   it('mounts ChatWindow when button is clicked', () => {
     const { getByRole, getByText } = render(<ChatBubble />);
-    fireEvent.click(getByRole('button', { name: /open ai chat/i }));
+    const launcher = getByRole('button', { name: /open ai chat/i });
+    expect(launcher).toHaveAttribute('aria-expanded', 'false');
+    expect(launcher).toHaveAttribute('aria-controls', 'portfolio-chat-window');
+
+    fireEvent.click(launcher);
+
     expect(getByText("John's AI Assistant")).toBeTruthy();
+    expect(getByRole('dialog', { name: "John's AI Assistant" })).toHaveAttribute(
+      'id',
+      'portfolio-chat-window'
+    );
+    expect(getByRole('button', { name: /close ai chat/i })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
+    expect(screen.getByPlaceholderText(/ask a question/i)).toHaveFocus();
   });
 
   it('unmounts ChatWindow when close button is triggered', () => {
@@ -41,6 +55,7 @@ describe('ChatBubble', () => {
     fireEvent.click(getByRole('button', { name: /open ai chat/i }));
     fireEvent.click(getByLabelText('Close chat'));
     expect(queryByTestId('chat-window-wrapper')).toBeNull();
+    expect(getByRole('button', { name: /open ai chat/i })).toHaveFocus();
   });
 
   it('unmounts ChatWindow from the floating toggle while open', () => {

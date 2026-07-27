@@ -4,6 +4,9 @@ import React, { useEffect, useRef, useState, FormEvent } from 'react';
 import { useOnlineChat } from '../hooks/useOnlineChat';
 import { ChatMessage } from './ChatMessage';
 
+export const CHAT_WINDOW_ID = 'portfolio-chat-window';
+const CHAT_WINDOW_TITLE_ID = 'portfolio-chat-window-title';
+
 interface ChatWindowProps {
   onClose: () => void;
 }
@@ -20,6 +23,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
   } = useOnlineChat();
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const prevMsgCount = useRef(messages.length);
   useEffect(() => {
@@ -30,6 +34,10 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
       behavior: newMessage || !isStreaming ? 'smooth' : 'auto'
     });
   }, [messages, isStreaming]);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -45,7 +53,18 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
   }
 
   return (
-    <div className="relative flex h-[min(520px,calc(100dvh-7rem))] w-80 flex-col overflow-hidden border border-surface bg-background shadow-2xl sm:w-96">
+    <div
+      id={CHAT_WINDOW_ID}
+      role="dialog"
+      aria-labelledby={CHAT_WINDOW_TITLE_ID}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          handleClose();
+        }
+      }}
+      className="relative flex h-[min(520px,calc(100dvh-7rem))] w-80 flex-col overflow-hidden border border-surface bg-background shadow-2xl sm:w-96"
+    >
       {/* corner brackets */}
       <span className="pointer-events-none absolute left-2 top-2 z-10 h-4 w-4 border-l border-t border-foreground/20" aria-hidden="true" />
       <span className="pointer-events-none absolute bottom-2 right-2 z-10 h-4 w-4 border-b border-r border-foreground/20" aria-hidden="true" />
@@ -53,7 +72,10 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
       {/* Header */}
       <div className="relative z-10 flex items-center justify-between border-b border-surface px-4 py-3">
         <div>
-          <p className="font-serif text-sm font-semibold tracking-tight text-foreground">
+          <p
+            id={CHAT_WINDOW_TITLE_ID}
+            className="font-serif text-sm font-semibold tracking-tight text-foreground"
+          >
             John&apos;s AI Assistant
           </p>
           <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.12em]">
@@ -121,6 +143,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
           className="flex items-center gap-3 border-t border-surface px-4 py-3"
         >
           <input
+            ref={inputRef}
             type="text"
             value={input}
             onChange={e => setInput(e.target.value)}
