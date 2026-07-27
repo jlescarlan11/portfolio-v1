@@ -612,6 +612,28 @@ describe('useOnlineChat', () => {
     expect(requestSignal?.aborted).toBe(true);
   });
 
+  it('rejects a non-UTF-8 chat stream before reading its body', async () => {
+    const response = successResponse();
+    response.headers.set(
+      'Content-Type',
+      'application/x-ndjson; charset=iso-8859-1'
+    );
+    const getReader = vi.spyOn(response.body!, 'getReader');
+    const cancelBody = vi.spyOn(response.body!, 'cancel');
+    vi.stubGlobal('fetch', vi.fn(async () => response));
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'protocol' })
+    );
+    expect(getReader).not.toHaveBeenCalled();
+    expect(cancelBody).toHaveBeenCalledOnce();
+  });
+
   it('rejects an oversized declared stream without reading its body', async () => {
     const response = successResponse();
     response.headers.set(

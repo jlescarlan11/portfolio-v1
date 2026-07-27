@@ -128,11 +128,28 @@ function parseRetryAfter(response: Response): number {
 }
 
 function isChatStreamResponse(response: Response): boolean {
-  return response.headers
-    .get('content-type')
-    ?.split(';', 1)[0]
-    .trim()
-    .toLowerCase() === 'application/x-ndjson';
+  const [rawMediaType = '', ...parameters] = (
+    response.headers.get('content-type') ?? ''
+  ).split(';');
+  if (rawMediaType.trim().toLowerCase() !== 'application/x-ndjson') {
+    return false;
+  }
+
+  return parameters.every(parameter => {
+    const separator = parameter.indexOf('=');
+    const name = (
+      separator === -1 ? parameter : parameter.slice(0, separator)
+    )
+      .trim()
+      .toLowerCase();
+    if (name !== 'charset') return true;
+
+    let value = separator === -1 ? '' : parameter.slice(separator + 1).trim();
+    if (value.startsWith('"') && value.endsWith('"')) {
+      value = value.slice(1, -1);
+    }
+    return value.toLowerCase() === 'utf-8';
+  });
 }
 
 function isJsonResponse(response: Response): boolean {
