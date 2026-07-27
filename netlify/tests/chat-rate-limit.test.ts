@@ -6,10 +6,9 @@ import {
 import chat, { config } from '../functions/chat.mts';
 
 describe('chat Netlify function', () => {
-  it('declares one distributed IP rule across every site domain', () => {
+  it('scopes one distributed IP rule to normalized chat paths', () => {
     expect(config).toEqual({
-      path: '/api/*',
-      excludedPath: '/api/chat/rate-limited',
+      path: ['/api/chat', '/api/chat/', '/api//chat'],
       method: 'POST',
       rateLimit: {
         action: 'rewrite',

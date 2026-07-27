@@ -24,8 +24,7 @@ export default async function chat(
 }
 
 export const config = {
-  path: '/api/*',
-  excludedPath: '/api/chat/rate-limited',
+  path: ['/api/chat', '/api/chat/', '/api//chat'],
   method: 'POST',
   rateLimit: {
     action: 'rewrite',
