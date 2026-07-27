@@ -70,6 +70,7 @@ export default function NavigationBar({
   return (
     <nav
       aria-label="main navigation"
+      inert={!isVisible}
       className={[
         'fixed top-6 left-1/2 z-50 -translate-x-1/2',
         'transition-all duration-300 ease-out',
