@@ -32,4 +32,12 @@ describe('AboutSection progressive enhancement', () => {
       expect(screen.getByRole('region', { name })).toBeInTheDocument();
     }
   });
+
+  it('renders declared skills even when they have no bespoke icon', () => {
+    const markup = renderToStaticMarkup(<AboutSection content={aboutContent} />);
+
+    for (const skill of ['C', 'C++', 'SQL', 'Riverpod', 'Drift', 'Vitest']) {
+      expect(markup).toContain(`>${skill}<`);
+    }
+  });
 });

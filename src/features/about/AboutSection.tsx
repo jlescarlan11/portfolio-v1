@@ -128,7 +128,7 @@ function SectionLabel({ children, id }: { children: string; id: string }) {
 
 interface SkillChipProps {
   label: string;
-  icon: JSX.Element;
+  icon: JSX.Element | null;
 }
 
 function SkillChip({ label, icon }: SkillChipProps) {
@@ -141,7 +141,9 @@ function SkillChip({ label, icon }: SkillChipProps) {
           className="flex-shrink-0 text-muted-foreground [&>svg]:h-3.5 [&>svg]:w-3.5"
           aria-hidden="true"
         >
-          {icon}
+          {icon ?? (
+            <span className="block h-1.5 w-1.5 border border-current opacity-50" />
+          )}
         </span>
         <Typography
           variant="caption"
@@ -232,12 +234,7 @@ function TimelineRow({ title, subtitle, startDate, endDate, isCurrent, bullets, 
 export default function AboutSection({ content, contributionSlot }: AboutSectionProps): React.JSX.Element {
   const { certifications, education, experience, techCategories } = content;
 
-  const iconCategories = techCategories
-    .map(({ category, items }) => ({
-      category,
-      items: items.filter((item) => getTechIcon(item.label) !== null)
-    }))
-    .filter(({ items }) => items.length > 0);
+  const skillCategories = techCategories.filter(({ items }) => items.length > 0);
 
   return (
     <SectionFrame
@@ -250,7 +247,7 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
       <div className="space-y-14">
 
         {/* ── SKILLS + CONTRIBUTION GRAPH ── */}
-        {iconCategories.length > 0 && (
+        {skillCategories.length > 0 && (
           <FadeIn
             delay={100}
             as="section"
@@ -259,7 +256,7 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
           >
             <SectionLabel id="skills-heading">Skills</SectionLabel>
             <div className="mb-10 space-y-7">
-              {iconCategories.map(({ category, items }) => (
+              {skillCategories.map(({ category, items }) => (
                 <div key={category}>
                   <Typography
                     variant="caption"
@@ -269,11 +266,13 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
                     {category}
                   </Typography>
                   <ul className="flex flex-wrap gap-2">
-                    {items.map((item) => {
-                      const icon = getTechIcon(item.label);
-                      if (!icon) return null;
-                      return <SkillChip key={item.label} label={item.label} icon={icon} />;
-                    })}
+                    {items.map((item) => (
+                      <SkillChip
+                        key={item.label}
+                        label={item.label}
+                        icon={getTechIcon(item.label)}
+                      />
+                    ))}
                   </ul>
                 </div>
               ))}
