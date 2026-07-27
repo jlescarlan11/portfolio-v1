@@ -936,6 +936,56 @@ describe('useOnlineChat', () => {
     expect(cancelBody).toHaveBeenCalledOnce();
   });
 
+  it('rejects a declared-empty success stream without waiting', async () => {
+    vi.useFakeTimers();
+    const cancelBody = vi.fn();
+    let requestSignal: AbortSignal | null | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        requestSignal = init?.signal;
+        return new Response(
+          new ReadableStream<Uint8Array>({
+            cancel: cancelBody
+          }),
+          {
+            status: 200,
+            headers: {
+              ...STREAM_RESPONSE_HEADERS,
+              'Content-Length': '0'
+            }
+          }
+        );
+      })
+    );
+    const { result } = renderHook(() => useOnlineChat());
+    let settled = false;
+    let sendPromise: Promise<void> | undefined;
+
+    act(() => {
+      sendPromise = result.current.send('Hello').finally(() => {
+        settled = true;
+      });
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    const settledBeforeTimeout = settled;
+    if (!settled) {
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(30_000);
+        await sendPromise;
+      });
+    }
+
+    expect(settledBeforeTimeout).toBe(true);
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'protocol' })
+    );
+    expect(requestSignal?.aborted).toBe(true);
+    expect(cancelBody).toHaveBeenCalledOnce();
+  });
+
   it('rejects conflicting response framing before reading its body', async () => {
     const body =
       frame({ type: 'text-delta', delta: 'John builds products.' }) +

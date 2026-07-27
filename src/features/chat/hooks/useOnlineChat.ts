@@ -576,6 +576,10 @@ export function useOnlineChat(): UseOnlineChatResult {
         const declaredLength = response.headers.get('content-length');
         const declaredResponseBytes =
           declaredLength === null ? undefined : Number(declaredLength);
+        if (declaredResponseBytes === 0) {
+          void response.body?.cancel().catch(() => undefined);
+          throw new ChatProtocolError();
+        }
 
         if (!response.body) {
           throw new ChatProtocolError();
