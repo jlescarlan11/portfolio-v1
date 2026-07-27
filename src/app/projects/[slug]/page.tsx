@@ -297,7 +297,7 @@ function SectionLabel({ children, id }: { children: string; id: string }) {
   return (
     <Typography
       variant="caption"
-      as="p"
+      as="h2"
       id={id}
       className="mb-5 text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle-foreground"
     >

@@ -42,4 +42,18 @@ describe('ProjectPage', () => {
       expect(screen.getByRole('region', { name })).toBeInTheDocument();
     }
   });
+
+  it('exposes case-study sections in the heading outline', async () => {
+    const page = await ProjectPage({
+      params: Promise.resolve({ slug: 'rent-n-roll' })
+    });
+
+    render(page);
+
+    for (const name of ['Overview', 'Highlights', 'Gallery']) {
+      expect(
+        screen.getByRole('heading', { level: 2, name })
+      ).toBeInTheDocument();
+    }
+  });
 });
