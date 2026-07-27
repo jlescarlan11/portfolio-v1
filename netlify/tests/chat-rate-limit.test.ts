@@ -3,7 +3,7 @@ import {
   RATE_LIMIT_REQUESTS,
   RATE_LIMIT_WINDOW_SECONDS
 } from '../../src/features/chat/server/config';
-import chat, { config } from '../functions/chat';
+import chat, { config } from '../functions/chat.mts';
 
 describe('chat Netlify function', () => {
   it('declares a distributed IP-and-domain rule with the documented boundary', () => {
