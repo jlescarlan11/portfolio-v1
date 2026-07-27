@@ -10,7 +10,8 @@ describe('chat Netlify function', () => {
     expect(config).toEqual({
       path: '/api/chat',
       rateLimit: {
-        action: 'rate_limit',
+        action: 'rewrite',
+        to: '/api/chat/rate-limited',
         aggregateBy: ['ip', 'domain'],
         windowLimit: RATE_LIMIT_REQUESTS,
         windowSize: RATE_LIMIT_WINDOW_SECONDS
