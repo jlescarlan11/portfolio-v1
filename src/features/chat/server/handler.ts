@@ -423,6 +423,10 @@ async function readRequestText(request: Request): Promise<string | Response> {
       ? ''
       : jsonError(400, 'VALIDATION_ERROR', 'Send a valid chat request.');
   }
+  if (declaredBytes === 0) {
+    cancelUnreadRequestBody(request);
+    return '';
+  }
 
   let reader: ReadableStreamDefaultReader<Uint8Array>;
   try {

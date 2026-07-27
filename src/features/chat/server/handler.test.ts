@@ -277,6 +277,42 @@ describe('handleChatRequest', () => {
     }
   );
 
+  it('cancels a declared-empty body without waiting for its stream', async () => {
+    vi.useFakeTimers();
+    try {
+      const cancelBody = vi.fn();
+      const inboundRequest = {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Length': '0',
+          'Content-Type': 'application/json'
+        }),
+        body: new ReadableStream<Uint8Array>({
+          cancel: cancelBody
+        }),
+        signal: new AbortController().signal
+      } as Request;
+      const startChat = vi.fn<StartHostedChat>();
+      let response: Response | undefined;
+      void handleChatRequest(inboundRequest, { startChat }).then(value => {
+        response = value;
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+      const settledBeforeTimeout = response !== undefined;
+      if (!settledBeforeTimeout) {
+        await vi.advanceTimersByTimeAsync(REQUEST_BODY_TIMEOUT_MS);
+      }
+
+      expect(settledBeforeTimeout).toBe(true);
+      expect(response?.status).toBe(400);
+      expect(cancelBody).toHaveBeenCalledOnce();
+      expect(startChat).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('rejects a body whose byte count differs from Content-Length', async () => {
     const startChat = vi.fn<StartHostedChat>();
     const encodedBody = new TextEncoder().encode(validBody());
