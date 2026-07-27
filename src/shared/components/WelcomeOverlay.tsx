@@ -15,12 +15,8 @@ function getProgressStyle(progress: number): CSSProperties {
 }
 
 export default function WelcomeOverlay(): React.JSX.Element | null {
-  const {
-    status,
-    completedCount,
-    totalCount,
-    progress
-  } = useInitialLoad();
+  const { status, progress } = useInitialLoad();
+  const progressPercentage = Math.round(progress * 100);
   const [visible, setVisible] = useState(true);
   const [closing, setClosing] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -131,9 +127,9 @@ export default function WelcomeOverlay(): React.JSX.Element | null {
             role="progressbar"
             aria-label={siteConfig.overlay.progressLabel}
             aria-valuemin={0}
-            aria-valuemax={totalCount}
-            aria-valuenow={completedCount}
-            aria-valuetext={`${completedCount} of ${totalCount} startup steps complete`}
+            aria-valuemax={100}
+            aria-valuenow={progressPercentage}
+            aria-valuetext={`${progressPercentage}% complete`}
             className="h-1 w-full overflow-hidden bg-surface-tint-strong"
           >
             <div
@@ -160,11 +156,10 @@ export default function WelcomeOverlay(): React.JSX.Element | null {
               aria-hidden="true"
               className="tabular-nums text-subtle-foreground"
             >
-              {String(completedCount).padStart(2, '0')} /{' '}
-              {String(totalCount).padStart(2, '0')}
+              {progressPercentage}%
             </Typography>
             <span className="sr-only">
-              {completedCount} of {totalCount} startup steps complete
+              {progressPercentage}% complete
             </span>
           </div>
         </div>

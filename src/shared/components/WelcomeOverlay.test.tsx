@@ -84,7 +84,7 @@ describe('WelcomeOverlay', () => {
     vi.restoreAllMocks();
   });
 
-  it('shows milestone progress without fabricated percentage or dialog semantics', () => {
+  it('shows a truthful milestone percentage without dialog semantics', () => {
     const fonts = createDeferred<FontFaceSet>();
     setDocumentFonts(fonts.promise);
     renderOverlay();
@@ -93,13 +93,14 @@ describe('WelcomeOverlay', () => {
       name: 'Portfolio startup progress'
     });
     expect(progress).toHaveAttribute('aria-valuemin', '0');
-    expect(progress).toHaveAttribute('aria-valuemax', '3');
-    expect(progress).toHaveAttribute('aria-valuenow', '1');
+    expect(progress).toHaveAttribute('aria-valuemax', '100');
+    expect(progress).toHaveAttribute('aria-valuenow', '33');
     expect(progress).toHaveAttribute(
       'aria-valuetext',
-      '1 of 3 startup steps complete'
+      '33% complete'
     );
-    expect(screen.queryByText(/%/)).not.toBeInTheDocument();
+    expect(screen.getByText('33%')).toBeInTheDocument();
+    expect(screen.queryByText(/\d+\s*\/\s*\d+/)).not.toBeInTheDocument();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent('Preparing portfolio');
 
@@ -107,7 +108,7 @@ describe('WelcomeOverlay', () => {
       vi.advanceTimersByTime(INITIAL_LOAD_TIMEOUT_MS - 1);
     });
 
-    expect(progress).toHaveAttribute('aria-valuenow', '1');
+    expect(progress).toHaveAttribute('aria-valuenow', '33');
     expect(screen.getByTestId('initial-load-overlay')).toBeInTheDocument();
   });
 
@@ -121,7 +122,7 @@ describe('WelcomeOverlay', () => {
     fireEvent.keyDown(window, { key: 'Escape' });
 
     expect(overlay).toBeInTheDocument();
-    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1');
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '33');
   });
 
   it('exits promptly after all real milestones settle and restores overflow', async () => {
@@ -132,14 +133,14 @@ describe('WelcomeOverlay', () => {
 
     expect(document.body.style.overflow).toBe('hidden');
     fireEvent.click(screen.getByRole('button', { name: 'Settle hero' }));
-    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '2');
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '67');
 
     await act(async () => {
       fonts.resolve({} as FontFaceSet);
       await fonts.promise;
     });
 
-    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '3');
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100');
     expect(screen.getByTestId('initial-load-overlay')).toHaveClass('opacity-0');
 
     act(() => {
