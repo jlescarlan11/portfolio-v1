@@ -1,0 +1,5 @@
+{"type":"server-started","port":64349,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:64349","screen_dir":"/Users/johnlesterescarlan/Personal Projects/portfolio-v1/.superpowers/brainstorm/77294-1777562152/content","state_dir":"/Users/johnlesterescarlan/Personal Projects/portfolio-v1/.superpowers/brainstorm/77294-1777562152/state"}
+{"type":"screen-added","file":"/Users/johnlesterescarlan/Personal Projects/portfolio-v1/.superpowers/brainstorm/77294-1777562152/content/chat-placement.html"}
+{"type":"screen-added","file":"/Users/johnlesterescarlan/Personal Projects/portfolio-v1/.superpowers/brainstorm/77294-1777562152/content/waiting-1.html"}
+{"type":"screen-added","file":"/Users/johnlesterescarlan/Personal Projects/portfolio-v1/.superpowers/brainstorm/77294-1777562152/content/chat-ui-design.html"}
+{"type":"server-stopped","reason":"idle timeout"}
