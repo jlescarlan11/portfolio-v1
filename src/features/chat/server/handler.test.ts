@@ -674,6 +674,43 @@ describe('handleChatRequest', () => {
     ]);
   });
 
+  it('rejects a malformed hosted stream before reading it', async () => {
+    let providerSignal: AbortSignal | undefined;
+    const telemetry: ChatTelemetryEvent[] = [];
+    const nextUpstream = vi.fn(async () => ({
+      done: true as const,
+      value: undefined
+    }));
+    const returnUpstream = vi.fn(async () => ({
+      done: true as const,
+      value: undefined
+    }));
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: ({ signal }) => {
+        providerSignal = signal;
+        return {
+          iterator: {
+            next: nextUpstream,
+            return: returnUpstream
+          },
+          getCompletion: undefined
+        } as unknown as HostedChatStream;
+      },
+      writeTelemetry: event => telemetry.push(event)
+    });
+
+    expect(response.status).toBe(503);
+    expect(nextUpstream).not.toHaveBeenCalled();
+    expect(providerSignal?.aborted).toBe(true);
+    expect(returnUpstream).toHaveBeenCalledOnce();
+    expect(telemetry).toEqual([
+      expect.objectContaining({
+        status: 'failed',
+        errorCategory: 'provider_protocol'
+      })
+    ]);
+  });
+
   it('returns a sanitized unavailable response for missing server configuration', async () => {
     const startChat = vi.fn<StartHostedChat>(() => {
       throw new ChatConfigurationError();

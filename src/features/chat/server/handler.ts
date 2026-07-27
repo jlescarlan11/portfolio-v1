@@ -103,6 +103,32 @@ function assertProviderCompletion(
   }
 }
 
+function assertHostedChatStream(
+  result: unknown
+): asserts result is HostedChatStream {
+  if (typeof result !== 'object' || result === null) {
+    throw new ProviderStreamProtocolError();
+  }
+
+  const stream = result as {
+    iterator?: {
+      next?: unknown;
+      return?: unknown;
+    } | null;
+    getCompletion?: unknown;
+  };
+  if (
+    typeof stream.iterator !== 'object' ||
+    stream.iterator === null ||
+    typeof stream.iterator.next !== 'function' ||
+    (stream.iterator.return !== undefined &&
+      typeof stream.iterator.return !== 'function') ||
+    typeof stream.getCompletion !== 'function'
+  ) {
+    throw new ProviderStreamProtocolError();
+  }
+}
+
 function normalizeFinishReason(value: string): FinishReason {
   return FINISH_REASONS.has(value as FinishReason)
     ? value as FinishReason
@@ -716,12 +742,13 @@ export async function handleChatRequest(
   try {
     const started = await withTimeout(
       (async () => {
-        const hostedStream = await resolved.startChat({
+        const hostedStream: unknown = await resolved.startChat({
           messages,
           signal: abortController.signal,
           systemPrompt: CHAT_SYSTEM_PROMPT
         });
-        pendingHostedStream = hostedStream;
+        pendingHostedStream = hostedStream as HostedChatStream;
+        assertHostedChatStream(hostedStream);
         const firstChunk: unknown = await hostedStream.iterator.next();
         assertProviderChunkResult(firstChunk);
         return {
