@@ -569,6 +569,25 @@ describe('handleChatRequest', () => {
     );
   });
 
+  it('clamps an overflowing provider Retry-After delay', async () => {
+    const startChat = vi.fn<StartHostedChat>(() => {
+      throw new APICallError({
+        message: 'quota',
+        url: 'https://gateway.invalid',
+        requestBodyValues: {},
+        responseHeaders: { 'Retry-After': '9'.repeat(400) },
+        statusCode: 429
+      });
+    });
+
+    const response = await handleChatRequest(request(validBody()), {
+      startChat
+    });
+
+    expect(response.status).toBe(429);
+    expect(response.headers.get('retry-after')).toBe('3600');
+  });
+
   it('converts a provider HTTP-date Retry-After value to seconds', async () => {
     const now = Date.parse('2026-07-28T00:00:00Z');
     const retryAt = new Date(now + 120_000).toUTCString();

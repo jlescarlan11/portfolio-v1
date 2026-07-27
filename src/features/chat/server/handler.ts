@@ -183,7 +183,7 @@ function parseRetryAfterHeader(
   if (!entry) return undefined;
 
   const seconds = Number(entry[1]);
-  if (Number.isFinite(seconds) && seconds > 0) {
+  if (seconds > 0) {
     return Math.min(Math.ceil(seconds), 3_600);
   }
 
