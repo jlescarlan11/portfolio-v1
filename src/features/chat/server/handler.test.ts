@@ -152,6 +152,34 @@ describe('handleChatRequest', () => {
     ]);
   });
 
+  it.each(['-1', '1.5', 'not-a-number'])(
+    'rejects an invalid Content-Length value %s before reading',
+    async (declaredLength) => {
+      const startChat = vi.fn<StartHostedChat>();
+      const body = new ReadableStream<Uint8Array>({
+        start(controller): void {
+          controller.enqueue(new TextEncoder().encode(validBody()));
+          controller.close();
+        }
+      });
+      const getReader = vi.spyOn(body, 'getReader');
+      const inboundRequest = {
+        headers: new Headers({
+          'Content-Length': declaredLength,
+          'Content-Type': 'application/json'
+        }),
+        body,
+        signal: new AbortController().signal
+      } as Request;
+
+      const response = await handleChatRequest(inboundRequest, { startChat });
+
+      expect(response.status).toBe(400);
+      expect(getReader).not.toHaveBeenCalled();
+      expect(startChat).not.toHaveBeenCalled();
+    }
+  );
+
   it('cancels an unread body when its declared length is oversized', async () => {
     const startChat = vi.fn<StartHostedChat>();
     const cancelBody = vi.fn();

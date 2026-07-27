@@ -281,8 +281,18 @@ async function readRequestText(request: Request): Promise<string | Response> {
 
   const declaredLength = request.headers.get('content-length');
   if (declaredLength !== null) {
-    const bytes = Number(declaredLength);
-    if (Number.isFinite(bytes) && bytes > MAX_REQUEST_BYTES) {
+    const normalizedLength = declaredLength.trim();
+    if (!/^\d+$/.test(normalizedLength)) {
+      cancelUnreadRequestBody(request);
+      return jsonError(
+        400,
+        'VALIDATION_ERROR',
+        'Send a valid chat request.'
+      );
+    }
+
+    const bytes = Number(normalizedLength);
+    if (!Number.isSafeInteger(bytes) || bytes > MAX_REQUEST_BYTES) {
       cancelUnreadRequestBody(request);
       return jsonError(
         413,
