@@ -3,7 +3,8 @@ import { CHAT_SYSTEM_PROMPT } from '../content';
 import {
   ChatConfigurationError,
   MAX_REQUEST_BYTES,
-  MAX_STREAM_OUTPUT_BYTES
+  MAX_STREAM_OUTPUT_BYTES,
+  REQUEST_BODY_TIMEOUT_MS
 } from './config';
 import type {
   ChatErrorBody,
@@ -45,6 +46,7 @@ const DEFAULT_DEPENDENCIES: ChatHandlerDependencies = {
   createRequestId: () => crypto.randomUUID()
 };
 
+const REQUEST_BODY_TIMEOUT = Symbol('request-body-timeout');
 const STREAM_ERROR_MESSAGE = 'The AI service stopped responding. Please try again.';
 const TEXT_ENCODER = new TextEncoder();
 const NO_STORE_RESPONSE_HEADERS = {
@@ -216,10 +218,27 @@ async function readRequestText(request: Request): Promise<string | Response> {
   const decoder = new TextDecoder();
   let receivedBytes = 0;
   let text = '';
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<typeof REQUEST_BODY_TIMEOUT>(resolve => {
+    timeoutId = setTimeout(
+      () => resolve(REQUEST_BODY_TIMEOUT),
+      REQUEST_BODY_TIMEOUT_MS
+    );
+  });
 
   try {
     while (true) {
-      const { done, value } = await reader.read();
+      const next = await Promise.race([reader.read(), timeout]);
+      if (next === REQUEST_BODY_TIMEOUT) {
+        void reader.cancel().catch(() => undefined);
+        return jsonError(
+          408,
+          'TIMEOUT',
+          'The chat request took too long. Please try again.'
+        );
+      }
+
+      const { done, value } = next;
       if (done) break;
 
       receivedBytes += value.byteLength;
@@ -238,7 +257,12 @@ async function readRequestText(request: Request): Promise<string | Response> {
   } catch {
     return jsonError(400, 'VALIDATION_ERROR', 'Check your conversation and try again.');
   } finally {
-    reader.releaseLock();
+    if (timeoutId !== undefined) clearTimeout(timeoutId);
+    try {
+      reader.releaseLock();
+    } catch {
+      // The timeout response is authoritative if cancellation is still settling.
+    }
   }
 }
 

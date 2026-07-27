@@ -4,7 +4,8 @@ import { CHAT_SYSTEM_PROMPT } from '../content';
 import {
   ChatConfigurationError,
   MAX_REQUEST_BYTES,
-  MAX_STREAM_OUTPUT_BYTES
+  MAX_STREAM_OUTPUT_BYTES,
+  REQUEST_BODY_TIMEOUT_MS
 } from './config';
 import type {
   ChatCompletionMetadata,
@@ -146,6 +147,45 @@ describe('handleChatRequest', () => {
         errorCategory: 'payload'
       })
     ]);
+  });
+
+  it('times out and cancels a request body that never closes', async () => {
+    vi.useFakeTimers();
+    const startChat = vi.fn<StartHostedChat>();
+    const cancelBody = vi.fn();
+    const requestInit: RequestInit & { duplex: 'half' } = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: new ReadableStream<Uint8Array>({
+        start(controller): void {
+          controller.enqueue(
+            new TextEncoder().encode('{"messages":[')
+          );
+        },
+        cancel: cancelBody
+      }),
+      duplex: 'half'
+    };
+    const responsePromise = handleChatRequest(
+      new Request('http://localhost/api/chat', requestInit),
+      { startChat }
+    );
+
+    await vi.advanceTimersByTimeAsync(REQUEST_BODY_TIMEOUT_MS);
+    const response = await Promise.race([
+      responsePromise,
+      Promise.resolve(undefined)
+    ]);
+
+    expect(response?.status).toBe(408);
+    expect(await response?.json()).toEqual({
+      error: {
+        code: 'TIMEOUT',
+        message: 'The chat request took too long. Please try again.'
+      }
+    });
+    expect(cancelBody).toHaveBeenCalledOnce();
+    expect(startChat).not.toHaveBeenCalled();
   });
 
   it('rejects simple cross-origin content types without calling the provider', async () => {
