@@ -61,10 +61,14 @@ OPENAI_API_KEY=replace-with-a-local-development-key
 OPENAI_BASE_URL=https://replace-with-an-openai-compatible-v1-endpoint
 ```
 
-Netlify deploys inject `OPENAI_API_KEY` and `OPENAI_BASE_URL` through Netlify AI
-Gateway. Do not copy production values into the repository, browser code,
-fixtures, logs, or screenshots. A missing value intentionally makes
-`POST /api/chat` return a sanitized `503`.
+Netlify deploys inject the collision-free `NETLIFY_AI_GATEWAY_KEY` and
+`NETLIFY_AI_GATEWAY_BASE_URL` values at runtime; the server prefers that pair so
+existing provider-specific project settings cannot bypass the gateway.
+`OPENAI_API_KEY` and `OPENAI_BASE_URL` are the local or non-Netlify fallback.
+Do not set the `NETLIFY_AI_GATEWAY_*` values by hand or copy any runtime value
+into the repository, browser code, fixtures, logs, or screenshots. If neither
+complete pair is available, `POST /api/chat` intentionally returns a sanitized
+`503`.
 
 ### Development
 

@@ -23,12 +23,17 @@ export class ChatConfigurationError extends Error {
 export function getHostedChatConfiguration(
   environment: NodeJS.ProcessEnv = process.env
 ): HostedChatConfiguration {
-  const apiKey = environment.OPENAI_API_KEY?.trim();
-  const baseUrl = environment.OPENAI_BASE_URL?.trim();
-
-  if (!apiKey || !baseUrl) {
-    throw new ChatConfigurationError();
+  const netlifyApiKey = environment.NETLIFY_AI_GATEWAY_KEY?.trim();
+  const netlifyBaseUrl = environment.NETLIFY_AI_GATEWAY_BASE_URL?.trim();
+  if (netlifyApiKey && netlifyBaseUrl) {
+    return { apiKey: netlifyApiKey, baseUrl: netlifyBaseUrl };
   }
 
-  return { apiKey, baseUrl };
+  const openAiApiKey = environment.OPENAI_API_KEY?.trim();
+  const openAiBaseUrl = environment.OPENAI_BASE_URL?.trim();
+  if (openAiApiKey && openAiBaseUrl) {
+    return { apiKey: openAiApiKey, baseUrl: openAiBaseUrl };
+  }
+
+  throw new ChatConfigurationError();
 }

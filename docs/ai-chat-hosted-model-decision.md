@@ -11,10 +11,10 @@
 Use the existing Netlify AI Gateway with OpenAI's `gpt-5-nano` model for the
 portfolio chatbot.
 
-Netlify already hosts the production site and injects gateway-scoped
-`OPENAI_API_KEY` and `OPENAI_BASE_URL` values into its Next.js compute runtime.
-This keeps credentials server-only and avoids adding another hosting account,
-provider balance, or static production key.
+Netlify already hosts the production site and injects collision-free
+`NETLIFY_AI_GATEWAY_KEY` and `NETLIFY_AI_GATEWAY_BASE_URL` values into its
+Next.js compute runtime. This keeps credentials server-only and avoids adding
+another hosting account, provider balance, or static production key.
 
 `gpt-5-nano` is the lowest-cost supported model that also has the highest
 published throughput tier among the low-cost candidates on Netlify:
@@ -34,13 +34,17 @@ through Netlify's gateway monitoring.
 
 Production and deploy previews use Netlify-injected values:
 
-- `OPENAI_API_KEY` — gateway credential; required at request time.
-- `OPENAI_BASE_URL` — gateway endpoint; required at request time.
+- `NETLIFY_AI_GATEWAY_KEY` — gateway credential; preferred at request time and
+  never set manually.
+- `NETLIFY_AI_GATEWAY_BASE_URL` — gateway endpoint; preferred at request time
+  and never set manually.
 
-Local development can receive the same values through `netlify dev`, or use a
-developer-owned OpenAI-compatible endpoint. Neither value may use a
-`NEXT_PUBLIC_` prefix or appear in client code, logs, errors, fixtures, or
-committed environment files.
+Local development can receive those values through `netlify dev`, or use a
+developer-owned OpenAI-compatible endpoint through `OPENAI_API_KEY` and
+`OPENAI_BASE_URL`. The server prefers the collision-free Netlify pair so an
+existing provider-specific project setting cannot bypass the gateway. None of
+these values may use a `NEXT_PUBLIC_` prefix or appear in client code, logs,
+errors, fixtures, or committed environment files.
 
 The model and request budgets are application-owned constants:
 

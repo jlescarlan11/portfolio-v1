@@ -35,6 +35,8 @@ import { startHostedChat } from './provider';
 
 describe('startHostedChat', () => {
   beforeEach(() => {
+    vi.stubEnv('NETLIFY_AI_GATEWAY_KEY', '');
+    vi.stubEnv('NETLIFY_AI_GATEWAY_BASE_URL', '');
     vi.stubEnv('OPENAI_API_KEY', 'test-placeholder-key');
     vi.stubEnv('OPENAI_BASE_URL', 'https://gateway.invalid/v1');
   });
@@ -77,7 +79,28 @@ describe('startHostedChat', () => {
     });
   });
 
+  it('prefers Netlify collision-free gateway configuration when both pairs exist', () => {
+    vi.stubEnv('NETLIFY_AI_GATEWAY_KEY', 'netlify-test-placeholder-key');
+    vi.stubEnv(
+      'NETLIFY_AI_GATEWAY_BASE_URL',
+      'https://netlify-gateway.invalid/v1'
+    );
+
+    startHostedChat({
+      messages: [{ role: 'user', content: 'Hello' }],
+      signal: new AbortController().signal
+    });
+
+    expect(mocks.createOpenAI).toHaveBeenCalledWith({
+      apiKey: 'netlify-test-placeholder-key',
+      baseURL: 'https://netlify-gateway.invalid/v1',
+      name: 'netlify-ai-gateway'
+    });
+  });
+
   it('fails without exposing details when gateway configuration is missing', () => {
+    vi.stubEnv('NETLIFY_AI_GATEWAY_KEY', '');
+    vi.stubEnv('NETLIFY_AI_GATEWAY_BASE_URL', '');
     vi.stubEnv('OPENAI_API_KEY', '');
     vi.stubEnv('OPENAI_BASE_URL', '');
 
