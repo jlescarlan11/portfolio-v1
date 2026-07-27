@@ -603,6 +603,49 @@ describe('useOnlineChat', () => {
     expect(requestSignal?.aborted).toBe(true);
   });
 
+  it('rejects invalid UTF-8 instead of accepting replacement characters', async () => {
+    let requestSignal: AbortSignal | null | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        requestSignal = init?.signal;
+        const encoder = new TextEncoder();
+        const prefix = encoder.encode('{"type":"text-delta","delta":"');
+        const suffix = encoder.encode(
+          '"}\n{"type":"finish","finishReason":"stop"}\n'
+        );
+        const body = new Uint8Array(prefix.length + suffix.length + 1);
+        body.set(prefix);
+        body[prefix.length] = 0xff;
+        body.set(suffix, prefix.length + 1);
+
+        return new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller): void {
+              controller.enqueue(body);
+              controller.close();
+            }
+          }),
+          { status: 200, headers: STREAM_RESPONSE_HEADERS }
+        );
+      })
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'protocol' })
+    );
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'user',
+      content: 'Hello'
+    });
+    expect(requestSignal?.aborted).toBe(true);
+  });
+
   it('aborts an unterminated frame once its buffer exceeds the client cap', async () => {
     let requestSignal: AbortSignal | null | undefined;
     vi.stubGlobal(

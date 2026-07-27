@@ -439,7 +439,7 @@ export function useOnlineChat(): UseOnlineChatResult {
         }
 
         const reader = response.body.getReader();
-        const decoder = new TextDecoder();
+        const decoder = new TextDecoder('utf-8', { fatal: true });
         let pendingLine = '';
         let sawFinish = false;
         let finishReason: string | null = null;
@@ -485,7 +485,11 @@ export function useOnlineChat(): UseOnlineChatResult {
             throw new ChatProtocolError();
           }
 
-          pendingLine += decoder.decode(value, { stream: !done });
+          try {
+            pendingLine += decoder.decode(value, { stream: !done });
+          } catch {
+            throw new ChatProtocolError();
+          }
           const lines = pendingLine.split('\n');
           pendingLine = lines.pop() ?? '';
           if (
