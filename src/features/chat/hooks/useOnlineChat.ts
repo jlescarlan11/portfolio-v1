@@ -167,9 +167,17 @@ function hasAcceptableDeclaredLength(
   response: Response,
   maxBytes: number
 ): boolean {
+  const transferEncoding = response.headers.get('transfer-encoding');
+  if (
+    transferEncoding !== null &&
+    transferEncoding.trim().toLowerCase() !== 'chunked'
+  ) {
+    return false;
+  }
+
   const value = response.headers.get('content-length');
   if (value === null) return true;
-  if (response.headers.has('transfer-encoding')) return false;
+  if (transferEncoding !== null) return false;
   if (!/^\d+$/.test(value)) return false;
 
   const bytes = Number(value);

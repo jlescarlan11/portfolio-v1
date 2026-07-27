@@ -1059,6 +1059,25 @@ describe('useOnlineChat', () => {
     expect(cancelBody).toHaveBeenCalledOnce();
   });
 
+  it('rejects an unsupported response transfer coding before reading', async () => {
+    const response = successResponse();
+    response.headers.set('Transfer-Encoding', 'gzip');
+    const getReader = vi.spyOn(response.body!, 'getReader');
+    const cancelBody = vi.spyOn(response.body!, 'cancel');
+    vi.stubGlobal('fetch', vi.fn(async () => response));
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'protocol' })
+    );
+    expect(getReader).not.toHaveBeenCalled();
+    expect(cancelBody).toHaveBeenCalledOnce();
+  });
+
   it('aborts as soon as a stream exceeds its declared response length', async () => {
     vi.useFakeTimers();
     const cancelBody = vi.fn();
