@@ -1,21 +1,28 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FaSun, FaMoon } from 'react-icons/fa6';
 
 type Theme = 'dark' | 'light';
+const COLOR_SCHEME_QUERY = '(prefers-color-scheme: dark)';
 
-function resolveTheme(): Theme {
+function getStoredTheme(): Theme | null {
   try {
     const stored = localStorage.getItem('theme');
     if (stored === 'dark' || stored === 'light') return stored;
   } catch {}
-  if (typeof window.matchMedia !== 'function') return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return null;
 }
 
-function applyTheme(theme: Theme): void {
+function resolveTheme(mediaQuery?: MediaQueryList): Theme {
+  const stored = getStoredTheme();
+  if (stored) return stored;
+  return mediaQuery?.matches ? 'dark' : 'light';
+}
+
+function applyTheme(theme: Theme, persist = false): void {
   document.documentElement.setAttribute('data-theme', theme);
+  if (!persist) return;
   try {
     localStorage.setItem('theme', theme);
   } catch {}
@@ -24,16 +31,33 @@ function applyTheme(theme: Theme): void {
 export function ThemeToggle(): React.JSX.Element {
   const [theme, setTheme] = useState<Theme>('dark');
   const [mounted, setMounted] = useState(false);
+  const hasManualOverride = useRef(false);
 
   useEffect(() => {
-    setTheme(resolveTheme());
+    const mediaQuery = typeof window.matchMedia === 'function'
+      ? window.matchMedia(COLOR_SCHEME_QUERY)
+      : undefined;
+    setTheme(resolveTheme(mediaQuery));
     setMounted(true);
+
+    if (getStoredTheme() || !mediaQuery) return;
+
+    function handleSystemThemeChange(event: MediaQueryListEvent): void {
+      if (hasManualOverride.current) return;
+      const nextTheme: Theme = event.matches ? 'dark' : 'light';
+      setTheme(nextTheme);
+      applyTheme(nextTheme);
+    }
+
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+    return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
   }, []);
 
   function toggle(): void {
     const next: Theme = theme === 'dark' ? 'light' : 'dark';
+    hasManualOverride.current = true;
     setTheme(next);
-    applyTheme(next);
+    applyTheme(next, true);
   }
 
   return (
