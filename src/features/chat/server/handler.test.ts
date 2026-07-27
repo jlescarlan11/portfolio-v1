@@ -69,6 +69,8 @@ describe('handleChatRequest', () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get('content-type')).toContain('application/x-ndjson');
+    expect(response.headers.get('cache-control')).toContain('no-store');
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
     expect(await readFrames(response)).toEqual([
       { type: 'text-delta', delta: 'John ' },
       { type: 'text-delta', delta: 'builds products.' },
@@ -110,6 +112,8 @@ describe('handleChatRequest', () => {
     });
 
     expect(response.status).toBe(status);
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
     expect(startChat).not.toHaveBeenCalled();
     expect(telemetry).toEqual([
       expect.objectContaining({

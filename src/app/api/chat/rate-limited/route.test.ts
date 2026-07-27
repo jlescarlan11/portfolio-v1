@@ -10,6 +10,8 @@ describe('rate-limited chat route', () => {
 
     expect(response.status).toBe(429);
     expect(response.headers.get('retry-after')).toBe('60');
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
     expect(await response.json()).toEqual({
       error: {
         code: 'RATE_LIMITED',

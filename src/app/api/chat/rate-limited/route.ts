@@ -23,6 +23,7 @@ export async function POST(): Promise<Response> {
       status: 429,
       headers: {
         'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff',
         'Retry-After': String(RATE_LIMIT_WINDOW_SECONDS)
       }
     }

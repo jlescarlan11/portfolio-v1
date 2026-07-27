@@ -45,6 +45,10 @@ const DEFAULT_DEPENDENCIES: ChatHandlerDependencies = {
 };
 
 const STREAM_ERROR_MESSAGE = 'The AI service stopped responding. Please try again.';
+const NO_STORE_RESPONSE_HEADERS = {
+  'Cache-Control': 'no-store',
+  'X-Content-Type-Options': 'nosniff'
+} as const;
 const FINISH_REASONS = new Set<FinishReason>([
   'stop',
   'length',
@@ -76,7 +80,7 @@ function jsonError(
 ): Response {
   const body: ChatErrorBody = { error: { code, message } };
   const headers = new Headers({
-    'Cache-Control': 'no-store',
+    ...NO_STORE_RESPONSE_HEADERS,
     'Content-Type': 'application/json; charset=utf-8'
   });
 
@@ -436,7 +440,10 @@ export async function handleChatRequest(
     if (abortController.signal.aborted) {
       emitOutcome('cancelled', { errorCategory: 'cancelled' });
       removeAbortListener();
-      return new Response(null, { status: 499 });
+      return new Response(null, {
+        status: 499,
+        headers: NO_STORE_RESPONSE_HEADERS
+      });
     }
 
     return createStreamResponse(
@@ -451,7 +458,10 @@ export async function handleChatRequest(
 
     if (abortController.signal.aborted) {
       emitOutcome('cancelled', { errorCategory: 'cancelled' });
-      return new Response(null, { status: 499 });
+      return new Response(null, {
+        status: 499,
+        headers: NO_STORE_RESPONSE_HEADERS
+      });
     }
 
     const classified = classifyProviderError(error, resolved.now());

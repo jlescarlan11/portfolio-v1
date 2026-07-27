@@ -21,6 +21,8 @@ describe('chat App Router fallback', () => {
     const response = await POST(request);
 
     expect(response.status).toBe(404);
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
     expect(handleChatRequest).not.toHaveBeenCalled();
   });
 

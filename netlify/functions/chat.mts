@@ -14,7 +14,10 @@ export default async function chat(
   if (normalizePathname(new URL(request.url).pathname) !== CHAT_PATH) {
     return new Response(null, {
       status: 404,
-      headers: { 'Cache-Control': 'no-store' }
+      headers: {
+        'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff'
+      }
     });
   }
   return handleChatRequest(request);

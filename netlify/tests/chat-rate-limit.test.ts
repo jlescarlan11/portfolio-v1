@@ -70,5 +70,7 @@ describe('chat Netlify function', () => {
     );
 
     expect(response.status).toBe(404);
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
   });
 });
