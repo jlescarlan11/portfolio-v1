@@ -312,6 +312,8 @@ export function useOnlineChat(): UseOnlineChatResult {
   const successfulConversationRef = useRef<ChatMessage[]>([]);
   const failedConversationRef = useRef<ChatMessage[] | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const responseReaderRef =
+    useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null);
   const abortReasonRef = useRef<'cancel' | 'timeout' | null>(null);
   const operationIdRef = useRef(0);
   const isStreamingRef = useRef(false);
@@ -481,6 +483,7 @@ export function useOnlineChat(): UseOnlineChatResult {
 
         const reader = response.body.getReader();
         responseReader = reader;
+        responseReaderRef.current = reader;
         const decoder = new TextDecoder('utf-8', { fatal: true });
         let pendingLine = '';
         let sawFinish = false;
@@ -608,6 +611,9 @@ export function useOnlineChat(): UseOnlineChatResult {
           setError(networkError());
         }
       } finally {
+        if (responseReaderRef.current === responseReader) {
+          responseReaderRef.current = null;
+        }
         window.clearTimeout(timeoutId);
         finishOperation(operationId);
       }
@@ -645,6 +651,8 @@ export function useOnlineChat(): UseOnlineChatResult {
   const reset = useCallback((): void => {
     operationIdRef.current += 1;
     abortReasonRef.current = 'cancel';
+    void responseReaderRef.current?.cancel().catch(() => undefined);
+    responseReaderRef.current = null;
     abortControllerRef.current?.abort(
       new DOMException('The chat was closed.', 'AbortError')
     );
@@ -667,6 +675,8 @@ export function useOnlineChat(): UseOnlineChatResult {
     return () => {
       operationIdRef.current += 1;
       abortReasonRef.current = 'cancel';
+      void responseReaderRef.current?.cancel().catch(() => undefined);
+      responseReaderRef.current = null;
       abortControllerRef.current?.abort(
         new DOMException('The chat was unmounted.', 'AbortError')
       );

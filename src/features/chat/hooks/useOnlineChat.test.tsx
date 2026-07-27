@@ -1281,21 +1281,58 @@ describe('useOnlineChat', () => {
     expect(result.current.error).toBeNull();
   });
 
+  it('settles an abort-insensitive response reader when closed', async () => {
+    const cancelBody = vi.fn();
+    let streamController:
+      | ReadableStreamDefaultController<Uint8Array>
+      | undefined;
+    const response = new Response(
+      new ReadableStream<Uint8Array>({
+        start(controller): void {
+          streamController = controller;
+        },
+        cancel: cancelBody
+      }),
+      { status: 200, headers: STREAM_RESPONSE_HEADERS }
+    );
+    const getReader = vi.spyOn(response.body!, 'getReader');
+    vi.stubGlobal('fetch', vi.fn(async () => response));
+    const { result } = renderHook(() => useOnlineChat());
+    let settled = false;
+    let sendPromise: Promise<void> | undefined;
+
+    act(() => {
+      sendPromise = result.current.send('Hello').finally(() => {
+        settled = true;
+      });
+    });
+    await waitFor(() => expect(getReader).toHaveBeenCalledOnce());
+    act(() => result.current.reset());
+    await act(async () => {
+      await Promise.resolve();
+    });
+    const settledWhenClosed = settled;
+
+    if (!settled) streamController?.close();
+    await act(async () => {
+      await sendPromise;
+    });
+
+    expect(settledWhenClosed).toBe(true);
+    expect(cancelBody).toHaveBeenCalledOnce();
+    expect(result.current.messages).toEqual([WELCOME_MESSAGE]);
+  });
+
   it('aborts an active request when the hook unmounts', async () => {
     let requestSignal: AbortSignal | undefined;
+    const cancelBody = vi.fn();
     vi.stubGlobal(
       'fetch',
       vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
         requestSignal = init?.signal ?? undefined;
         return new Response(
           new ReadableStream<Uint8Array>({
-            start(controller): void {
-              requestSignal?.addEventListener(
-                'abort',
-                () => controller.error(requestSignal?.reason),
-                { once: true }
-              );
-            }
+            cancel: cancelBody
           }),
           { status: 200, headers: STREAM_RESPONSE_HEADERS }
         );
@@ -1310,5 +1347,6 @@ describe('useOnlineChat', () => {
     hook.unmount();
 
     expect(requestSignal?.aborted).toBe(true);
+    expect(cancelBody).toHaveBeenCalledOnce();
   });
 });
