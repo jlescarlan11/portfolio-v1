@@ -83,7 +83,7 @@ describe('startHostedChat', () => {
     vi.stubEnv('NETLIFY_AI_GATEWAY_KEY', 'netlify-test-placeholder-key');
     vi.stubEnv(
       'NETLIFY_AI_GATEWAY_BASE_URL',
-      'https://netlify-gateway.invalid/v1'
+      'https://netlify-gateway.invalid/'
     );
 
     startHostedChat({

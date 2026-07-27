@@ -20,13 +20,21 @@ export class ChatConfigurationError extends Error {
   }
 }
 
+function normalizeOpenAiCompatibleBaseUrl(baseUrl: string): string {
+  const normalized = baseUrl.replace(/\/+$/, '');
+  return /\/v1$/i.test(normalized) ? normalized : `${normalized}/v1`;
+}
+
 export function getHostedChatConfiguration(
   environment: NodeJS.ProcessEnv = process.env
 ): HostedChatConfiguration {
   const netlifyApiKey = environment.NETLIFY_AI_GATEWAY_KEY?.trim();
   const netlifyBaseUrl = environment.NETLIFY_AI_GATEWAY_BASE_URL?.trim();
   if (netlifyApiKey && netlifyBaseUrl) {
-    return { apiKey: netlifyApiKey, baseUrl: netlifyBaseUrl };
+    return {
+      apiKey: netlifyApiKey,
+      baseUrl: normalizeOpenAiCompatibleBaseUrl(netlifyBaseUrl)
+    };
   }
 
   const openAiApiKey = environment.OPENAI_API_KEY?.trim();
