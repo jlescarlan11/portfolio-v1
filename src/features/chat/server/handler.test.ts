@@ -194,6 +194,28 @@ describe('handleChatRequest', () => {
     );
   });
 
+  it('converts a provider HTTP-date Retry-After value to seconds', async () => {
+    const now = Date.parse('2026-07-28T00:00:00Z');
+    const retryAt = new Date(now + 120_000).toUTCString();
+    const startChat = vi.fn<StartHostedChat>(() => {
+      throw new APICallError({
+        message: 'quota',
+        url: 'https://gateway.invalid',
+        requestBodyValues: {},
+        responseHeaders: { 'Retry-After': retryAt },
+        statusCode: 429
+      });
+    });
+
+    const response = await handleChatRequest(request(validBody()), {
+      startChat,
+      now: () => now
+    });
+
+    expect(response.status).toBe(429);
+    expect(response.headers.get('retry-after')).toBe('120');
+  });
+
   it('maps a provider timeout to a sanitized 504 response', async () => {
     const timeout = new Error('sensitive provider timeout detail');
     timeout.name = 'TimeoutError';

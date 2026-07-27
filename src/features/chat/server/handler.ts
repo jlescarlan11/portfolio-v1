@@ -74,7 +74,8 @@ function isNamedError(error: unknown, name: string): boolean {
 }
 
 function parseRetryAfterHeader(
-  headers: Record<string, string> | undefined
+  headers: Record<string, string> | undefined,
+  now: number
 ): number | undefined {
   if (!headers) return undefined;
   const entry = Object.entries(headers).find(
@@ -83,12 +84,23 @@ function parseRetryAfterHeader(
   if (!entry) return undefined;
 
   const seconds = Number(entry[1]);
-  return Number.isFinite(seconds) && seconds > 0
-    ? Math.min(Math.ceil(seconds), 3_600)
+  if (Number.isFinite(seconds) && seconds > 0) {
+    return Math.min(Math.ceil(seconds), 3_600);
+  }
+
+  const retryAt = Date.parse(entry[1]);
+  if (!Number.isFinite(retryAt)) return undefined;
+
+  const secondsUntilRetry = Math.ceil((retryAt - now) / 1_000);
+  return secondsUntilRetry > 0
+    ? Math.min(secondsUntilRetry, 3_600)
     : undefined;
 }
 
-function classifyProviderError(error: unknown): ClassifiedError {
+function classifyProviderError(
+  error: unknown,
+  now: number = Date.now()
+): ClassifiedError {
   if (isNamedError(error, 'TimeoutError')) {
     return {
       status: 504,
@@ -117,7 +129,7 @@ function classifyProviderError(error: unknown): ClassifiedError {
         message: 'The AI service is busy. Please try again shortly.',
         telemetryStatus: 'provider_quota',
         category: 'provider_quota',
-        retryAfter: parseRetryAfterHeader(error.responseHeaders)
+        retryAfter: parseRetryAfterHeader(error.responseHeaders, now)
       };
     }
   }
@@ -411,7 +423,7 @@ export async function handleChatRequest(
       return new Response(null, { status: 499 });
     }
 
-    const classified = classifyProviderError(error);
+    const classified = classifyProviderError(error, resolved.now());
     emitOutcome(classified.telemetryStatus, {
       errorCategory: classified.category
     });
