@@ -97,6 +97,27 @@ describe('handleChatRequest', () => {
     ]);
   });
 
+  it('rejects non-POST requests before reading or calling the provider', async () => {
+    const inbound = new Request('http://localhost/api/chat', {
+      method: 'DELETE',
+      body: validBody(),
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const getReader = vi.spyOn(inbound.body!, 'getReader');
+    const cancelBody = vi.spyOn(inbound.body!, 'cancel');
+    const startChat = vi.fn<StartHostedChat>(() =>
+      createHostedStream(['should not run'])
+    );
+
+    const response = await handleChatRequest(inbound, { startChat });
+
+    expect(response.status).toBe(405);
+    expect(response.headers.get('allow')).toBe('POST');
+    expect(getReader).not.toHaveBeenCalled();
+    expect(cancelBody).toHaveBeenCalledOnce();
+    expect(startChat).not.toHaveBeenCalled();
+  });
+
   it.each([
     ['malformed JSON', '{', 400, 'validation'],
     [
@@ -164,6 +185,7 @@ describe('handleChatRequest', () => {
       });
       const getReader = vi.spyOn(body, 'getReader');
       const inboundRequest = {
+        method: 'POST',
         headers: new Headers({
           'Content-Length': declaredLength,
           'Content-Type': 'application/json'
@@ -184,6 +206,7 @@ describe('handleChatRequest', () => {
     const startChat = vi.fn<StartHostedChat>();
     const encodedBody = new TextEncoder().encode(validBody());
     const inboundRequest = {
+      method: 'POST',
       headers: new Headers({
         'Content-Length': String(encodedBody.byteLength - 1),
         'Content-Type': 'application/json'
@@ -214,6 +237,7 @@ describe('handleChatRequest', () => {
     });
     const getReader = vi.spyOn(body, 'getReader');
     const inboundRequest = {
+      method: 'POST',
       headers: new Headers({
         'Content-Length': String(encodedBody.byteLength),
         'Content-Type': 'application/json',
@@ -234,6 +258,7 @@ describe('handleChatRequest', () => {
     const startChat = vi.fn<StartHostedChat>();
     const cancelBody = vi.fn();
     const inboundRequest = {
+      method: 'POST',
       headers: new Headers({
         'Content-Length': String(MAX_REQUEST_BYTES + 1),
         'Content-Type': 'application/json'
@@ -257,6 +282,7 @@ describe('handleChatRequest', () => {
       const startChat = vi.fn<StartHostedChat>();
       const cancelBody = vi.fn(() => new Promise<void>(() => undefined));
       const inboundRequest = {
+        method: 'POST',
         headers: new Headers({ 'Content-Type': 'application/json' }),
         body: new ReadableStream<Uint8Array>({
           start(controller): void {
@@ -327,6 +353,7 @@ describe('handleChatRequest', () => {
     const startChat = vi.fn<StartHostedChat>();
     const telemetry: ChatTelemetryEvent[] = [];
     const inboundRequest = {
+      method: 'POST',
       headers: new Headers({ 'Content-Type': 'application/json' }),
       body: new ReadableStream<Uint8Array>({
         start(controller): void {
@@ -392,6 +419,7 @@ describe('handleChatRequest', () => {
     const startChat = vi.fn<StartHostedChat>();
     const cancelBody = vi.fn();
     const inboundRequest = {
+      method: 'POST',
       headers: new Headers({ 'Content-Type': 'text/plain' }),
       body: new ReadableStream<Uint8Array>({
         cancel: cancelBody
@@ -417,6 +445,7 @@ describe('handleChatRequest', () => {
     });
     const getReader = vi.spyOn(body, 'getReader');
     const inboundRequest = {
+      method: 'POST',
       headers: new Headers({
         'Content-Encoding': 'gzip',
         'Content-Type': 'application/json'

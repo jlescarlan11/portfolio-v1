@@ -114,6 +114,16 @@ function cancelledResponse(): Response {
   });
 }
 
+function methodNotAllowedResponse(): Response {
+  return new Response(null, {
+    status: 405,
+    headers: {
+      ...NO_STORE_RESPONSE_HEADERS,
+      Allow: 'POST'
+    }
+  });
+}
+
 function encodeFrame(frame: ChatStreamFrame): Uint8Array {
   return TEXT_ENCODER.encode(`${JSON.stringify(frame)}\n`);
 }
@@ -584,6 +594,12 @@ export async function handleChatRequest(
       ...details
     });
   };
+
+  if (request.method !== 'POST') {
+    cancelUnreadRequestBody(request);
+    emitOutcome('rejected', { errorCategory: 'method' });
+    return methodNotAllowedResponse();
+  }
 
   const requestText = await readRequestText(request);
   if (requestText instanceof Response) {
