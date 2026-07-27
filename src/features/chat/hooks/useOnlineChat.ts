@@ -194,6 +194,9 @@ async function readApiErrorCode(
     void response.body?.cancel().catch(() => undefined);
     return undefined;
   }
+  const declaredLength = response.headers.get('content-length');
+  const declaredResponseBytes =
+    declaredLength === null ? undefined : Number(declaredLength);
   if (!response.body) return undefined;
 
   if (signal?.aborted) {
@@ -243,12 +246,22 @@ async function readApiErrorCode(
       if (done) break;
 
       receivedBytes += value.byteLength;
-      if (receivedBytes > MAX_API_ERROR_RESPONSE_BYTES) {
+      if (
+        receivedBytes > MAX_API_ERROR_RESPONSE_BYTES ||
+        (declaredResponseBytes !== undefined &&
+          receivedBytes > declaredResponseBytes)
+      ) {
         void reader.cancel().catch(() => undefined);
         return undefined;
       }
 
       text += decoder.decode(value, { stream: true });
+    }
+    if (
+      declaredResponseBytes !== undefined &&
+      receivedBytes !== declaredResponseBytes
+    ) {
+      return undefined;
     }
 
     text += decoder.decode();
