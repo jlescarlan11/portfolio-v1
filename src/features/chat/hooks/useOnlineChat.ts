@@ -107,6 +107,13 @@ function parseRetryAfter(response: Response): number {
     : DEFAULT_RETRY_AFTER_SECONDS;
 }
 
+function errorCodeFromStatus(status: number): string | undefined {
+  if (status === 400 || status === 413) return 'VALIDATION_ERROR';
+  if (status === 429) return 'RATE_LIMITED';
+  if (status === 504) return 'TIMEOUT';
+  return undefined;
+}
+
 async function readApiErrorCode(response: Response): Promise<string | undefined> {
   if (!response.body) return undefined;
 
@@ -144,7 +151,11 @@ async function readApiErrorCode(response: Response): Promise<string | undefined>
 }
 
 async function classifyHttpError(response: Response): Promise<ChatClientError> {
-  const code = await readApiErrorCode(response);
+  const statusCode = errorCodeFromStatus(response.status);
+  if (statusCode) {
+    void response.body?.cancel().catch(() => undefined);
+  }
+  const code = statusCode ?? (await readApiErrorCode(response));
 
   if (
     response.status === 413 ||
