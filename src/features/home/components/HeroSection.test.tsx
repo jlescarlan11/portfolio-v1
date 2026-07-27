@@ -16,12 +16,14 @@ import HeroSection from './HeroSection';
 vi.mock('./ProfileImage', () => ({
   default: ({
     alt,
+    src,
     onSettled
   }: {
     alt: string;
+    src: string;
     onSettled?: (outcome: 'loaded') => void;
   }) => (
-    <button onClick={() => onSettled?.('loaded')}>
+    <button data-src={src} onClick={() => onSettled?.('loaded')}>
       Settle {alt}
     </button>
   )
@@ -79,10 +81,10 @@ describe('HeroSection initial-load integration', () => {
   it('renders without readiness reporting outside the initial-load coordinator', () => {
     render(<HeroSection {...heroContent} />);
 
-    expect(
-      screen.getByRole('button', {
-        name: `Settle ${heroContent.profileImage.alt}`
-      })
-    ).toBeInTheDocument();
+    const portrait = screen.getByRole('button', {
+      name: `Settle ${heroContent.profileImage.alt}`
+    });
+    expect(portrait).toBeInTheDocument();
+    expect(portrait).toHaveAttribute('data-src', '/hero-image.jpg');
   });
 });

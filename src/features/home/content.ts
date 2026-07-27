@@ -25,7 +25,7 @@ export const heroContent: HeroContent = {
     'I build full-stack products and AI automation pipelines — from solo-architected marketplaces to LLM-powered workflows, with reliability and end-to-end delivery as the constant.',
 
   profileImage: {
-    src: '/hero-image.svg',
+    src: '/hero-image.jpg',
     alt: 'Portrait of John Lester Escarlan'
   },
   socialLinks: [
