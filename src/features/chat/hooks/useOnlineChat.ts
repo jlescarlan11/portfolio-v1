@@ -196,7 +196,19 @@ async function readApiErrorCode(
   }
   if (!response.body) return undefined;
 
-  const reader = response.body.getReader();
+  if (signal?.aborted) {
+    throw (
+      signal.reason ??
+      new DOMException('The chat request was aborted.', 'AbortError')
+    );
+  }
+
+  let reader: ReadableStreamDefaultReader<Uint8Array>;
+  try {
+    reader = response.body.getReader();
+  } catch {
+    return undefined;
+  }
   const cancelOnAbort = (): void => {
     void reader.cancel().catch(() => undefined);
   };

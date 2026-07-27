@@ -274,6 +274,25 @@ describe('useOnlineChat', () => {
     expect(cancelBody).toHaveBeenCalledOnce();
   });
 
+  it('uses the HTTP fallback when an API error body is locked', async () => {
+    const response = errorResponse(503, 'SERVICE_UNAVAILABLE');
+    const responseLock = response.body!.getReader();
+    vi.stubGlobal('fetch', vi.fn(async () => response));
+    const { result } = renderHook(() => useOnlineChat());
+
+    try {
+      await act(async () => {
+        await result.current.send('Hello');
+      });
+
+      expect(result.current.error).toEqual(
+        expect.objectContaining({ kind: 'unavailable', canRetry: true })
+      );
+    } finally {
+      responseLock.releaseLock();
+    }
+  });
+
   it('honors an HTTP-date Retry-After value', async () => {
     vi.useFakeTimers();
     const now = new Date('2026-01-01T00:00:00.000Z');
