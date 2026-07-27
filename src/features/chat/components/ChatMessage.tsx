@@ -3,6 +3,7 @@
 import React, { memo } from 'react';
 import Markdown from 'react-markdown';
 import type { Components } from 'react-markdown';
+import { NewTabNotice } from '@/shared/components/NewTabNotice';
 
 const markdownComponents: Components = {
   p: ({ children }) => <p className="mb-2 text-[13px] leading-relaxed last:mb-0">{children}</p>,
@@ -13,6 +14,7 @@ const markdownComponents: Components = {
   a: ({ href, children }) => (
     <a href={href} target="_blank" rel="noopener noreferrer" className="text-foreground underline decoration-foreground/30 underline-offset-2 transition-colors hover:decoration-foreground/70">
       {children}
+      <NewTabNotice />
     </a>
   ),
   code: ({ children }) => (

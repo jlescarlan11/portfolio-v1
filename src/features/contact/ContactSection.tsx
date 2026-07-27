@@ -2,6 +2,7 @@ import type { ContactContent } from '@/features/contact/content';
 import SectionFrame from '@/shared/components/SectionFrame';
 import { Typography } from '@/shared/components/Typography';
 import { FadeIn } from '@/shared/components/FadeIn';
+import { NewTabNotice } from '@/shared/components/NewTabNotice';
 import { TYPOGRAPHY_STYLES } from '@/shared/styles/shared';
 import { CopyEmailButton } from './CopyEmailButton';
 
@@ -79,6 +80,7 @@ export default function ContactSection({
           >
             {content.resumeLabel}
             <span aria-hidden="true" className="opacity-50">↗</span>
+            <NewTabNotice />
           </a>
         </div>
       </FadeIn>

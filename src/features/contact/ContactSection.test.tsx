@@ -25,6 +25,19 @@ afterEach(() => {
 });
 
 describe('ContactSection', () => {
+  it('announces that the resume opens in a new tab', () => {
+    render(<ContactSection content={contactContent} />);
+
+    expect(
+      screen.getByRole('link', {
+        name: `${contactContent.resumeLabel} (opens in new tab)`
+      })
+    ).toMatchObject({
+      target: '_blank',
+      rel: 'noopener noreferrer'
+    });
+  });
+
   it('copies the visible email through an explicit accessible control', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', {

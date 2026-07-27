@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Typography } from '@/shared/components/Typography';
+import { NewTabNotice } from '@/shared/components/NewTabNotice';
 import { SURFACE } from '@/shared/styles/shared';
 
 interface Certification {
@@ -51,6 +52,7 @@ export function CertificationsList({
                     className="underline underline-offset-4 decoration-foreground/20 transition-colors duration-200 hover:decoration-foreground"
                   >
                     {cert.name}
+                    <NewTabNotice />
                   </a>
                 ) : cert.name}
               </Typography>

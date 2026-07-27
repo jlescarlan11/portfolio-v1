@@ -65,4 +65,19 @@ describe('AboutSection progressive enhancement', () => {
       expect(markup).toContain(`>${skill}<`);
     }
   });
+
+  it('announces that certification links open in a new tab', () => {
+    render(<AboutSection content={aboutContent} />);
+
+    for (const certification of aboutContent.certifications) {
+      expect(
+        screen.getByRole('link', {
+          name: `${certification.name} (opens in new tab)`
+        })
+      ).toMatchObject({
+        target: '_blank',
+        rel: 'noopener noreferrer'
+      });
+    }
+  });
 });

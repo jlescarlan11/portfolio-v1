@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, afterEach } from 'vitest';
-import { render, cleanup } from '@testing-library/react';
+import { render, cleanup, screen } from '@testing-library/react';
 import { ChatMessage } from './ChatMessage';
 
 afterEach(cleanup);
@@ -40,5 +40,23 @@ describe('ChatMessage', () => {
 
     expect(queryByRole('img', { name: 'Untrusted image' })).not.toBeInTheDocument();
     expect(getByText('Untrusted image')).toBeInTheDocument();
+  });
+
+  it('announces that assistant links open in a new tab', () => {
+    render(
+      <ChatMessage
+        role="assistant"
+        content="[Portfolio](https://example.com)"
+      />
+    );
+
+    expect(
+      screen.getByRole('link', {
+        name: 'Portfolio (opens in new tab)'
+      })
+    ).toMatchObject({
+      target: '_blank',
+      rel: 'noopener noreferrer'
+    });
   });
 });

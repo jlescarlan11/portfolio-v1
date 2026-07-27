@@ -8,6 +8,7 @@ import {
 } from '@/features/projects';
 import { Typography } from '@/shared/components/Typography';
 import { FadeIn } from '@/shared/components/FadeIn';
+import { NewTabNotice } from '@/shared/components/NewTabNotice';
 import { siteConfig } from '@/shared/site/config';
 import { SURFACE, TYPOGRAPHY_STYLES } from '@/shared/styles/shared';
 import { formatMonthYear, isRenderableExternalUrl } from '@/shared/lib/project';
@@ -177,6 +178,7 @@ function MetaStrip({ client, completedAt, technologies, liveUrl, githubUrl }: Me
               >
                 View live
                 <span aria-hidden="true" className="opacity-50">↗</span>
+                <NewTabNotice />
               </a>
             )}
             {safeGithubUrl && (
@@ -186,7 +188,9 @@ function MetaStrip({ client, completedAt, technologies, liveUrl, githubUrl }: Me
                 rel="noopener noreferrer"
                 className={TYPOGRAPHY_STYLES.linkSecondary}
               >
-                GitHub ↗
+                GitHub
+                <span aria-hidden="true"> ↗</span>
+                <NewTabNotice />
               </a>
             )}
           </div>

@@ -1,4 +1,5 @@
 import { Typography } from '@/shared/components/Typography';
+import { NewTabNotice } from '@/shared/components/NewTabNotice';
 import { formatMonthYear, isRenderableExternalUrl } from '@/shared/lib/project';
 import { BUTTON_STYLES, SURFACE, TYPOGRAPHY_STYLES } from '@/shared/styles/shared';
 
@@ -66,6 +67,7 @@ export function ProjectInfo({
               <Typography variant="label" as="span">
                 View live
               </Typography>
+              <NewTabNotice />
             </a>
           ) : null}
           {safeGithubUrl ? (
@@ -76,6 +78,7 @@ export function ProjectInfo({
               className={`${TYPOGRAPHY_STYLES.linkSecondary} inline-flex items-center gap-2`}
             >
               GitHub
+              <NewTabNotice />
             </a>
           ) : null}
         </div>

@@ -58,6 +58,37 @@ describe('ProjectPage', () => {
       ).toBeInTheDocument();
     }
   });
+
+  it('announces that project destinations open in a new tab', async () => {
+    const livePage = await ProjectPage({
+      params: Promise.resolve({ slug: 'rent-n-roll' })
+    });
+    const { unmount } = render(livePage);
+
+    expect(
+      screen.getByRole('link', {
+        name: 'View live (opens in new tab)'
+      })
+    ).toMatchObject({
+      target: '_blank',
+      rel: 'noopener noreferrer'
+    });
+
+    unmount();
+    const sourcePage = await ProjectPage({
+      params: Promise.resolve({ slug: 'health' })
+    });
+    render(sourcePage);
+
+    expect(
+      screen.getByRole('link', {
+        name: 'GitHub (opens in new tab)'
+      })
+    ).toMatchObject({
+      target: '_blank',
+      rel: 'noopener noreferrer'
+    });
+  });
 });
 
 describe('generateMetadata', () => {

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { FaLinkedin } from 'react-icons/fa6';
 import { SiGithub, SiGmail, SiHackerrank } from 'react-icons/si';
 import type { HomeSocialLink } from '@/features/home/content';
@@ -30,7 +31,9 @@ function SocialLinkItem({ link }: { link: HomeSocialLink }): React.JSX.Element {
         target={isExternal ? '_blank' : undefined}
         rel={isExternal ? 'noopener noreferrer' : undefined}
         className="group relative inline-flex h-11 w-11 items-center justify-center border border-transparent text-muted-foreground transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04] hover:border-surface hover:text-foreground"
-        aria-label={link.label}
+        aria-label={
+          isExternal ? `${link.label} (opens in new tab)` : link.label
+        }
         title={link.platform}
       >
         <span className="inline-flex items-center justify-center [&>svg]:h-5 [&>svg]:w-5" aria-hidden="true">
