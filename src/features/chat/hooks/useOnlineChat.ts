@@ -212,6 +212,7 @@ export function useOnlineChat(): UseOnlineChatResult {
     async (conversation: ChatMessage[], appendUser: boolean): Promise<void> => {
       if (isStreamingRef.current) return;
 
+      const hadPreviousFailure = failedConversationRef.current !== null;
       const operationId = operationIdRef.current + 1;
       operationIdRef.current = operationId;
       isStreamingRef.current = true;
@@ -220,11 +221,24 @@ export function useOnlineChat(): UseOnlineChatResult {
       failedConversationRef.current = null;
 
       const currentUser = conversation[conversation.length - 1];
-      updateMessages(current => [
-        ...current,
-        ...(appendUser ? [currentUser] : []),
-        { role: 'assistant', content: '' }
-      ]);
+      updateMessages(current => {
+        let transcript = current;
+
+        if (hadPreviousFailure) {
+          if (transcript.at(-1)?.role === 'assistant') {
+            transcript = transcript.slice(0, -1);
+          }
+          if (appendUser && transcript.at(-1)?.role === 'user') {
+            transcript = transcript.slice(0, -1);
+          }
+        }
+
+        return [
+          ...transcript,
+          ...(appendUser ? [currentUser] : []),
+          { role: 'assistant', content: '' }
+        ];
+      });
 
       const abortController = new AbortController();
       abortControllerRef.current = abortController;

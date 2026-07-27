@@ -340,6 +340,80 @@ describe('useOnlineChat', () => {
     );
   });
 
+  it('replaces an incomplete assistant message when retrying a failed stream', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        streamResponse([
+          frame({ type: 'text-delta', delta: 'Partial answer' }),
+          frame({
+            type: 'error',
+            code: 'STREAM_ERROR',
+            message: 'sanitized server message'
+          })
+        ])
+      )
+      .mockResolvedValueOnce(successResponse('Recovered answer.'));
+    vi.stubGlobal('fetch', fetchMock);
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'assistant',
+      content: 'Partial answer'
+    });
+
+    await act(async () => {
+      await result.current.retry();
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.current.messages).toEqual([
+      WELCOME_MESSAGE,
+      { role: 'user', content: 'Hello' },
+      { role: 'assistant', content: 'Recovered answer.' }
+    ]);
+  });
+
+  it('discards a failed turn before sending a different question', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        streamResponse([
+          frame({ type: 'text-delta', delta: 'Partial answer' }),
+          frame({
+            type: 'error',
+            code: 'STREAM_ERROR',
+            message: 'sanitized server message'
+          })
+        ])
+      )
+      .mockResolvedValueOnce(successResponse('Different answer.'));
+    vi.stubGlobal('fetch', fetchMock);
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Failed question');
+    });
+    await act(async () => {
+      await result.current.send('Different question');
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[1][1]?.body).toBe(
+      JSON.stringify({
+        messages: [{ role: 'user', content: 'Different question' }]
+      })
+    );
+    expect(result.current.messages).toEqual([
+      WELCOME_MESSAGE,
+      { role: 'user', content: 'Different question' },
+      { role: 'assistant', content: 'Different answer.' }
+    ]);
+  });
+
   it('treats a finished stream with no assistant text as an empty protocol error', async () => {
     vi.stubGlobal(
       'fetch',
