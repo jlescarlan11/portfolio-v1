@@ -61,4 +61,26 @@ describe('ThemeToggle', () => {
     expect(document.documentElement).toHaveAttribute('data-theme', 'light');
     expect(screen.getByRole('button', { name: 'Switch to dark mode' })).toBeInTheDocument();
   });
+
+  it('applies a saved theme changed in another tab', () => {
+    vi.stubGlobal('matchMedia', vi.fn(() => ({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn()
+    })));
+
+    render(<ThemeToggle />);
+    expect(screen.getByRole('button', { name: 'Switch to dark mode' })).toBeInTheDocument();
+
+    localStorage.setItem('theme', 'dark');
+    act(() => {
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'theme',
+        newValue: 'dark'
+      }));
+    });
+
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(screen.getByRole('button', { name: 'Switch to light mode' })).toBeInTheDocument();
+  });
 });

@@ -40,17 +40,29 @@ export function ThemeToggle(): React.JSX.Element {
     setTheme(resolveTheme(mediaQuery));
     setMounted(true);
 
-    if (getStoredTheme() || !mediaQuery) return;
-
     function handleSystemThemeChange(event: MediaQueryListEvent): void {
-      if (hasManualOverride.current) return;
+      if (hasManualOverride.current || getStoredTheme()) return;
       const nextTheme: Theme = event.matches ? 'dark' : 'light';
       setTheme(nextTheme);
       applyTheme(nextTheme);
     }
 
-    mediaQuery.addEventListener('change', handleSystemThemeChange);
-    return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
+    function handleStoredThemeChange(event: StorageEvent): void {
+      if (event.key !== 'theme') return;
+      hasManualOverride.current = false;
+      const nextTheme: Theme = event.newValue === 'dark' || event.newValue === 'light'
+        ? event.newValue
+        : mediaQuery?.matches ? 'dark' : 'light';
+      setTheme(nextTheme);
+      applyTheme(nextTheme);
+    }
+
+    mediaQuery?.addEventListener('change', handleSystemThemeChange);
+    window.addEventListener('storage', handleStoredThemeChange);
+    return () => {
+      mediaQuery?.removeEventListener('change', handleSystemThemeChange);
+      window.removeEventListener('storage', handleStoredThemeChange);
+    };
   }, []);
 
   function toggle(): void {
