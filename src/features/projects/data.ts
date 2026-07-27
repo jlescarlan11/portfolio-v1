@@ -15,7 +15,7 @@ export const projects: ProjectRecord[] = [
     category: 'Full-Stack Marketplace / Two-Sided Platform',
     description:
       'A solo-built two-sided rental marketplace — listing management with photo uploads, multi-tier volume pricing, contract e-signatures, custodial escrow via PayMongo webhooks, identity verification, booking handoff scheduling, and dispute adjudication.',
-    logo: '',
+    logo: '/project/rent-n-roll.jpg',
     technologies: ['Next.js', 'TypeScript', 'React', 'Tailwind CSS', 'Supabase', 'Zod', 'PayMongo'],
     completedAt: '2025-12',
     links: {
@@ -32,6 +32,10 @@ export const projects: ProjectRecord[] = [
         'Architected full-stack marketplace solo: escrow, e-signatures, identity verification, and dispute adjudication.',
         'Led data layer migration eliminating 24 untyped queries through Supabase RPC patterns and server-side type generation.',
         'Multi-tier volume pricing and custodial escrow via PayMongo webhooks.'
+      ],
+      gallery: [
+        '/project/rent-n-roll.jpg',
+        '/project/rent-n-roll-listing.jpg'
       ]
     }
   },

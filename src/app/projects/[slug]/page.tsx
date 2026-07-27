@@ -100,6 +100,7 @@ function ProjectHero({ src, title, isLogo }: ProjectHeroProps) {
         src={src}
         alt={`${title} preview`}
         fill
+        sizes="(max-width: 768px) calc(100vw - 2.5rem), 768px"
         className="object-cover transition-transform duration-700 hover:scale-[1.02]"
         priority
       />
@@ -224,6 +225,7 @@ function SmartGallery({ images, projectTitle }: SmartGalleryProps) {
           src={images[0]}
           alt={`${projectTitle} screenshot`}
           fill
+          sizes="(max-width: 768px) calc(100vw - 2.5rem), 768px"
           className="object-cover"
         />
       </div>
@@ -243,6 +245,7 @@ function SmartGallery({ images, projectTitle }: SmartGalleryProps) {
               src={img}
               alt={`${projectTitle} — view ${i + 1}`}
               fill
+              sizes="(max-width: 640px) calc(100vw - 2.5rem), 378px"
               className="object-cover transition-transform duration-500 hover:scale-[1.03]"
             />
           </div>
@@ -263,6 +266,7 @@ function SmartGallery({ images, projectTitle }: SmartGalleryProps) {
           src={hero}
           alt={`${projectTitle} — main view`}
           fill
+          sizes="(max-width: 768px) calc(100vw - 2.5rem), 768px"
           className="object-cover transition-transform duration-500 hover:scale-[1.02]"
         />
       </div>
@@ -277,6 +281,7 @@ function SmartGallery({ images, projectTitle }: SmartGalleryProps) {
               src={img}
               alt={`${projectTitle} — view ${i + 2}`}
               fill
+              sizes="(max-width: 768px) 50vw, 378px"
               className="object-cover transition-transform duration-500 hover:scale-[1.03]"
             />
           </div>
