@@ -476,6 +476,14 @@ async function readRequestText(request: Request): Promise<string | Response> {
       if (done) break;
 
       receivedBytes += value.byteLength;
+      if (declaredBytes !== undefined && receivedBytes > declaredBytes) {
+        void reader.cancel().catch(() => undefined);
+        return jsonError(
+          400,
+          'VALIDATION_ERROR',
+          'Send a valid chat request.'
+        );
+      }
       if (receivedBytes > MAX_REQUEST_BYTES) {
         void reader.cancel().catch(() => undefined);
         return jsonError(

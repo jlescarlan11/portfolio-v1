@@ -301,6 +301,45 @@ describe('handleChatRequest', () => {
     expect(startChat).not.toHaveBeenCalled();
   });
 
+  it('rejects and cancels a body as soon as it exceeds Content-Length', async () => {
+    vi.useFakeTimers();
+    try {
+      const cancelBody = vi.fn();
+      const inboundRequest = {
+        method: 'POST',
+        headers: new Headers({
+          'Content-Length': '1',
+          'Content-Type': 'application/json'
+        }),
+        body: new ReadableStream<Uint8Array>({
+          start(controller): void {
+            controller.enqueue(new TextEncoder().encode('{}'));
+          },
+          cancel: cancelBody
+        }),
+        signal: new AbortController().signal
+      } as Request;
+      const startChat = vi.fn<StartHostedChat>();
+      let response: Response | undefined;
+      void handleChatRequest(inboundRequest, { startChat }).then(value => {
+        response = value;
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+      const settledBeforeTimeout = response !== undefined;
+      if (!settledBeforeTimeout) {
+        await vi.advanceTimersByTimeAsync(REQUEST_BODY_TIMEOUT_MS);
+      }
+
+      expect(settledBeforeTimeout).toBe(true);
+      expect(response?.status).toBe(400);
+      expect(cancelBody).toHaveBeenCalledOnce();
+      expect(startChat).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('rejects conflicting length and transfer framing before reading', async () => {
     const startChat = vi.fn<StartHostedChat>();
     const encodedBody = new TextEncoder().encode(validBody());
