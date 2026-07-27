@@ -46,6 +46,7 @@ const DEFAULT_DEPENDENCIES: ChatHandlerDependencies = {
   createRequestId: () => crypto.randomUUID()
 };
 
+const REQUEST_BODY_ABORTED = Symbol('request-body-aborted');
 const REQUEST_BODY_TIMEOUT = Symbol('request-body-timeout');
 const STREAM_ERROR_MESSAGE = 'The AI service stopped responding. Please try again.';
 const TEXT_ENCODER = new TextEncoder();
@@ -93,6 +94,13 @@ function jsonError(
   }
 
   return new Response(JSON.stringify(body), { status, headers });
+}
+
+function cancelledResponse(): Response {
+  return new Response(null, {
+    status: 499,
+    headers: NO_STORE_RESPONSE_HEADERS
+  });
 }
 
 function encodeFrame(frame: ChatStreamFrame): Uint8Array {
@@ -185,6 +193,8 @@ function linkAbortSignal(source: AbortSignal, target: AbortController): () => vo
 }
 
 async function readRequestText(request: Request): Promise<string | Response> {
+  if (request.signal.aborted) return cancelledResponse();
+
   const contentType = request.headers
     .get('content-type')
     ?.split(';', 1)[0]
@@ -219,16 +229,31 @@ async function readRequestText(request: Request): Promise<string | Response> {
   let receivedBytes = 0;
   let text = '';
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let removeAbortListener = (): void => undefined;
   const timeout = new Promise<typeof REQUEST_BODY_TIMEOUT>(resolve => {
     timeoutId = setTimeout(
       () => resolve(REQUEST_BODY_TIMEOUT),
       REQUEST_BODY_TIMEOUT_MS
     );
   });
+  const aborted = new Promise<typeof REQUEST_BODY_ABORTED>(resolve => {
+    if (request.signal.aborted) {
+      resolve(REQUEST_BODY_ABORTED);
+      return;
+    }
+    const onAbort = (): void => resolve(REQUEST_BODY_ABORTED);
+    request.signal.addEventListener('abort', onAbort, { once: true });
+    removeAbortListener = () =>
+      request.signal.removeEventListener('abort', onAbort);
+  });
 
   try {
     while (true) {
-      const next = await Promise.race([reader.read(), timeout]);
+      const next = await Promise.race([reader.read(), timeout, aborted]);
+      if (next === REQUEST_BODY_ABORTED) {
+        void reader.cancel().catch(() => undefined);
+        return cancelledResponse();
+      }
       if (next === REQUEST_BODY_TIMEOUT) {
         void reader.cancel().catch(() => undefined);
         return jsonError(
@@ -255,9 +280,11 @@ async function readRequestText(request: Request): Promise<string | Response> {
     text += decoder.decode();
     return text;
   } catch {
+    if (request.signal.aborted) return cancelledResponse();
     return jsonError(400, 'VALIDATION_ERROR', 'Check your conversation and try again.');
   } finally {
     if (timeoutId !== undefined) clearTimeout(timeoutId);
+    removeAbortListener();
     try {
       reader.releaseLock();
     } catch {
@@ -450,8 +477,13 @@ export async function handleChatRequest(
 
   const requestText = await readRequestText(request);
   if (requestText instanceof Response) {
-    emitOutcome('rejected', {
-      errorCategory: requestText.status === 413 ? 'payload' : 'request'
+    const wasCancelled = requestText.status === 499;
+    emitOutcome(wasCancelled ? 'cancelled' : 'rejected', {
+      errorCategory: wasCancelled
+        ? 'cancelled'
+        : requestText.status === 413
+          ? 'payload'
+          : 'request'
     });
     return requestText;
   }
@@ -495,10 +527,7 @@ export async function handleChatRequest(
     if (abortController.signal.aborted) {
       emitOutcome('cancelled', { errorCategory: 'cancelled' });
       removeAbortListener();
-      return new Response(null, {
-        status: 499,
-        headers: NO_STORE_RESPONSE_HEADERS
-      });
+      return cancelledResponse();
     }
 
     return createStreamResponse(
@@ -513,10 +542,7 @@ export async function handleChatRequest(
 
     if (abortController.signal.aborted) {
       emitOutcome('cancelled', { errorCategory: 'cancelled' });
-      return new Response(null, {
-        status: 499,
-        headers: NO_STORE_RESPONSE_HEADERS
-      });
+      return cancelledResponse();
     }
 
     const classified = classifyProviderError(error, resolved.now());

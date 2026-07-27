@@ -188,6 +188,51 @@ describe('handleChatRequest', () => {
     expect(startChat).not.toHaveBeenCalled();
   });
 
+  it('treats a client disconnect during request ingestion as cancellation', async () => {
+    const abortController = new AbortController();
+    const startChat = vi.fn<StartHostedChat>();
+    const telemetry: ChatTelemetryEvent[] = [];
+    const inboundRequest = {
+      headers: new Headers({ 'Content-Type': 'application/json' }),
+      body: new ReadableStream<Uint8Array>({
+        start(controller): void {
+          controller.enqueue(
+            new TextEncoder().encode('{"messages":[')
+          );
+          abortController.signal.addEventListener(
+            'abort',
+            () => controller.error(abortController.signal.reason),
+            { once: true }
+          );
+        }
+      }),
+      signal: abortController.signal
+    } as Request;
+    const responsePromise = handleChatRequest(
+      inboundRequest,
+      {
+        startChat,
+        writeTelemetry: event => telemetry.push(event)
+      }
+    );
+
+    await Promise.resolve();
+    abortController.abort(
+      new DOMException('Client disconnected.', 'AbortError')
+    );
+    const response = await responsePromise;
+
+    expect(response.status).toBe(499);
+    expect(await response.text()).toBe('');
+    expect(startChat).not.toHaveBeenCalled();
+    expect(telemetry).toEqual([
+      expect.objectContaining({
+        status: 'cancelled',
+        errorCategory: 'cancelled'
+      })
+    ]);
+  });
+
   it('rejects simple cross-origin content types without calling the provider', async () => {
     const startChat = vi.fn<StartHostedChat>();
     const telemetry: ChatTelemetryEvent[] = [];
