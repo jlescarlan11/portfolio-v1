@@ -91,6 +91,18 @@ function assertProviderChunkResult(
   }
 }
 
+function assertProviderCompletion(
+  result: unknown
+): asserts result is ChatCompletionMetadata {
+  if (
+    typeof result !== 'object' ||
+    result === null ||
+    typeof (result as { finishReason?: unknown }).finishReason !== 'string'
+  ) {
+    throw new ProviderStreamProtocolError();
+  }
+}
+
 function normalizeFinishReason(value: string): FinishReason {
   return FINISH_REASONS.has(value as FinishReason)
     ? value as FinishReason
@@ -184,14 +196,16 @@ async function withTimeout<T>(
   }
 }
 
-function getHostedCompletion(
+async function getHostedCompletion(
   hostedStream: HostedChatStream
 ): Promise<ChatCompletionMetadata> {
-  return withTimeout(
+  const result: unknown = await withTimeout(
     hostedStream.getCompletion(),
     COMPLETION_TIMEOUT_MS,
     'Provider completion metadata timed out.'
   );
+  assertProviderCompletion(result);
+  return result;
 }
 
 async function getNextHostedChunk(
