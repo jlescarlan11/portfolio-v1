@@ -1007,6 +1007,28 @@ describe('handleChatRequest', () => {
     );
   });
 
+  it('reserves stream bytes for the mandatory terminal frame', async () => {
+    const encoder = new TextEncoder();
+    const emptyDeltaFrameBytes = encoder.encode(
+      `${JSON.stringify({ type: 'text-delta', delta: '' })}\n`
+    ).byteLength;
+    const delta = 'x'.repeat(
+      MAX_STREAM_OUTPUT_BYTES - emptyDeltaFrameBytes
+    );
+    let providerSignal: AbortSignal | undefined;
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: ({ signal }) => {
+        providerSignal = signal;
+        return createHostedStream([delta]);
+      }
+    });
+
+    expect(await readFrames(response)).toEqual([
+      { type: 'finish', finishReason: 'length' }
+    ]);
+    expect(providerSignal?.aborted).toBe(true);
+  });
+
   it('finishes the output-limit response without waiting for provider cleanup', async () => {
     vi.useFakeTimers();
     try {

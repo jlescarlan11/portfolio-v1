@@ -128,6 +128,15 @@ function encodeFrame(frame: ChatStreamFrame): Uint8Array {
   return TEXT_ENCODER.encode(`${JSON.stringify(frame)}\n`);
 }
 
+const TERMINAL_FRAME_BYTE_BUDGET = Math.max(
+  encodeFrame({ type: 'finish', finishReason: 'length' }).byteLength,
+  encodeFrame({
+    type: 'error',
+    code: 'STREAM_ERROR',
+    message: STREAM_ERROR_MESSAGE
+  }).byteLength
+);
+
 function releaseHostedStream(hostedStream: HostedChatStream): void {
   try {
     const cleanup = hostedStream.iterator.return?.();
@@ -454,7 +463,12 @@ function createStreamResponse(
           const encodedDelta = encodeFrame({ type: 'text-delta', delta });
           const nextByteCount =
             streamedOutputBytes + encodedDelta.byteLength;
-          if (nextByteCount > MAX_STREAM_OUTPUT_BYTES) return false;
+          if (
+            nextByteCount + TERMINAL_FRAME_BYTE_BUDGET >
+            MAX_STREAM_OUTPUT_BYTES
+          ) {
+            return false;
+          }
 
           streamedOutputBytes = nextByteCount;
           controller.enqueue(encodedDelta);
