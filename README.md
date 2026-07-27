@@ -121,6 +121,11 @@ Application limits are deliberately conservative:
 - 20 anonymous POST requests per IP and domain in a 60-second distributed
   Netlify rate-limit window
 
+Netlify's edge counter can admit requests that are already in flight at the
+boundary, so this is abuse protection rather than a strict billing cap. The
+live verifier checks convergence and retry-window recovery; gateway account
+limits and the documented 80% usage alert are the cost backstops.
+
 Pre-stream errors use JSON with `400`, `413`, `429`, `503`, or `504`. A stream
 that fails after text begins ends with a sanitized error frame. Application
 telemetry records only request ID, model, outcome, duration, token counts,

@@ -107,6 +107,13 @@ if (!baseUrl) {
           finished = true;
         }
         if (event.type === 'error') throw new Error(event.message);
+        if (
+          event.type !== 'text-delta' &&
+          event.type !== 'finish' &&
+          event.type !== 'error'
+        ) {
+          throw new Error('Unknown stream frame.');
+        }
       }
 
       if (done) break;

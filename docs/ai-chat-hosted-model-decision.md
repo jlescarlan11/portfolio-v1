@@ -66,7 +66,14 @@ The model and request budgets are application-owned constants:
 Netlify begins blocking after its configured `windowLimit` is exceeded. The
 deployed rule therefore uses the static platform value `19`, which the live
 boundary verifier confirms as 20 allowed requests followed by a blocked request
-21.
+21 for sequential traffic. Because enforcement runs on Netlify's distributed
+edge, requests already in flight at the boundary can briefly overshoot the
+nominal threshold before the counter converges. The live verifier races two
+boundary requests, requires enforcement after propagation, waits for the
+advertised retry window, and confirms that traffic is accepted again. Treat the
+20-request limit as abuse protection rather than an exact account-budget
+control; the gateway's account limits and the 80% usage alert remain the
+authoritative cost backstops.
 
 The 8,000-token application limit is intentionally much smaller than the model
 and Netlify gateway context limits. It provides predictable cost and leaves
