@@ -451,11 +451,13 @@ function createStreamResponse(
     start(controller): void {
       const pump = async (): Promise<void> => {
         const enqueueDelta = (delta: string): boolean => {
-          const nextByteCount = streamedOutputBytes + TEXT_ENCODER.encode(delta).byteLength;
+          const encodedDelta = encodeFrame({ type: 'text-delta', delta });
+          const nextByteCount =
+            streamedOutputBytes + encodedDelta.byteLength;
           if (nextByteCount > MAX_STREAM_OUTPUT_BYTES) return false;
 
           streamedOutputBytes = nextByteCount;
-          controller.enqueue(encodeFrame({ type: 'text-delta', delta }));
+          controller.enqueue(encodedDelta);
           return true;
         };
 

@@ -981,6 +981,32 @@ describe('handleChatRequest', () => {
     );
   });
 
+  it('counts JSON escaping against the stream byte cap', async () => {
+    const telemetry: ChatTelemetryEvent[] = [];
+    let providerSignal: AbortSignal | undefined;
+    const escapedDelta = '\u0000'.repeat(
+      Math.ceil(MAX_STREAM_OUTPUT_BYTES / 6)
+    );
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: ({ signal }) => {
+        providerSignal = signal;
+        return createHostedStream([escapedDelta]);
+      },
+      writeTelemetry: event => telemetry.push(event)
+    });
+
+    expect(await readFrames(response)).toEqual([
+      { type: 'finish', finishReason: 'length' }
+    ]);
+    expect(providerSignal?.aborted).toBe(true);
+    expect(telemetry[0]).toEqual(
+      expect.objectContaining({
+        status: 'output_limit',
+        finishReason: 'length'
+      })
+    );
+  });
+
   it('finishes the output-limit response without waiting for provider cleanup', async () => {
     vi.useFakeTimers();
     try {
