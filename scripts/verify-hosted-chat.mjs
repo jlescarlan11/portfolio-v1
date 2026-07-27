@@ -69,9 +69,12 @@ if (!baseUrl) {
     }
   ];
 
-  const readAnswer = async response => {
+  const readAnswer = async (response, startedAt) => {
     if (!response.ok || !response.body) {
       throw new Error(`HTTP ${response.status}`);
+    }
+    if (!response.headers.get('content-type')?.includes('application/x-ndjson')) {
+      throw new Error('Unexpected response content type.');
     }
 
     const reader = response.body.getReader();
@@ -79,6 +82,7 @@ if (!baseUrl) {
     let pending = '';
     let answer = '';
     let finished = false;
+    let firstTokenAt;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -89,8 +93,19 @@ if (!baseUrl) {
       for (const line of lines) {
         if (!line.trim()) continue;
         const event = JSON.parse(line);
-        if (event.type === 'text-delta') answer += event.delta;
-        if (event.type === 'finish') finished = true;
+        if (event.type === 'text-delta') {
+          if (finished || typeof event.delta !== 'string') {
+            throw new Error('Invalid text frame.');
+          }
+          if (event.delta && firstTokenAt === undefined) {
+            firstTokenAt = performance.now();
+          }
+          answer += event.delta;
+        }
+        if (event.type === 'finish') {
+          if (finished) throw new Error('Duplicate finish frame.');
+          finished = true;
+        }
         if (event.type === 'error') throw new Error(event.message);
       }
 
@@ -98,22 +113,36 @@ if (!baseUrl) {
     }
 
     if (!finished) throw new Error('Stream ended without a finish frame.');
-    return answer;
+    return {
+      answer,
+      firstTokenMs:
+        firstTokenAt === undefined ? undefined : Math.round(firstTokenAt - startedAt),
+      totalMs: Math.round(performance.now() - startedAt)
+    };
   };
 
   let failed = false;
   for (const testCase of cases) {
     try {
+      const startedAt = performance.now();
       const response = await fetch(`${baseUrl}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [{ role: 'user', content: testCase.prompt }]
-        })
+        }),
+        signal: AbortSignal.timeout(35_000)
       });
-      const answer = await readAnswer(response);
+      const measurement = await readAnswer(response, startedAt);
+      const { answer } = measurement;
       const passed = testCase.validate(answer);
-      console.log(`${passed ? 'PASS' : 'FAIL'} ${testCase.id}: ${answer}`);
+      const timing =
+        measurement.firstTokenMs === undefined
+          ? `total=${measurement.totalMs}ms`
+          : `ttft=${measurement.firstTokenMs}ms total=${measurement.totalMs}ms`;
+      console.log(
+        `${passed ? 'PASS' : 'FAIL'} ${testCase.id} [${timing}]: ${answer}`
+      );
       failed ||= !passed;
     } catch (error) {
       failed = true;

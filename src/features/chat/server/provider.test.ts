@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildSystemPrompt } from '../content';
 import {
   HOSTED_CHAT_MODEL,
+  HOSTED_CHAT_REASONING,
   MAX_OUTPUT_TOKENS,
   PROVIDER_TIMEOUT_MS
 } from './config';
@@ -61,6 +62,7 @@ describe('startHostedChat', () => {
       expect.objectContaining({
         system: buildSystemPrompt(),
         messages,
+        reasoning: HOSTED_CHAT_REASONING,
         maxOutputTokens: MAX_OUTPUT_TOKENS,
         maxRetries: 0,
         abortSignal: signal,
@@ -94,6 +96,21 @@ describe('startHostedChat', () => {
     expect(mocks.createOpenAI).toHaveBeenCalledWith({
       apiKey: 'netlify-test-placeholder-key',
       baseURL: 'https://netlify-gateway.invalid/v1',
+      name: 'netlify-ai-gateway'
+    });
+  });
+
+  it('uses the official OpenAI endpoint when the fallback key has no custom base URL', () => {
+    vi.stubEnv('OPENAI_BASE_URL', '');
+
+    startHostedChat({
+      messages: [{ role: 'user', content: 'Hello' }],
+      signal: new AbortController().signal
+    });
+
+    expect(mocks.createOpenAI).toHaveBeenCalledWith({
+      apiKey: 'test-placeholder-key',
+      baseURL: 'https://api.openai.com/v1',
       name: 'netlify-ai-gateway'
     });
   });

@@ -3,6 +3,7 @@ import { streamText, type ModelMessage } from 'ai';
 import { buildSystemPrompt } from '../content';
 import {
   HOSTED_CHAT_MODEL,
+  HOSTED_CHAT_REASONING,
   getHostedChatConfiguration,
   MAX_OUTPUT_TOKENS,
   PROVIDER_TIMEOUT_MS
@@ -29,6 +30,7 @@ export const startHostedChat: StartHostedChat = ({
     model: openai.chat(HOSTED_CHAT_MODEL),
     system: buildSystemPrompt(),
     messages: modelMessages,
+    reasoning: HOSTED_CHAT_REASONING,
     maxOutputTokens: MAX_OUTPUT_TOKENS,
     maxRetries: 0,
     abortSignal: signal,

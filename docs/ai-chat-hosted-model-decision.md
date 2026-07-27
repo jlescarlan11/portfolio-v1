@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-27
 
-**Status:** Approved for implementation
+**Status:** Provisionally selected; release blocked on the live quality gate
 
 **Issues:** #6, #7, #8, #9, #10
 
@@ -39,16 +39,19 @@ Production and deploy previews use Netlify-injected values:
 - `NETLIFY_AI_GATEWAY_BASE_URL` — gateway endpoint; preferred at request time
   and never set manually.
 
-Local development can receive those values through `netlify dev`, or use a
-developer-owned OpenAI-compatible endpoint through `OPENAI_API_KEY` and
-`OPENAI_BASE_URL`. The server prefers the collision-free Netlify pair so an
-existing provider-specific project setting cannot bypass the gateway. None of
-these values may use a `NEXT_PUBLIC_` prefix or appear in client code, logs,
-errors, fixtures, or committed environment files.
+Local development can receive those values through `netlify dev`, or use
+`OPENAI_API_KEY` for the official OpenAI endpoint. `OPENAI_BASE_URL` is an
+optional override for a different OpenAI-compatible endpoint. The server
+prefers the collision-free Netlify pair so an existing provider-specific
+project setting cannot bypass the gateway. None of these values may use a
+`NEXT_PUBLIC_` prefix or appear in client code, logs, errors, fixtures, or
+committed environment files.
 
 The model and request budgets are application-owned constants:
 
 - Model: `gpt-5-nano`
+- Reasoning effort: `minimal` to favor latency and cost for short portfolio
+  answers
 - Maximum request body: 16 KiB
 - Maximum message count: 12
 - Maximum current user message: 2,000 Unicode characters

@@ -67,6 +67,20 @@ describe('validateChatRequestText', () => {
     }
   });
 
+  it('accepts a current user message exactly at the Unicode character limit', () => {
+    const content = '🙂'.repeat(MAX_USER_CHARACTERS);
+    const result = validateChatRequestText(
+      payload([{ role: 'user', content }])
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      value: {
+        messages: [{ role: 'user', content }]
+      }
+    });
+  });
+
   it('rejects a conversation above the message-count limit', () => {
     const messages = Array.from({ length: MAX_MESSAGE_COUNT + 1 }, (_, index) => ({
       role: index % 2 === 0 ? 'user' : 'assistant',

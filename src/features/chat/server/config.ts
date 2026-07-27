@@ -1,4 +1,5 @@
 export const HOSTED_CHAT_MODEL = 'gpt-5-nano';
+export const HOSTED_CHAT_REASONING = 'minimal' as const;
 export const MAX_REQUEST_BYTES = 16 * 1024;
 export const MAX_MESSAGE_COUNT = 12;
 export const MAX_USER_CHARACTERS = 2_000;
@@ -7,6 +8,7 @@ export const MAX_OUTPUT_TOKENS = 256;
 export const PROVIDER_TIMEOUT_MS = 25_000;
 export const RATE_LIMIT_WINDOW_SECONDS = 60;
 export const RATE_LIMIT_REQUESTS = 20;
+const DEFAULT_OPENAI_BASE_URL = 'https://api.openai.com/v1';
 
 export interface HostedChatConfiguration {
   apiKey: string;
@@ -39,8 +41,11 @@ export function getHostedChatConfiguration(
 
   const openAiApiKey = environment.OPENAI_API_KEY?.trim();
   const openAiBaseUrl = environment.OPENAI_BASE_URL?.trim();
-  if (openAiApiKey && openAiBaseUrl) {
-    return { apiKey: openAiApiKey, baseUrl: openAiBaseUrl };
+  if (openAiApiKey) {
+    return {
+      apiKey: openAiApiKey,
+      baseUrl: openAiBaseUrl || DEFAULT_OPENAI_BASE_URL
+    };
   }
 
   throw new ChatConfigurationError();

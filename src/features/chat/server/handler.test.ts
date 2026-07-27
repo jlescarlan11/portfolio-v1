@@ -194,6 +194,58 @@ describe('handleChatRequest', () => {
     );
   });
 
+  it('maps a provider timeout to a sanitized 504 response', async () => {
+    const timeout = new Error('sensitive provider timeout detail');
+    timeout.name = 'TimeoutError';
+    const telemetry: ChatTelemetryEvent[] = [];
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: () => {
+        throw timeout;
+      },
+      writeTelemetry: event => telemetry.push(event)
+    });
+    const body = await response.text();
+
+    expect(response.status).toBe(504);
+    expect(body).toBe(
+      JSON.stringify({
+        error: {
+          code: 'TIMEOUT',
+          message: 'The AI service took too long to respond. Please try again.'
+        }
+      })
+    );
+    expect(body).not.toContain(timeout.message);
+    expect(telemetry[0]).toEqual(
+      expect.objectContaining({
+        status: 'failed',
+        errorCategory: 'timeout'
+      })
+    );
+  });
+
+  it('maps an unexpected provider failure to a sanitized 503 response', async () => {
+    const sensitive = 'SENSITIVE_PROVIDER_FAILURE';
+    const telemetry: ChatTelemetryEvent[] = [];
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: () => {
+        throw new Error(sensitive);
+      },
+      writeTelemetry: event => telemetry.push(event)
+    });
+    const body = await response.text();
+
+    expect(response.status).toBe(503);
+    expect(body).not.toContain(sensitive);
+    expect(JSON.stringify(telemetry)).not.toContain(sensitive);
+    expect(telemetry[0]).toEqual(
+      expect.objectContaining({
+        status: 'failed',
+        errorCategory: 'provider'
+      })
+    );
+  });
+
   it('returns a sanitized midstream error while preserving emitted text', async () => {
     const startChat: StartHostedChat = () => ({
       iterator: (async function* failingStream(): AsyncGenerator<string> {

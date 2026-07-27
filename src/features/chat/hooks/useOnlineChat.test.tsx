@@ -234,6 +234,56 @@ describe('useOnlineChat', () => {
     );
   });
 
+  it('distinguishes an online network failure', async () => {
+    vi.spyOn(window.navigator, 'onLine', 'get').mockReturnValue(true);
+    vi.stubGlobal('fetch', vi.fn(async () => Promise.reject(new TypeError('failed'))));
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual({
+      kind: 'network',
+      message: 'The connection was interrupted. Please try again.',
+      canRetry: true
+    });
+  });
+
+  it('aborts a client-side timeout and exposes a retryable timeout error', async () => {
+    vi.useFakeTimers();
+    let requestSignal: AbortSignal | undefined;
+    const fetchMock = vi.fn(
+      async (_input: RequestInfo | URL, init?: RequestInit): Promise<Response> =>
+        new Promise((_resolve, reject) => {
+          requestSignal = init?.signal ?? undefined;
+          requestSignal?.addEventListener(
+            'abort',
+            () => reject(requestSignal?.reason),
+            { once: true }
+          );
+        })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const { result } = renderHook(() => useOnlineChat());
+
+    let sendPromise: Promise<void> | undefined;
+    act(() => {
+      sendPromise = result.current.send('Hello');
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(30_000);
+      await sendPromise;
+    });
+
+    expect(requestSignal?.aborted).toBe(true);
+    expect(result.current.error).toEqual({
+      kind: 'timeout',
+      message: 'The AI took too long to respond. Please try again.',
+      canRetry: true
+    });
+  });
+
   it('treats malformed or interrupted NDJSON as a retryable protocol error', async () => {
     let requestSignal: AbortSignal | null | undefined;
     vi.stubGlobal(
@@ -259,6 +309,35 @@ describe('useOnlineChat', () => {
       content: 'Hello'
     });
     expect(requestSignal?.aborted).toBe(true);
+  });
+
+  it('keeps partial assistant text when the server reports a midstream error', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        streamResponse([
+          frame({ type: 'text-delta', delta: 'Partial answer' }),
+          frame({
+            type: 'error',
+            code: 'STREAM_ERROR',
+            message: 'sanitized server message'
+          })
+        ])
+      )
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'assistant',
+      content: 'Partial answer'
+    });
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'protocol', canRetry: true })
+    );
   });
 
   it('treats a finished stream with no assistant text as an empty protocol error', async () => {
@@ -372,5 +451,36 @@ describe('useOnlineChat', () => {
     expect(result.current.messages).toEqual([WELCOME_MESSAGE]);
     expect(result.current.isStreaming).toBe(false);
     expect(result.current.error).toBeNull();
+  });
+
+  it('aborts an active request when the hook unmounts', async () => {
+    let requestSignal: AbortSignal | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        requestSignal = init?.signal ?? undefined;
+        return new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller): void {
+              requestSignal?.addEventListener(
+                'abort',
+                () => controller.error(requestSignal?.reason),
+                { once: true }
+              );
+            }
+          }),
+          { status: 200 }
+        );
+      })
+    );
+    const hook = renderHook(() => useOnlineChat());
+
+    act(() => {
+      void hook.result.current.send('Hello');
+    });
+    await waitFor(() => expect(hook.result.current.isStreaming).toBe(true));
+    hook.unmount();
+
+    expect(requestSignal?.aborted).toBe(true);
   });
 });

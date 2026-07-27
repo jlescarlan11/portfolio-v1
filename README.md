@@ -58,17 +58,20 @@ NEXT_PUBLIC_CONTACT_EMAIL=your-email@example.com
 
 # Server-only hosted chat values. Never use NEXT_PUBLIC_ for these.
 OPENAI_API_KEY=replace-with-a-local-development-key
-OPENAI_BASE_URL=https://replace-with-an-openai-compatible-v1-endpoint
+# Optional: omit for the official OpenAI API.
+# OPENAI_BASE_URL=https://replace-with-an-openai-compatible-v1-endpoint
 ```
 
 Netlify deploys inject the collision-free `NETLIFY_AI_GATEWAY_KEY` and
 `NETLIFY_AI_GATEWAY_BASE_URL` values at runtime; the server prefers that pair so
 existing provider-specific project settings cannot bypass the gateway.
-`OPENAI_API_KEY` and `OPENAI_BASE_URL` are the local or non-Netlify fallback.
+`OPENAI_API_KEY` is the local or non-Netlify fallback and uses the official
+OpenAI endpoint by default. Set `OPENAI_BASE_URL` only for a different
+OpenAI-compatible endpoint.
 Do not set the `NETLIFY_AI_GATEWAY_*` values by hand or copy any runtime value
 into the repository, browser code, fixtures, logs, or screenshots. If neither
-complete pair is available, `POST /api/chat` intentionally returns a sanitized
-`503`.
+the Netlify pair nor `OPENAI_API_KEY` is available, `POST /api/chat`
+intentionally returns a sanitized `503`.
 
 ### Development
 
@@ -111,6 +114,7 @@ the cancellation signal upstream.
 
 Application limits are deliberately conservative:
 
+- `gpt-5-nano` with `minimal` reasoning effort
 - 16 KiB body, 12 messages, and 2,000 Unicode characters in the current prompt
 - 8,000 estimated input tokens and 256 maximum output tokens
 - 25-second provider timeout
