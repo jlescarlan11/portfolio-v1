@@ -936,6 +936,32 @@ describe('useOnlineChat', () => {
     expect(cancelBody).toHaveBeenCalledOnce();
   });
 
+  it('rejects conflicting response framing before reading its body', async () => {
+    const body =
+      frame({ type: 'text-delta', delta: 'John builds products.' }) +
+      frame({ type: 'finish', finishReason: 'stop' });
+    const response = streamResponse([body]);
+    response.headers.set(
+      'Content-Length',
+      String(new TextEncoder().encode(body).byteLength)
+    );
+    response.headers.set('Transfer-Encoding', 'chunked');
+    const getReader = vi.spyOn(response.body!, 'getReader');
+    const cancelBody = vi.spyOn(response.body!, 'cancel');
+    vi.stubGlobal('fetch', vi.fn(async () => response));
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'protocol' })
+    );
+    expect(getReader).not.toHaveBeenCalled();
+    expect(cancelBody).toHaveBeenCalledOnce();
+  });
+
   it('aborts as soon as a stream exceeds its declared response length', async () => {
     vi.useFakeTimers();
     const cancelBody = vi.fn();
