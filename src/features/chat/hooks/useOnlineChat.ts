@@ -127,15 +127,16 @@ function isJsonResponse(response: Response): boolean {
     .toLowerCase() === 'application/json';
 }
 
-function hasAcceptableDeclaredStreamLength(response: Response): boolean {
+function hasAcceptableDeclaredLength(
+  response: Response,
+  maxBytes: number
+): boolean {
   const value = response.headers.get('content-length');
   if (value === null) return true;
   if (!/^\d+$/.test(value)) return false;
 
   const bytes = Number(value);
-  return (
-    Number.isSafeInteger(bytes) && bytes <= MAX_CHAT_STREAM_RESPONSE_BYTES
-  );
+  return Number.isSafeInteger(bytes) && bytes <= maxBytes;
 }
 
 function errorCodeFromStatus(status: number): string | undefined {
@@ -147,6 +148,10 @@ function errorCodeFromStatus(status: number): string | undefined {
 
 async function readApiErrorCode(response: Response): Promise<string | undefined> {
   if (!isJsonResponse(response)) {
+    void response.body?.cancel().catch(() => undefined);
+    return undefined;
+  }
+  if (!hasAcceptableDeclaredLength(response, MAX_API_ERROR_RESPONSE_BYTES)) {
     void response.body?.cancel().catch(() => undefined);
     return undefined;
   }
@@ -419,7 +424,12 @@ export function useOnlineChat(): UseOnlineChatResult {
           throw new ChatProtocolError();
         }
 
-        if (!hasAcceptableDeclaredStreamLength(response)) {
+        if (
+          !hasAcceptableDeclaredLength(
+            response,
+            MAX_CHAT_STREAM_RESPONSE_BYTES
+          )
+        ) {
           void response.body?.cancel().catch(() => undefined);
           throw new ChatProtocolError();
         }
