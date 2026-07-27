@@ -14,7 +14,7 @@
 
 ## Overview
 
-This is the source code for my personal portfolio site — built with Next.js 15 and the App Router, designed to present a focused set of projects including **Kaizen** (personal finance for Filipino students), **HEALTH** (AI-powered healthcare navigation), and **PriceCraft**. The architecture follows a feature-based structure for clean separation of concerns and long-term maintainability.
+This is the source code for my personal portfolio site — built with Next.js 15 and the App Router, designed to present a focused set of projects including **Rent N Roll** (a two-sided rental marketplace), **HEALTH** (AI-powered healthcare navigation), and **PriceCraft**. The architecture follows a feature-based structure for clean separation of concerns and long-term maintainability.
 
 ---
 
@@ -26,6 +26,7 @@ This is the source code for my personal portfolio site — built with Next.js 15
 | UI        | React 19                                                     |
 | Language  | TypeScript                                                   |
 | Styling   | Tailwind CSS 4                                               |
+| AI chat   | Netlify AI Gateway · AI SDK · OpenAI `gpt-5-nano`           |
 | Icons     | React Icons                                                  |
 | Testing   | Vitest · Node Test Runner · React Testing Library · Jest DOM |
 | Tooling   | ESLint · Turbopack                                           |
@@ -36,7 +37,7 @@ This is the source code for my personal portfolio site — built with Next.js 15
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 22+
 - npm
 
 ### Installation
@@ -54,7 +55,16 @@ Create a `.env.local` file in the root directory:
 ```env
 NEXT_PUBLIC_SITE_URL=https://johnlesterescarlan.netlify.app
 NEXT_PUBLIC_CONTACT_EMAIL=your-email@example.com
+
+# Server-only hosted chat values. Never use NEXT_PUBLIC_ for these.
+OPENAI_API_KEY=replace-with-a-local-development-key
+OPENAI_BASE_URL=https://replace-with-an-openai-compatible-v1-endpoint
 ```
+
+Netlify deploys inject `OPENAI_API_KEY` and `OPENAI_BASE_URL` through Netlify AI
+Gateway. Do not copy production values into the repository, browser code,
+fixtures, logs, or screenshots. A missing value intentionally makes
+`POST /api/chat` return a sanitized `503`.
 
 ### Development
 
@@ -63,6 +73,10 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the site.
+
+To exercise Netlify-provided integrations locally, use `npx netlify dev`
+instead. The rest of the portfolio runs with `npm run dev`; only a real chat
+request needs gateway configuration.
 
 ---
 
@@ -78,6 +92,58 @@ Open [http://localhost:3000](http://localhost:3000) to view the site.
 | `npm test`          | Run all tests (unit + UI)                    |
 | `npm run test:unit` | Run unit tests via Node's native test runner |
 | `npm run test:ui`   | Run component tests via Vitest               |
+| `npm run verify:chat` | Run the hosted-chat quality corpus against `CHAT_BASE_URL` |
+| `npm run verify:chat:rate-limit` | Verify the live distributed 20-per-minute boundary |
+
+---
+
+## Hosted AI Chat
+
+The browser posts validated `user`/`assistant` history to `POST /api/chat`.
+The server prepends the trusted portfolio prompt, trims the oldest complete
+turns to the input budget, and streams newline-delimited JSON text frames from
+Netlify AI Gateway. Closing the widget aborts the browser request and forwards
+the cancellation signal upstream.
+
+Application limits are deliberately conservative:
+
+- 16 KiB body, 12 messages, and 2,000 Unicode characters in the current prompt
+- 8,000 estimated input tokens and 256 maximum output tokens
+- 25-second provider timeout
+- 20 anonymous POST requests per IP and domain in a 60-second distributed
+  Netlify rate-limit window
+
+Pre-stream errors use JSON with `400`, `413`, `429`, `503`, or `504`. A stream
+that fails after text begins ends with a sanitized error frame. Application
+telemetry records only request ID, model, outcome, duration, token counts,
+finish reason, and error category—never message content, the system prompt,
+credentials, authorization headers, raw provider bodies, or IP addresses.
+See [the model and API decision](docs/ai-chat-hosted-model-decision.md) for the
+full contract and operational policy.
+
+### Preview and production verification
+
+1. Open a pull request and wait for the Netlify deploy preview.
+2. Run `CHAT_BASE_URL=https://<deploy-preview-host> npm run verify:chat`.
+   After at least 60 seconds with no requests from the same client, run
+   `CHAT_BASE_URL=https://<deploy-preview-host> npm run verify:chat:rate-limit`.
+   This sends only invalid bodies, so it exercises the edge boundary without
+   invoking the model.
+3. In a narrow mobile viewport, open the widget, send a prompt, observe
+   progressive text, close it mid-stream, reopen it, and retry a simulated
+   network failure.
+4. Repeat in Safari or Firefox with graphics acceleration unavailable. The
+   welcome message and input must still appear immediately.
+5. Inspect browser network traffic and built client assets: only `/api/chat`
+   may receive prompt content, and no gateway credential or legacy model asset
+   may be present.
+6. After production release, repeat the corpus and review Netlify gateway usage,
+   application outcomes, and the 80% account-credit notification described in
+   the decision record.
+
+`CHAT_BASE_URL` is only the public preview/production origin; it is not a
+credential. The verification script makes seven real model requests, so do not
+run it repeatedly without checking gateway usage.
 
 ---
 
@@ -93,6 +159,7 @@ src/
     ├── home/               # Landing section components & content
     ├── about/              # Profile, timeline, and background data
     ├── contact/            # Contact form and links
+    ├── chat/               # Hosted chat client, API policy, and tests
     └── projects/           # Project data, galleries, and filtering
   shared/                   # Globally shared resources
     ├── components/         # Reusable UI components (buttons, badges)

@@ -6,18 +6,16 @@ import { ChatWindow } from './ChatWindow';
 
 export function ChatBubble() {
   const [isOpen, setIsOpen] = useState(false);
-  const [hasOpened, setHasOpened] = useState(false);
   const [labelVisible, setLabelVisible] = useState(true);
 
-  function toggle() {
-    if (!hasOpened) setHasOpened(true);
+  function toggle(): void {
     setIsOpen(prev => !prev);
   }
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-      {hasOpened && (
-        <div data-testid="chat-window-wrapper" className={isOpen ? 'block' : 'hidden'}>
+      {isOpen && (
+        <div data-testid="chat-window-wrapper">
           <ChatWindow onClose={() => setIsOpen(false)} />
         </div>
       )}
@@ -37,7 +35,7 @@ export function ChatBubble() {
       )}
       <button
         onClick={toggle}
-        aria-label="Open AI chat"
+        aria-label={isOpen ? 'Close AI chat' : 'Open AI chat'}
         className="relative flex h-11 w-11 items-center justify-center border border-surface bg-background/90 backdrop-blur-md transition-colors duration-300 hover:border-foreground/40 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
       >
         <span className="absolute left-[3px] top-[3px] h-2.5 w-2.5 border-l border-t border-foreground/30" aria-hidden="true" />

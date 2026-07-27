@@ -1,61 +1,105 @@
 import React from 'react';
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, cleanup } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render } from '@testing-library/react';
+import type { ChatMessage } from '../server/contracts';
 import { ChatWindow } from './ChatWindow';
 
 afterEach(cleanup);
 
-// jsdom doesn't implement scrollIntoView
 window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
-vi.mock('../hooks/useWebLLM', () => ({
-  useWebLLM: vi.fn(),
-  MODEL_ID: 'test-model'
+const hookResult = vi.hoisted(() => ({
+  messages: [
+    {
+      role: 'assistant' as const,
+      content: "Hi! I'm John's AI assistant. Ask me anything about his work."
+    }
+  ] as ChatMessage[],
+  isStreaming: false,
+  retryBlocked: false,
+  error: null as {
+    kind: 'unavailable';
+    message: string;
+    canRetry: boolean;
+  } | null,
+  send: vi.fn(async () => undefined),
+  retry: vi.fn(async () => undefined),
+  reset: vi.fn()
 }));
 
-import { useWebLLM } from '../hooks/useWebLLM';
-const mockUseWebLLM = vi.mocked(useWebLLM);
+vi.mock('../hooks/useOnlineChat', () => ({
+  useOnlineChat: () => hookResult
+}));
 
 describe('ChatWindow', () => {
-  it('shows progress bar when status is loading', () => {
-    mockUseWebLLM.mockReturnValue({
-      status: 'loading',
-      progress: 45,
-      progressText: 'Loading model...',
-      messages: [],
-      send: vi.fn(),
-      initialize: vi.fn(),
-      isStreaming: false
-    });
-    const { getByRole } = render(<ChatWindow onClose={vi.fn()} />);
-    expect(getByRole('progressbar')).toBeTruthy();
+  afterEach(() => {
+    hookResult.isStreaming = false;
+    hookResult.retryBlocked = false;
+    hookResult.error = null;
+    hookResult.send.mockClear();
+    hookResult.retry.mockClear();
+    hookResult.reset.mockClear();
   });
 
-  it('shows unsupported message when status is unsupported', () => {
-    mockUseWebLLM.mockReturnValue({
-      status: 'unsupported',
-      progress: 0,
-      progressText: '',
-      messages: [],
-      send: vi.fn(),
-      initialize: vi.fn(),
-      isStreaming: false
-    });
-    const { getByText } = render(<ChatWindow onClose={vi.fn()} />);
-    expect(getByText(/WebGPU/i)).toBeTruthy();
-  });
+  it('opens ready with the welcome message and input on a non-WebGPU browser', () => {
+    const { getByText, getByPlaceholderText, queryByText } = render(
+      <ChatWindow onClose={vi.fn()} />
+    );
 
-  it('shows message input when status is ready', () => {
-    mockUseWebLLM.mockReturnValue({
-      status: 'ready',
-      progress: 100,
-      progressText: '',
-      messages: [],
-      send: vi.fn(),
-      initialize: vi.fn(),
-      isStreaming: false
-    });
-    const { getByPlaceholderText } = render(<ChatWindow onClose={vi.fn()} />);
+    expect(getByText(/Hi! I'm John's AI assistant/)).toBeTruthy();
     expect(getByPlaceholderText(/ask a question/i)).toBeTruthy();
+    expect(getByText(/online/i)).toBeTruthy();
+    expect(queryByText(/WebGPU/i)).toBeNull();
+    expect(queryByText(/Download.*Start/i)).toBeNull();
+  });
+
+  it('trims and submits one non-empty message', () => {
+    const { getByPlaceholderText, getByRole } = render(
+      <ChatWindow onClose={vi.fn()} />
+    );
+    const input = getByPlaceholderText(/ask a question/i);
+
+    fireEvent.change(input, { target: { value: '  Tell me about John.  ' } });
+    fireEvent.click(getByRole('button', { name: /send message/i }));
+
+    expect(hookResult.send).toHaveBeenCalledOnce();
+    expect(hookResult.send).toHaveBeenCalledWith('Tell me about John.');
+  });
+
+  it('disables submission and displays thinking while a request streams', () => {
+    hookResult.isStreaming = true;
+    hookResult.messages = [
+      hookResult.messages[0],
+      { role: 'user', content: 'Hello' },
+      { role: 'assistant', content: '' }
+    ];
+    const { getByLabelText, getByPlaceholderText } = render(
+      <ChatWindow onClose={vi.fn()} />
+    );
+
+    expect(getByLabelText('Thinking')).toBeTruthy();
+    expect(getByPlaceholderText(/ask a question/i)).toHaveProperty('disabled', true);
+    expect(getByLabelText(/send message/i)).toHaveProperty('disabled', true);
+  });
+
+  it('shows a retry action for recoverable service errors', () => {
+    hookResult.error = {
+      kind: 'unavailable',
+      message: 'The AI service is temporarily unavailable. Please try again.',
+      canRetry: true
+    };
+    const { getByRole } = render(<ChatWindow onClose={vi.fn()} />);
+
+    fireEvent.click(getByRole('button', { name: /retry/i }));
+    expect(hookResult.retry).toHaveBeenCalledOnce();
+  });
+
+  it('resets active chat state before closing', () => {
+    const onClose = vi.fn();
+    const { getByLabelText } = render(<ChatWindow onClose={onClose} />);
+
+    fireEvent.click(getByLabelText(/close chat/i));
+    expect(hookResult.reset).toHaveBeenCalledOnce();
+    expect(onClose).toHaveBeenCalledOnce();
   });
 });

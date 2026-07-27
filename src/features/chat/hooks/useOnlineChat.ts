@@ -1,0 +1,460 @@
+'use client';
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ChatMessage, ChatStreamFrame } from '../server/contracts';
+
+const CHAT_ENDPOINT = '/api/chat';
+const CLIENT_TIMEOUT_MS = 30_000;
+const MAX_CONTEXT_MESSAGES = 10;
+
+export const WELCOME_MESSAGE: ChatMessage = {
+  role: 'assistant',
+  content:
+    "Hi! I'm John's AI assistant. Ask me anything about his work, skills, or experience."
+};
+
+export type ChatClientErrorKind =
+  | 'validation'
+  | 'rate_limit'
+  | 'offline'
+  | 'timeout'
+  | 'unavailable'
+  | 'network'
+  | 'protocol';
+
+export interface ChatClientError {
+  kind: ChatClientErrorKind;
+  message: string;
+  retryAfterSeconds?: number;
+  canRetry: boolean;
+}
+
+export interface UseOnlineChatResult {
+  messages: ChatMessage[];
+  isStreaming: boolean;
+  retryBlocked: boolean;
+  error: ChatClientError | null;
+  send: (text: string) => Promise<void>;
+  retry: () => Promise<void>;
+  reset: () => void;
+}
+
+interface ApiErrorBody {
+  error?: {
+    code?: unknown;
+  };
+}
+
+class ChatProtocolError extends Error {
+  constructor() {
+    super('The chat stream did not match the expected protocol.');
+    this.name = 'ChatProtocolError';
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function parseStreamFrame(line: string): ChatStreamFrame {
+  let value: unknown;
+  try {
+    value = JSON.parse(line);
+  } catch {
+    throw new ChatProtocolError();
+  }
+
+  if (!isRecord(value)) {
+    throw new ChatProtocolError();
+  }
+
+  if (value.type === 'text-delta' && typeof value.delta === 'string') {
+    return { type: 'text-delta', delta: value.delta };
+  }
+
+  if (value.type === 'finish' && typeof value.finishReason === 'string') {
+    return { type: 'finish', finishReason: value.finishReason };
+  }
+
+  if (
+    value.type === 'error' &&
+    value.code === 'STREAM_ERROR' &&
+    typeof value.message === 'string'
+  ) {
+    return {
+      type: 'error',
+      code: 'STREAM_ERROR',
+      message: value.message
+    };
+  }
+
+  throw new ChatProtocolError();
+}
+
+function parseRetryAfter(response: Response): number | undefined {
+  const value = Number(response.headers.get('retry-after'));
+  return Number.isFinite(value) && value > 0
+    ? Math.min(Math.ceil(value), 3_600)
+    : undefined;
+}
+
+async function readApiErrorCode(response: Response): Promise<string | undefined> {
+  try {
+    const body = (await response.json()) as ApiErrorBody;
+    return typeof body.error?.code === 'string' ? body.error.code : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function classifyHttpError(response: Response): Promise<ChatClientError> {
+  const code = await readApiErrorCode(response);
+
+  if (
+    response.status === 413 ||
+    response.status === 400 ||
+    code === 'PAYLOAD_TOO_LARGE' ||
+    code === 'VALIDATION_ERROR'
+  ) {
+    return {
+      kind: 'validation',
+      message: 'Please shorten or revise your message, then try again.',
+      canRetry: false
+    };
+  }
+
+  if (response.status === 429 || code === 'RATE_LIMITED') {
+    const retryAfterSeconds = parseRetryAfter(response);
+    return {
+      kind: 'rate_limit',
+      message: retryAfterSeconds
+        ? `Too many requests. Try again in about ${retryAfterSeconds} seconds.`
+        : 'Too many requests. Please wait a moment and try again.',
+      retryAfterSeconds,
+      canRetry: true
+    };
+  }
+
+  if (response.status === 504 || code === 'TIMEOUT') {
+    return {
+      kind: 'timeout',
+      message: 'The AI took too long to respond. Please try again.',
+      canRetry: true
+    };
+  }
+
+  return {
+    kind: 'unavailable',
+    message: 'The AI service is temporarily unavailable. Please try again.',
+    canRetry: true
+  };
+}
+
+function networkError(): ChatClientError {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    return {
+      kind: 'offline',
+      message: 'You appear to be offline. Reconnect and try again.',
+      canRetry: true
+    };
+  }
+
+  return {
+    kind: 'network',
+    message: 'The connection was interrupted. Please try again.',
+    canRetry: true
+  };
+}
+
+export function useOnlineChat(): UseOnlineChatResult {
+  const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [retryBlocked, setRetryBlocked] = useState(false);
+  const [error, setError] = useState<ChatClientError | null>(null);
+  const successfulConversationRef = useRef<ChatMessage[]>([]);
+  const failedConversationRef = useRef<ChatMessage[] | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const abortReasonRef = useRef<'cancel' | 'timeout' | null>(null);
+  const operationIdRef = useRef(0);
+  const isStreamingRef = useRef(false);
+  const retryBlockedRef = useRef(false);
+  const retryTimerRef = useRef<number | null>(null);
+
+  const updateMessages = useCallback(
+    (updater: (current: ChatMessage[]) => ChatMessage[]): void => {
+      setMessages(current => {
+        const next = updater(current);
+        return next;
+      });
+    },
+    []
+  );
+
+  const finishOperation = useCallback((operationId: number): void => {
+    if (operationId !== operationIdRef.current) return;
+    isStreamingRef.current = false;
+    setIsStreaming(false);
+    abortControllerRef.current = null;
+    abortReasonRef.current = null;
+  }, []);
+
+  const removeEmptyPendingAssistant = useCallback((): void => {
+    updateMessages(current => {
+      const last = current[current.length - 1];
+      if (last?.role === 'assistant' && last.content === '') {
+        return current.slice(0, -1);
+      }
+      return current;
+    });
+  }, [updateMessages]);
+
+  const runRequest = useCallback(
+    async (conversation: ChatMessage[], appendUser: boolean): Promise<void> => {
+      if (isStreamingRef.current) return;
+
+      const operationId = operationIdRef.current + 1;
+      operationIdRef.current = operationId;
+      isStreamingRef.current = true;
+      setIsStreaming(true);
+      setError(null);
+      failedConversationRef.current = null;
+
+      const currentUser = conversation[conversation.length - 1];
+      updateMessages(current => [
+        ...current,
+        ...(appendUser ? [currentUser] : []),
+        { role: 'assistant', content: '' }
+      ]);
+
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+      abortReasonRef.current = null;
+      const timeoutId = window.setTimeout(() => {
+        if (operationId !== operationIdRef.current) return;
+        abortReasonRef.current = 'timeout';
+        abortController.abort(
+          new DOMException('The chat request timed out.', 'TimeoutError')
+        );
+      }, CLIENT_TIMEOUT_MS);
+
+      let fullAssistantResponse = '';
+      let bufferedText = '';
+      let animationFrameId: number | null = null;
+
+      const flushBufferedText = (): void => {
+        if (!bufferedText || operationId !== operationIdRef.current) return;
+        const text = bufferedText;
+        bufferedText = '';
+        updateMessages(current => {
+          const next = [...current];
+          const pending = next[next.length - 1];
+          if (pending?.role !== 'assistant') return current;
+          next[next.length - 1] = {
+            role: 'assistant',
+            content: pending.content + text
+          };
+          return next;
+        });
+        animationFrameId = null;
+      };
+
+      const scheduleFlush = (): void => {
+        if (animationFrameId !== null) return;
+        animationFrameId = window.requestAnimationFrame(flushBufferedText);
+      };
+
+      try {
+        const response = await fetch(CHAT_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: conversation }),
+          signal: abortController.signal
+        });
+
+        if (!response.ok) {
+          const classified = await classifyHttpError(response);
+          if (operationId !== operationIdRef.current) return;
+          failedConversationRef.current = conversation;
+          removeEmptyPendingAssistant();
+          if (classified.retryAfterSeconds) {
+            retryBlockedRef.current = true;
+            setRetryBlocked(true);
+            if (retryTimerRef.current !== null) {
+              window.clearTimeout(retryTimerRef.current);
+            }
+            retryTimerRef.current = window.setTimeout(() => {
+              retryBlockedRef.current = false;
+              retryTimerRef.current = null;
+              setRetryBlocked(false);
+            }, classified.retryAfterSeconds * 1_000);
+          }
+          setError(classified);
+          return;
+        }
+
+        if (!response.body) {
+          throw new ChatProtocolError();
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let pendingLine = '';
+        let sawFinish = false;
+
+        const processLine = (line: string): void => {
+          if (!line.trim()) return;
+          const frame = parseStreamFrame(line);
+
+          if (frame.type === 'text-delta') {
+            if (sawFinish) throw new ChatProtocolError();
+            fullAssistantResponse += frame.delta;
+            bufferedText += frame.delta;
+            scheduleFlush();
+            return;
+          }
+
+          if (frame.type === 'error') {
+            throw new ChatProtocolError();
+          }
+
+          if (sawFinish) throw new ChatProtocolError();
+          sawFinish = true;
+        };
+
+        while (true) {
+          const { done, value } = await reader.read();
+          pendingLine += decoder.decode(value, { stream: !done });
+          const lines = pendingLine.split('\n');
+          pendingLine = lines.pop() ?? '';
+          lines.forEach(processLine);
+
+          if (done) break;
+        }
+
+        if (pendingLine.trim()) {
+          processLine(pendingLine);
+        }
+
+        if (!sawFinish || !fullAssistantResponse.trim()) {
+          throw new ChatProtocolError();
+        }
+
+        if (animationFrameId !== null) {
+          window.cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
+        }
+        flushBufferedText();
+
+        if (operationId !== operationIdRef.current) return;
+        successfulConversationRef.current = [
+          ...conversation,
+          { role: 'assistant', content: fullAssistantResponse }
+        ];
+      } catch (caught: unknown) {
+        if (animationFrameId !== null) {
+          window.cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
+        }
+        flushBufferedText();
+
+        if (operationId !== operationIdRef.current) return;
+
+        if (abortController.signal.aborted && abortReasonRef.current === 'cancel') {
+          removeEmptyPendingAssistant();
+          return;
+        }
+
+        failedConversationRef.current = conversation;
+        if (!fullAssistantResponse) {
+          removeEmptyPendingAssistant();
+        }
+
+        if (abortController.signal.aborted && abortReasonRef.current === 'timeout') {
+          setError({
+            kind: 'timeout',
+            message: 'The AI took too long to respond. Please try again.',
+            canRetry: true
+          });
+        } else if (caught instanceof ChatProtocolError) {
+          abortController.abort(
+            new DOMException('The chat stream was invalid.', 'AbortError')
+          );
+          setError({
+            kind: 'protocol',
+            message: 'The AI response was interrupted. Please try again.',
+            canRetry: true
+          });
+        } else {
+          setError(networkError());
+        }
+      } finally {
+        window.clearTimeout(timeoutId);
+        finishOperation(operationId);
+      }
+    },
+    [finishOperation, removeEmptyPendingAssistant, updateMessages]
+  );
+
+  const send = useCallback(
+    async (text: string): Promise<void> => {
+      const content = text.trim();
+      if (!content || isStreamingRef.current || retryBlockedRef.current) return;
+
+      const retainedHistory = successfulConversationRef.current.slice(
+        -MAX_CONTEXT_MESSAGES
+      );
+      await runRequest(
+        [...retainedHistory, { role: 'user', content }],
+        true
+      );
+    },
+    [runRequest]
+  );
+
+  const retry = useCallback(async (): Promise<void> => {
+    if (
+      !failedConversationRef.current ||
+      isStreamingRef.current ||
+      retryBlockedRef.current
+    ) {
+      return;
+    }
+    await runRequest(failedConversationRef.current, false);
+  }, [runRequest]);
+
+  const reset = useCallback((): void => {
+    operationIdRef.current += 1;
+    abortReasonRef.current = 'cancel';
+    abortControllerRef.current?.abort(
+      new DOMException('The chat was closed.', 'AbortError')
+    );
+    abortControllerRef.current = null;
+    isStreamingRef.current = false;
+    successfulConversationRef.current = [];
+    failedConversationRef.current = null;
+    retryBlockedRef.current = false;
+    if (retryTimerRef.current !== null) {
+      window.clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
+    }
+    setMessages([WELCOME_MESSAGE]);
+    setIsStreaming(false);
+    setRetryBlocked(false);
+    setError(null);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      operationIdRef.current += 1;
+      abortReasonRef.current = 'cancel';
+      abortControllerRef.current?.abort(
+        new DOMException('The chat was unmounted.', 'AbortError')
+      );
+      if (retryTimerRef.current !== null) {
+        window.clearTimeout(retryTimerRef.current);
+      }
+    };
+  }, []);
+
+  return { messages, isStreaming, retryBlocked, error, send, retry, reset };
+}

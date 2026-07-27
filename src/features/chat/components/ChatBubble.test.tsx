@@ -5,17 +5,23 @@ import { ChatBubble } from './ChatBubble';
 
 afterEach(cleanup);
 
-vi.mock('../hooks/useWebLLM', () => ({
-  useWebLLM: () => ({
-    status: 'unsupported',
-    progress: 0,
-    progressText: '',
-    messages: [],
+window.HTMLElement.prototype.scrollIntoView = vi.fn();
+
+vi.mock('../hooks/useOnlineChat', () => ({
+  useOnlineChat: () => ({
+    messages: [
+      {
+        role: 'assistant',
+        content: "Hi! I'm John's AI assistant."
+      }
+    ],
+    error: null,
     send: vi.fn(),
-    initialize: vi.fn(),
-    isStreaming: false
-  }),
-  MODEL_ID: 'test-model'
+    retry: vi.fn(),
+    reset: vi.fn(),
+    isStreaming: false,
+    retryBlocked: false
+  })
 }));
 
 describe('ChatBubble', () => {
@@ -30,10 +36,17 @@ describe('ChatBubble', () => {
     expect(getByText("John's AI Assistant")).toBeTruthy();
   });
 
-  it('hides ChatWindow when close button is triggered', () => {
-    const { getByRole, getByLabelText, getByTestId } = render(<ChatBubble />);
+  it('unmounts ChatWindow when close button is triggered', () => {
+    const { getByRole, getByLabelText, queryByTestId } = render(<ChatBubble />);
     fireEvent.click(getByRole('button', { name: /open ai chat/i }));
     fireEvent.click(getByLabelText('Close chat'));
-    expect(getByTestId('chat-window-wrapper').className).toContain('hidden');
+    expect(queryByTestId('chat-window-wrapper')).toBeNull();
+  });
+
+  it('unmounts ChatWindow from the floating toggle while open', () => {
+    const { getByRole, queryByTestId } = render(<ChatBubble />);
+    fireEvent.click(getByRole('button', { name: /open ai chat/i }));
+    fireEvent.click(getByRole('button', { name: /close ai chat/i }));
+    expect(queryByTestId('chat-window-wrapper')).toBeNull();
   });
 });

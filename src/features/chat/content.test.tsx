@@ -11,7 +11,7 @@ describe('buildSystemPrompt', () => {
   });
 
   it('includes at least one project title', () => {
-    expect(buildSystemPrompt()).toContain('FireCheck');
+    expect(buildSystemPrompt()).toContain('Rent N Roll');
   });
 
   it('includes at least one skill', () => {

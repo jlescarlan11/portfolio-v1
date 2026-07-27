@@ -1,0 +1,376 @@
+import {
+  act,
+  cleanup,
+  renderHook,
+  waitFor
+} from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { useOnlineChat, WELCOME_MESSAGE } from './useOnlineChat';
+
+function frame(value: unknown): string {
+  return `${JSON.stringify(value)}\n`;
+}
+
+function streamResponse(chunks: string[]): Response {
+  const encoder = new TextEncoder();
+  return new Response(
+    new ReadableStream<Uint8Array>({
+      start(controller): void {
+        chunks.forEach(chunk => controller.enqueue(encoder.encode(chunk)));
+        controller.close();
+      }
+    }),
+    {
+      status: 200,
+      headers: { 'Content-Type': 'application/x-ndjson' }
+    }
+  );
+}
+
+function successResponse(text = 'John builds products.'): Response {
+  return streamResponse([
+    frame({ type: 'text-delta', delta: text }),
+    frame({ type: 'finish', finishReason: 'stop' })
+  ]);
+}
+
+function errorResponse(
+  status: number,
+  code: string,
+  retryAfter?: string
+): Response {
+  const headers = new Headers({ 'Content-Type': 'application/json' });
+  if (retryAfter) headers.set('Retry-After', retryAfter);
+  return new Response(
+    JSON.stringify({ error: { code, message: 'server detail' } }),
+    { status, headers }
+  );
+}
+
+describe('useOnlineChat', () => {
+  beforeEach(() => {
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+      callback(0);
+      return 1;
+    });
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it('starts with only the welcome message and no persisted session', () => {
+    const first = renderHook(() => useOnlineChat());
+    expect(first.result.current.messages).toEqual([WELCOME_MESSAGE]);
+    first.unmount();
+
+    const second = renderHook(() => useOnlineChat());
+    expect(second.result.current.messages).toEqual([WELCOME_MESSAGE]);
+  });
+
+  it('sends one request, adds the user immediately, and streams one assistant message', async () => {
+    let streamController: ReadableStreamDefaultController<Uint8Array> | undefined;
+    const encoder = new TextEncoder();
+    const fetchMock = vi.fn(async () =>
+      new Response(
+        new ReadableStream<Uint8Array>({
+          start(controller): void {
+            streamController = controller;
+          }
+        }),
+        { status: 200 }
+      )
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const { result } = renderHook(() => useOnlineChat());
+
+    let sendPromise: Promise<void> | undefined;
+    act(() => {
+      sendPromise = result.current.send('Tell me about John.');
+    });
+
+    await waitFor(() => {
+      expect(result.current.messages).toEqual([
+        WELCOME_MESSAGE,
+        { role: 'user', content: 'Tell me about John.' },
+        { role: 'assistant', content: '' }
+      ]);
+      expect(result.current.isStreaming).toBe(true);
+    });
+
+    act(() => {
+      streamController?.enqueue(
+        encoder.encode(frame({ type: 'text-delta', delta: 'John builds ' }))
+      );
+    });
+    await waitFor(() => {
+      expect(result.current.messages.at(-1)?.content).toBe('John builds ');
+    });
+
+    act(() => {
+      streamController?.enqueue(
+        encoder.encode(frame({ type: 'text-delta', delta: 'products.' }))
+      );
+      streamController?.enqueue(
+        encoder.encode(frame({ type: 'finish', finishReason: 'stop' }))
+      );
+      streamController?.close();
+    });
+    await act(async () => {
+      await sendPromise;
+    });
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'assistant',
+      content: 'John builds products.'
+    });
+    expect(result.current.isStreaming).toBe(false);
+  });
+
+  it('ignores whitespace and duplicate submissions while a request is active', async () => {
+    let streamController: ReadableStreamDefaultController<Uint8Array> | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller): void {
+              streamController = controller;
+            }
+          }),
+          { status: 200 }
+        )
+      )
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('   ');
+    });
+    act(() => {
+      void result.current.send('Hello');
+      void result.current.send('Hello');
+    });
+
+    await waitFor(() => expect(fetch).toHaveBeenCalledOnce());
+    act(() => {
+      streamController?.enqueue(
+        new TextEncoder().encode(frame({ type: 'finish', finishReason: 'stop' }))
+      );
+      streamController?.close();
+    });
+    await waitFor(() => expect(result.current.isStreaming).toBe(false));
+  });
+
+  it.each([
+    [
+      413,
+      'PAYLOAD_TOO_LARGE',
+      'validation',
+      'Please shorten or revise your message, then try again.'
+    ],
+    [
+      429,
+      'RATE_LIMITED',
+      'rate_limit',
+      'Too many requests. Try again in about 60 seconds.'
+    ],
+    [
+      504,
+      'TIMEOUT',
+      'timeout',
+      'The AI took too long to respond. Please try again.'
+    ],
+    [
+      503,
+      'SERVICE_UNAVAILABLE',
+      'unavailable',
+      'The AI service is temporarily unavailable. Please try again.'
+    ]
+  ])(
+    'maps HTTP %s to a distinct %s error while preserving the user message',
+    async (status, code, kind, message) => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async () =>
+          errorResponse(status, code, status === 429 ? '60' : undefined)
+        )
+      );
+      const { result } = renderHook(() => useOnlineChat());
+
+      await act(async () => {
+        await result.current.send('Hello');
+      });
+
+      expect(result.current.error).toEqual(
+        expect.objectContaining({ kind, message })
+      );
+      expect(result.current.messages).toEqual([
+        WELCOME_MESSAGE,
+        { role: 'user', content: 'Hello' }
+      ]);
+    }
+  );
+
+  it('distinguishes an offline fetch failure', async () => {
+    vi.spyOn(window.navigator, 'onLine', 'get').mockReturnValue(false);
+    vi.stubGlobal('fetch', vi.fn(async () => Promise.reject(new TypeError('failed'))));
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({
+        kind: 'offline',
+        message: 'You appear to be offline. Reconnect and try again.'
+      })
+    );
+  });
+
+  it('treats malformed or interrupted NDJSON as a retryable protocol error', async () => {
+    let requestSignal: AbortSignal | null | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        requestSignal = init?.signal;
+        return streamResponse(['not-json\n']);
+      })
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual({
+      kind: 'protocol',
+      message: 'The AI response was interrupted. Please try again.',
+      canRetry: true
+    });
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'user',
+      content: 'Hello'
+    });
+    expect(requestSignal?.aborted).toBe(true);
+  });
+
+  it('treats a finished stream with no assistant text as an empty protocol error', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        streamResponse([frame({ type: 'finish', finishReason: 'stop' })])
+      )
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'protocol', canRetry: true })
+    );
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'user',
+      content: 'Hello'
+    });
+  });
+
+  it('retries the same failed request without duplicating the user message', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(errorResponse(503, 'SERVICE_UNAVAILABLE'))
+      .mockResolvedValueOnce(successResponse('Recovered.'));
+    vi.stubGlobal('fetch', fetchMock);
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+    await act(async () => {
+      await result.current.retry();
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[0][1]?.body).toBe(fetchMock.mock.calls[1][1]?.body);
+    expect(result.current.messages.filter(message => message.role === 'user')).toEqual([
+      { role: 'user', content: 'Hello' }
+    ]);
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'assistant',
+      content: 'Recovered.'
+    });
+    expect(result.current.error).toBeNull();
+  });
+
+  it('blocks an immediate 429 retry and enables it after Retry-After', async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(errorResponse(429, 'RATE_LIMITED', '60'))
+      .mockResolvedValueOnce(successResponse('Recovered.'));
+    vi.stubGlobal('fetch', fetchMock);
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+    expect(result.current.retryBlocked).toBe(true);
+
+    await act(async () => {
+      await result.current.retry();
+    });
+    expect(fetchMock).toHaveBeenCalledOnce();
+
+    act(() => vi.advanceTimersByTime(60_000));
+    expect(result.current.retryBlocked).toBe(false);
+
+    await act(async () => {
+      await result.current.retry();
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'assistant',
+      content: 'Recovered.'
+    });
+  });
+
+  it('aborts an active request and resets state when closed', async () => {
+    let requestSignal: AbortSignal | undefined;
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      requestSignal = init?.signal ?? undefined;
+      return new Response(
+        new ReadableStream<Uint8Array>({
+          start(controller): void {
+            requestSignal?.addEventListener(
+              'abort',
+              () => controller.error(requestSignal?.reason),
+              { once: true }
+            );
+          }
+        }),
+        { status: 200 }
+      );
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const { result } = renderHook(() => useOnlineChat());
+
+    act(() => {
+      void result.current.send('Hello');
+    });
+    await waitFor(() => expect(result.current.isStreaming).toBe(true));
+    act(() => result.current.reset());
+
+    expect(requestSignal?.aborted).toBe(true);
+    expect(result.current.messages).toEqual([WELCOME_MESSAGE]);
+    expect(result.current.isStreaming).toBe(false);
+    expect(result.current.error).toBeNull();
+  });
+});
