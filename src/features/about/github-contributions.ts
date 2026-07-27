@@ -21,6 +21,8 @@ type Fetcher = (
 ) => Promise<Response>;
 
 export const GITHUB_REQUEST_TIMEOUT_MS = 5_000;
+const MAX_CONTRIBUTION_WEEKS = 54;
+const MAX_DAYS_PER_WEEK = 7;
 
 const CONTRIBUTION_QUERY = `
   query($username: String!) {
@@ -104,13 +106,18 @@ export function parseGitHubContributionData(
     typeof totalContributions !== 'number' ||
     !Number.isInteger(totalContributions) ||
     totalContributions < 0 ||
-    !Array.isArray(weeks)
+    !Array.isArray(weeks) ||
+    weeks.length > MAX_CONTRIBUTION_WEEKS
   ) {
     throw new GitHubContributionDataError();
   }
 
   const parsedWeeks = weeks.map(candidate => {
-    if (!isRecord(candidate) || !Array.isArray(candidate.contributionDays)) {
+    if (
+      !isRecord(candidate) ||
+      !Array.isArray(candidate.contributionDays) ||
+      candidate.contributionDays.length > MAX_DAYS_PER_WEEK
+    ) {
       throw new GitHubContributionDataError();
     }
 

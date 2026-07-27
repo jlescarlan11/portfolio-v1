@@ -105,6 +105,50 @@ describe('GitHub contribution data', () => {
     ).toThrow('GitHub contribution data is unavailable.');
   });
 
+  it('rejects contribution calendars larger than one year', () => {
+    const oversizedCalendar = {
+      ...validCalendar,
+      weeks: Array.from(
+        { length: 55 },
+        () => validCalendar.weeks[0]
+      )
+    };
+
+    expect(() =>
+      parseGitHubContributionData({
+        data: {
+          user: {
+            contributionsCollection: {
+              contributionCalendar: oversizedCalendar
+            }
+          }
+        }
+      })
+    ).toThrow('GitHub contribution data is unavailable.');
+  });
+
+  it('rejects contribution weeks with more than seven days', () => {
+    expect(() =>
+      parseGitHubContributionData({
+        data: {
+          user: {
+            contributionsCollection: {
+              contributionCalendar: {
+                ...validCalendar,
+                weeks: [{
+                  contributionDays: Array.from(
+                    { length: 8 },
+                    () => validCalendar.weeks[0].contributionDays[0]
+                  )
+                }]
+              }
+            }
+          }
+        }
+      })
+    ).toThrow('GitHub contribution data is unavailable.');
+  });
+
   it('logs a sanitized warning when cached contribution data is unavailable', async () => {
     const sensitive = 'SENSITIVE_GITHUB_PROVIDER_DETAIL';
     vi.stubEnv('GITHUB_TOKEN', 'test-placeholder-token');
