@@ -20,4 +20,16 @@ describe('ChatMessage', () => {
     const { container } = render(<ChatMessage role="assistant" content="Hi" />);
     expect(container.firstElementChild?.className).toContain('flex-row');
   });
+
+  it('does not render model-provided remote images', () => {
+    const { getByText, queryByRole } = render(
+      <ChatMessage
+        role="assistant"
+        content="![Untrusted image](https://third-party.invalid/pixel.png)"
+      />
+    );
+
+    expect(queryByRole('img', { name: 'Untrusted image' })).not.toBeInTheDocument();
+    expect(getByText('Untrusted image')).toBeInTheDocument();
+  });
 });

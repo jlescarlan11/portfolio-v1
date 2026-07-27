@@ -18,6 +18,10 @@ const markdownComponents: Components = {
   code: ({ children }) => (
     <code className="bg-surface-tint px-1 py-0.5 font-mono text-xs text-foreground">{children}</code>
   ),
+  img: ({ alt }) =>
+    alt ? (
+      <span className="text-[13px] italic text-subtle-foreground">{alt}</span>
+    ) : null,
 };
 
 const THINKING_DELAYS = [0, 150, 300];
