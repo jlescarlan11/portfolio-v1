@@ -68,7 +68,7 @@ export default async function ContributionGraph({
         <Typography
           variant="caption"
           as="p"
-          className="text-[10px] font-semibold uppercase tracking-[0.1em] text-foreground/50"
+          className="text-[10px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground"
         >
           GITHUB CONTRIBUTIONS
         </Typography>
