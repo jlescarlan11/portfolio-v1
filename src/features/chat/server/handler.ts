@@ -52,6 +52,7 @@ const DEFAULT_DEPENDENCIES: ChatHandlerDependencies = {
 
 const REQUEST_BODY_ABORTED = Symbol('request-body-aborted');
 const REQUEST_BODY_TIMEOUT = Symbol('request-body-timeout');
+const MAX_CONSECUTIVE_EMPTY_REQUEST_CHUNKS = 32;
 const STREAM_ERROR_MESSAGE = 'The AI service stopped responding. Please try again.';
 const TEXT_ENCODER = new TextEncoder();
 const NO_STORE_RESPONSE_HEADERS = {
@@ -441,6 +442,7 @@ async function readRequestText(request: Request): Promise<string | Response> {
   const decoder = new TextDecoder('utf-8', { fatal: true });
   let receivedBytes = 0;
   let text = '';
+  let consecutiveEmptyChunks = 0;
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
   let removeAbortListener = (): void => undefined;
   const timeout = new Promise<typeof REQUEST_BODY_TIMEOUT>(resolve => {
@@ -479,7 +481,23 @@ async function readRequestText(request: Request): Promise<string | Response> {
       const { done, value } = next;
       if (done) break;
 
-      receivedBytes += value.byteLength;
+      const chunkBytes = value.byteLength;
+      if (chunkBytes === 0) {
+        consecutiveEmptyChunks += 1;
+        if (
+          consecutiveEmptyChunks > MAX_CONSECUTIVE_EMPTY_REQUEST_CHUNKS
+        ) {
+          void reader.cancel().catch(() => undefined);
+          return jsonError(
+            400,
+            'VALIDATION_ERROR',
+            'Send a valid chat request.'
+          );
+        }
+      } else {
+        consecutiveEmptyChunks = 0;
+      }
+      receivedBytes += chunkBytes;
       if (declaredBytes !== undefined && receivedBytes > declaredBytes) {
         void reader.cancel().catch(() => undefined);
         return jsonError(

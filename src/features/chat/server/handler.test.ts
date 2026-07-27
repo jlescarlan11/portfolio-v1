@@ -205,6 +205,34 @@ describe('handleChatRequest', () => {
     expect(startChat).not.toHaveBeenCalled();
   });
 
+  it('rejects a request body that makes no byte progress', async () => {
+    const cancelBody = vi.fn();
+    const inboundRequest = {
+      method: 'POST',
+      headers: new Headers({ 'Content-Type': 'application/json' }),
+      body: new ReadableStream<Uint8Array>({
+        start(controller): void {
+          for (let index = 0; index < 64; index += 1) {
+            controller.enqueue(new Uint8Array());
+          }
+          controller.enqueue(new TextEncoder().encode(validBody()));
+          controller.close();
+        },
+        cancel: cancelBody
+      }),
+      signal: new AbortController().signal
+    } as Request;
+    const startChat = vi.fn<StartHostedChat>(() =>
+      createHostedStream(['should not run'])
+    );
+
+    const response = await handleChatRequest(inboundRequest, { startChat });
+
+    expect(response.status).toBe(400);
+    expect(cancelBody).toHaveBeenCalledOnce();
+    expect(startChat).not.toHaveBeenCalled();
+  });
+
   it('rejects a pre-locked request body without throwing', async () => {
     const body = new ReadableStream<Uint8Array>();
     const bodyLock = body.getReader();
