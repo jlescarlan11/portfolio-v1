@@ -152,6 +152,27 @@ describe('handleChatRequest', () => {
     ]);
   });
 
+  it('cancels an unread body when its declared length is oversized', async () => {
+    const startChat = vi.fn<StartHostedChat>();
+    const cancelBody = vi.fn();
+    const inboundRequest = {
+      headers: new Headers({
+        'Content-Length': String(MAX_REQUEST_BYTES + 1),
+        'Content-Type': 'application/json'
+      }),
+      body: new ReadableStream<Uint8Array>({
+        cancel: cancelBody
+      }),
+      signal: new AbortController().signal
+    } as Request;
+
+    const response = await handleChatRequest(inboundRequest, { startChat });
+
+    expect(response.status).toBe(413);
+    expect(cancelBody).toHaveBeenCalledOnce();
+    expect(startChat).not.toHaveBeenCalled();
+  });
+
   it('does not wait for oversized body cancellation to settle', async () => {
     vi.useFakeTimers();
     try {

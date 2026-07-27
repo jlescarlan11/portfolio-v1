@@ -273,6 +273,7 @@ async function readRequestText(request: Request): Promise<string | Response> {
   if (declaredLength !== null) {
     const bytes = Number(declaredLength);
     if (Number.isFinite(bytes) && bytes > MAX_REQUEST_BYTES) {
+      void request.body?.cancel().catch(() => undefined);
       return jsonError(
         413,
         'PAYLOAD_TOO_LARGE',
