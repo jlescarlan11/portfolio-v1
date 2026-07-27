@@ -47,9 +47,40 @@ describe('getIndexingHeaderRules', () => {
 });
 
 describe('next.config crawler and redirect wiring', () => {
-  it('wires preview headers into Next.js configuration', async () => {
-    await expect(createNextConfig('branch-deploy').headers?.()).resolves.toEqual(
-      getIndexingHeaderRules('branch-deploy')
+  it('applies baseline security headers to production responses', async () => {
+    await expect(createNextConfig('production').headers?.()).resolves.toContainEqual({
+      source: '/:path*',
+      headers: [
+        {
+          key: 'Content-Security-Policy',
+          value: "base-uri 'self'; frame-ancestors 'none'; object-src 'none'"
+        },
+        {
+          key: 'Permissions-Policy',
+          value: 'camera=(), geolocation=(), microphone=()'
+        },
+        {
+          key: 'Referrer-Policy',
+          value: 'strict-origin-when-cross-origin'
+        },
+        {
+          key: 'X-Content-Type-Options',
+          value: 'nosniff'
+        },
+        {
+          key: 'X-Frame-Options',
+          value: 'DENY'
+        }
+      ]
+    });
+  });
+
+  it('wires preview indexing headers into Next.js configuration', async () => {
+    const rules = await createNextConfig('branch-deploy').headers?.();
+
+    expect(rules).toHaveLength(1);
+    expect(rules?.[0].headers).toContainEqual(
+      getIndexingHeaderRules('branch-deploy')[0].headers[0]
     );
   });
 

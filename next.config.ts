@@ -1,10 +1,42 @@
 import type { NextConfig } from 'next';
 import { getIndexingHeaderRules } from './src/shared/seo/indexing-policy';
 
+const SECURITY_HEADERS = [
+  {
+    key: 'Content-Security-Policy',
+    value: "base-uri 'self'; frame-ancestors 'none'; object-src 'none'"
+  },
+  {
+    key: 'Permissions-Policy',
+    value: 'camera=(), geolocation=(), microphone=()'
+  },
+  {
+    key: 'Referrer-Policy',
+    value: 'strict-origin-when-cross-origin'
+  },
+  {
+    key: 'X-Content-Type-Options',
+    value: 'nosniff'
+  },
+  {
+    key: 'X-Frame-Options',
+    value: 'DENY'
+  }
+];
+
 export function createNextConfig(context?: string): NextConfig {
   return {
     async headers() {
-      return getIndexingHeaderRules(context);
+      const indexingHeaders = getIndexingHeaderRules(context).flatMap(
+        rule => rule.headers
+      );
+
+      return [
+        {
+          source: '/:path*',
+          headers: [...SECURITY_HEADERS, ...indexingHeaders]
+        }
+      ];
     },
     async redirects() {
       return [
