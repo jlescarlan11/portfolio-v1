@@ -44,7 +44,7 @@ describe('siteConfig SEO defaults', () => {
       siteName: 'John Lester Escarlan',
       siteUrl: PRODUCTION_SITE_URL,
       socialImage: {
-        path: '/hero-image.svg',
+        path: '/hero-image.jpg',
         width: 1080,
         height: 1080,
         alt: 'Portrait of John Lester Escarlan'

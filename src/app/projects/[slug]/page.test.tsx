@@ -1,7 +1,8 @@
 import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import ProjectPage from './page';
+import { siteConfig } from '@/shared/site/config';
+import ProjectPage, { generateMetadata } from './page';
 
 beforeEach(() => {
   vi.stubGlobal('React', React);
@@ -56,4 +57,26 @@ describe('ProjectPage', () => {
       ).toBeInTheDocument();
     }
   });
+});
+
+describe('generateMetadata', () => {
+  it.each(['health', 'job-pipeline'])(
+    'uses the raster fallback for %s instead of missing or SVG artwork',
+    async (slug) => {
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ slug })
+      });
+      const expectedImage = {
+        url: siteConfig.seo.socialImage.path,
+        alt: siteConfig.seo.socialImage.alt
+      };
+
+      expect(metadata.openGraph).toMatchObject({
+        images: [expectedImage]
+      });
+      expect(metadata.twitter).toMatchObject({
+        images: [expectedImage]
+      });
+    }
+  );
 });

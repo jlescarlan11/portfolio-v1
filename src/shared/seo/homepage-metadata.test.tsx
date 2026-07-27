@@ -27,7 +27,7 @@ describe('homepageMetadata', () => {
       type: 'website',
       images: [
         {
-          url: new URL(`${PRODUCTION_SITE_URL}/hero-image.svg`),
+          url: new URL(`${PRODUCTION_SITE_URL}/hero-image.jpg`),
           width: 1080,
           height: 1080,
           alt: 'Portrait of John Lester Escarlan'
@@ -43,7 +43,7 @@ describe('homepageMetadata', () => {
       description: siteConfig.seo.description,
       images: [
         {
-          url: new URL(`${PRODUCTION_SITE_URL}/hero-image.svg`),
+          url: new URL(`${PRODUCTION_SITE_URL}/hero-image.jpg`),
           width: 1080,
           height: 1080,
           alt: 'Portrait of John Lester Escarlan'

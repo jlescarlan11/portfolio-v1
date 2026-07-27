@@ -24,6 +24,14 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
   const { slug } = await params;
   const project = getProjectBySlug(slug);
   if (!project) return {};
+  const galleryImage = project.caseStudy.gallery?.[0];
+  const socialImage = galleryImage
+    ? { url: galleryImage, alt: project.title }
+    : {
+        url: siteConfig.seo.socialImage.path,
+        alt: siteConfig.seo.socialImage.alt
+      };
+
   return {
     title: project.title,
     description: project.caseStudy.summary,
@@ -32,13 +40,13 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
       description: project.caseStudy.summary,
       url: `${siteConfig.seo.siteUrl}/projects/${project.slug}`,
       siteName: siteConfig.seo.siteName,
-      images: [{ url: project.logo, alt: project.title }]
+      images: [socialImage]
     },
     twitter: {
       card: 'summary_large_image',
       title: project.title,
       description: project.caseStudy.summary,
-      images: [project.logo]
+      images: [socialImage]
     }
   };
 }

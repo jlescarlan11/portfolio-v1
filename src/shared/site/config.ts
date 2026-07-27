@@ -73,7 +73,7 @@ export const siteConfig = {
     siteUrl: resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
     locale: 'en_US',
     socialImage: {
-      path: '/hero-image.svg',
+      path: '/hero-image.jpg',
       width: 1080,
       height: 1080,
       alt: 'Portrait of John Lester Escarlan'
