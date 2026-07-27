@@ -200,6 +200,10 @@ function DossierTile({ project, tileIndex, ctaLabel }: DossierTileProps) {
     };
 
     recalc();
+    if (typeof ResizeObserver !== 'function') {
+      return;
+    }
+
     const observer = new ResizeObserver(recalc);
     observer.observe(row);
     return () => observer.disconnect();
