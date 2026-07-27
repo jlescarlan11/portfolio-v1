@@ -320,7 +320,10 @@ export default async function ProjectPage({ params }: ProjectPageProps): Promise
 
   return (
     <>
-      <main className="bg-surface px-5 pb-24 pt-12 sm:px-8 md:px-12 md:pb-32 md:pt-20">
+      <main
+        id="main-content"
+        className="bg-surface px-5 pb-24 pt-12 sm:px-8 md:px-12 md:pb-32 md:pt-20"
+      >
         <article className="mx-auto max-w-3xl">
 
           {/* ── HEADER ─────────────────────────────────────────────── */}
