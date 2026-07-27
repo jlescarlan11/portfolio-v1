@@ -406,6 +406,32 @@ describe('handleChatRequest', () => {
     expect(startChat).not.toHaveBeenCalled();
   });
 
+  it('rejects an unsupported request content encoding before reading', async () => {
+    const startChat = vi.fn<StartHostedChat>();
+    const encodedBody = new TextEncoder().encode(validBody());
+    const body = new ReadableStream<Uint8Array>({
+      start(controller): void {
+        controller.enqueue(encodedBody);
+        controller.close();
+      }
+    });
+    const getReader = vi.spyOn(body, 'getReader');
+    const inboundRequest = {
+      headers: new Headers({
+        'Content-Encoding': 'gzip',
+        'Content-Type': 'application/json'
+      }),
+      body,
+      signal: new AbortController().signal
+    } as Request;
+
+    const response = await handleChatRequest(inboundRequest, { startChat });
+
+    expect(response.status).toBe(400);
+    expect(getReader).not.toHaveBeenCalled();
+    expect(startChat).not.toHaveBeenCalled();
+  });
+
   it('does not include rejected request content in telemetry', async () => {
     const sensitive = 'SENSITIVE_REJECTED_REQUEST_CONTENT';
     const telemetry: ChatTelemetryEvent[] = [];

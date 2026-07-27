@@ -279,6 +279,15 @@ async function readRequestText(request: Request): Promise<string | Response> {
     );
   }
 
+  const contentEncoding = request.headers.get('content-encoding');
+  if (
+    contentEncoding !== null &&
+    contentEncoding.trim().toLowerCase() !== 'identity'
+  ) {
+    cancelUnreadRequestBody(request);
+    return jsonError(400, 'VALIDATION_ERROR', 'Send a valid chat request.');
+  }
+
   let declaredBytes: number | undefined;
   const declaredLength = request.headers.get('content-length');
   if (
