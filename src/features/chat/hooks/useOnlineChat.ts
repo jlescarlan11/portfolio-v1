@@ -109,10 +109,11 @@ function parseRetryAfter(response: Response): number {
   if (value === null) return DEFAULT_RETRY_AFTER_SECONDS;
 
   const delaySeconds = Number(value);
-  if (Number.isFinite(delaySeconds)) {
-    return delaySeconds > 0
-      ? Math.min(Math.ceil(delaySeconds), 3_600)
-      : DEFAULT_RETRY_AFTER_SECONDS;
+  if (delaySeconds > 0) {
+    return Math.min(Math.ceil(delaySeconds), 3_600);
+  }
+  if (!Number.isNaN(delaySeconds)) {
+    return DEFAULT_RETRY_AFTER_SECONDS;
   }
 
   const retryAt = Date.parse(value);

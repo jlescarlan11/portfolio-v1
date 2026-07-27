@@ -322,6 +322,27 @@ describe('useOnlineChat', () => {
     );
   });
 
+  it('clamps an overflowing direct Retry-After delay', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        errorResponse(429, 'RATE_LIMITED', '9'.repeat(400))
+      )
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({
+        kind: 'rate_limit',
+        retryAfterSeconds: 3_600
+      })
+    );
+  });
+
   it('rejects a non-JSON API error without reading its response body', async () => {
     const response = new Response('<html>gateway error</html>', {
       status: 418,
