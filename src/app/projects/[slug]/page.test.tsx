@@ -30,6 +30,7 @@ describe('ProjectPage', () => {
     render(page);
 
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content');
+    expect(screen.getByRole('main')).toHaveAttribute('tabindex', '-1');
   });
 
   it('gives case-study sections their visible labels as accessible names', async () => {

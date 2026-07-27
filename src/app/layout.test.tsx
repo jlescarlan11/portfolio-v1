@@ -15,6 +15,20 @@ vi.mock('geist/font/mono', () => ({
 vi.mock('./globals.css', () => ({}));
 
 describe('RootLayout progressive enhancement', () => {
+  it('puts skip navigation before persistent chat controls', () => {
+    const markup = renderToStaticMarkup(
+      <RootLayout>
+        <main>Portfolio</main>
+      </RootLayout>
+    );
+    const skipLinkIndex = markup.indexOf('Skip to main content');
+    const chatLauncherIndex = markup.indexOf('Open AI chat');
+
+    expect(skipLinkIndex).toBeGreaterThanOrEqual(0);
+    expect(chatLauncherIndex).toBeGreaterThanOrEqual(0);
+    expect(skipLinkIndex).toBeLessThan(chatLauncherIndex);
+  });
+
   it('reveals pending fade content immediately when JavaScript is disabled', () => {
     const markup = renderToStaticMarkup(
       <RootLayout>

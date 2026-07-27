@@ -18,6 +18,7 @@ describe('NotFound', () => {
     render(<NotFound />);
 
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content');
+    expect(screen.getByRole('main')).toHaveAttribute('tabindex', '-1');
     expect(
       screen.getByRole('heading', {
         level: 1,

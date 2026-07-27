@@ -17,7 +17,7 @@ export default function HomePage(): React.JSX.Element {
         <NavigationBar items={siteConfig.navigation.header} />
       </header>
 
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
         <HeroSection {...heroContent} />
         <ProjectsSection
           projects={projects}

@@ -6,6 +6,7 @@ export default function NotFound(): React.JSX.Element {
   return (
     <main
       id="main-content"
+      tabIndex={-1}
       className="grid min-h-dvh place-items-center bg-surface px-6 py-24"
     >
       <section
