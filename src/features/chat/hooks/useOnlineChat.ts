@@ -15,6 +15,7 @@ const MAX_CONTEXT_MESSAGES = 10;
 const DEFAULT_RETRY_AFTER_SECONDS = 60;
 
 export const MAX_API_ERROR_RESPONSE_BYTES = 8 * 1024;
+export const API_ERROR_RESPONSE_TIMEOUT_MS = 2_000;
 
 export const WELCOME_MESSAGE: ChatMessage = {
   role: 'assistant',
@@ -142,10 +143,23 @@ async function readApiErrorCode(response: Response): Promise<string | undefined>
   const decoder = new TextDecoder();
   let receivedBytes = 0;
   let text = '';
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<null>(resolve => {
+    timeoutId = globalThis.setTimeout(
+      () => resolve(null),
+      API_ERROR_RESPONSE_TIMEOUT_MS
+    );
+  });
 
   try {
     while (true) {
-      const { done, value } = await reader.read();
+      const result = await Promise.race([reader.read(), timeout]);
+      if (result === null) {
+        void reader.cancel().catch(() => undefined);
+        return undefined;
+      }
+
+      const { done, value } = result;
       if (done) break;
 
       receivedBytes += value.byteLength;
@@ -163,6 +177,7 @@ async function readApiErrorCode(response: Response): Promise<string | undefined>
   } catch {
     return undefined;
   } finally {
+    if (timeoutId !== undefined) globalThis.clearTimeout(timeoutId);
     try {
       reader.releaseLock();
     } catch {

@@ -11,6 +11,7 @@ import {
   MAX_STREAM_RESPONSE_CHARACTERS
 } from '../server/contracts';
 import {
+  API_ERROR_RESPONSE_TIMEOUT_MS,
   MAX_API_ERROR_RESPONSE_BYTES,
   useOnlineChat,
   WELCOME_MESSAGE
@@ -331,6 +332,57 @@ describe('useOnlineChat', () => {
     });
 
     expect(cancelBody).toHaveBeenCalledOnce();
+  });
+
+  it('times out a small API error body independently of the request deadline', async () => {
+    vi.useFakeTimers();
+    const cancelBody = vi.fn();
+    let streamController:
+      | ReadableStreamDefaultController<Uint8Array>
+      | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller): void {
+              streamController = controller;
+              controller.enqueue(new TextEncoder().encode('{"error":'));
+            },
+            cancel: cancelBody
+          }),
+          {
+            status: 418,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        )
+      )
+    );
+    const { result } = renderHook(() => useOnlineChat());
+    let settled = false;
+
+    let sendPromise: Promise<void> | undefined;
+    act(() => {
+      sendPromise = result.current.send('Hello').finally(() => {
+        settled = true;
+      });
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(API_ERROR_RESPONSE_TIMEOUT_MS);
+    });
+    const settledAtErrorDeadline = settled;
+
+    if (!settled) streamController?.close();
+    await act(async () => {
+      await sendPromise;
+    });
+
+    expect(settledAtErrorDeadline).toBe(true);
+    expect(cancelBody).toHaveBeenCalledOnce();
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'unavailable' })
+    );
   });
 
   it('distinguishes an offline fetch failure', async () => {
