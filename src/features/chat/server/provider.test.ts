@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { buildSystemPrompt } from '../content';
 import {
   HOSTED_CHAT_MODEL,
   HOSTED_CHAT_REASONING,
@@ -35,6 +34,8 @@ vi.mock('ai', () => ({
 
 import { startHostedChat } from './provider';
 
+const TEST_SYSTEM_PROMPT = 'Use this exact cached system prompt.';
+
 describe('startHostedChat', () => {
   beforeEach(() => {
     vi.stubEnv('SITE_ID', '');
@@ -52,7 +53,11 @@ describe('startHostedChat', () => {
   it('owns the gateway, model, prompt, output budget, timeout, and abort signal on the server', async () => {
     const signal = new AbortController().signal;
     const messages = [{ role: 'user' as const, content: 'Tell me about John.' }];
-    const stream = await startHostedChat({ messages, signal });
+    const stream = await startHostedChat({
+      messages,
+      signal,
+      systemPrompt: TEST_SYSTEM_PROMPT
+    });
 
     expect(mocks.createOpenAI).toHaveBeenCalledWith({
       apiKey: 'test-placeholder-key',
@@ -62,7 +67,7 @@ describe('startHostedChat', () => {
     expect(mocks.chat).toHaveBeenCalledWith(HOSTED_CHAT_MODEL);
     expect(mocks.streamText).toHaveBeenCalledWith(
       expect.objectContaining({
-        system: buildSystemPrompt(),
+        system: TEST_SYSTEM_PROMPT,
         messages,
         reasoning: HOSTED_CHAT_REASONING,
         providerOptions: {
@@ -97,7 +102,8 @@ describe('startHostedChat', () => {
 
     startHostedChat({
       messages: [{ role: 'user', content: 'Hello' }],
-      signal: new AbortController().signal
+      signal: new AbortController().signal,
+      systemPrompt: TEST_SYSTEM_PROMPT
     });
 
     expect(mocks.createOpenAI).toHaveBeenCalledWith({
@@ -113,7 +119,8 @@ describe('startHostedChat', () => {
     expect(() =>
       startHostedChat({
         messages: [{ role: 'user', content: 'Hello' }],
-        signal: new AbortController().signal
+        signal: new AbortController().signal,
+        systemPrompt: TEST_SYSTEM_PROMPT
       })
     ).toThrow('Hosted chat configuration is unavailable.');
     expect(mocks.createOpenAI).not.toHaveBeenCalled();
@@ -130,7 +137,8 @@ describe('startHostedChat', () => {
     expect(() =>
       startHostedChat({
         messages: [{ role: 'user', content: 'Hello' }],
-        signal: new AbortController().signal
+        signal: new AbortController().signal,
+        systemPrompt: TEST_SYSTEM_PROMPT
       })
     ).toThrow('Hosted chat configuration is unavailable.');
     expect(mocks.createOpenAI).not.toHaveBeenCalled();
@@ -141,7 +149,8 @@ describe('startHostedChat', () => {
 
     startHostedChat({
       messages: [{ role: 'user', content: 'Hello' }],
-      signal: new AbortController().signal
+      signal: new AbortController().signal,
+      systemPrompt: TEST_SYSTEM_PROMPT
     });
 
     expect(mocks.createOpenAI).toHaveBeenCalledWith({
@@ -160,7 +169,8 @@ describe('startHostedChat', () => {
     expect(() =>
       startHostedChat({
         messages: [{ role: 'user', content: 'Hello' }],
-        signal: new AbortController().signal
+        signal: new AbortController().signal,
+        systemPrompt: TEST_SYSTEM_PROMPT
       })
     ).toThrow('Hosted chat configuration is unavailable.');
   });

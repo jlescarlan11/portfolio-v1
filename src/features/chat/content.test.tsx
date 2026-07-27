@@ -1,7 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { buildSystemPrompt } from './content';
+import { buildSystemPrompt, CHAT_SYSTEM_PROMPT } from './content';
 
 describe('buildSystemPrompt', () => {
+  it('exposes one cached prompt matching the canonical builder', () => {
+    expect(CHAT_SYSTEM_PROMPT).toBe(buildSystemPrompt());
+  });
+
   it("includes John's full name", () => {
     expect(buildSystemPrompt()).toContain('John Lester Escarlan');
   });

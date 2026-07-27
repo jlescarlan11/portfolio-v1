@@ -42,6 +42,7 @@ export interface HostedChatStream {
 export interface StartHostedChatInput {
   messages: ChatMessage[];
   signal: AbortSignal;
+  systemPrompt: string;
 }
 
 export type StartHostedChat = (

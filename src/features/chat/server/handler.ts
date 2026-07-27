@@ -1,5 +1,5 @@
 import { APICallError } from 'ai';
-import { buildSystemPrompt } from '../content';
+import { CHAT_SYSTEM_PROMPT } from '../content';
 import {
   ChatConfigurationError,
   MAX_REQUEST_BYTES
@@ -380,7 +380,7 @@ export async function handleChatRequest(
 
   let messages = validation.value.messages;
   try {
-    messages = prepareChatContext(buildSystemPrompt(), messages).messages;
+    messages = prepareChatContext(CHAT_SYSTEM_PROMPT, messages).messages;
   } catch (error: unknown) {
     if (error instanceof CurrentMessageTooLargeError) {
       return jsonError(
@@ -398,7 +398,8 @@ export async function handleChatRequest(
   try {
     const hostedStream = await resolved.startChat({
       messages,
-      signal: abortController.signal
+      signal: abortController.signal,
+      systemPrompt: CHAT_SYSTEM_PROMPT
     });
     const firstChunk = await hostedStream.iterator.next();
 

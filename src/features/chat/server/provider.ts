@@ -1,6 +1,5 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText, type ModelMessage } from 'ai';
-import { buildSystemPrompt } from '../content';
 import {
   HOSTED_CHAT_MODEL,
   HOSTED_CHAT_REASONING,
@@ -13,7 +12,8 @@ import type { HostedChatStream, StartHostedChat } from './contracts';
 
 export const startHostedChat: StartHostedChat = ({
   messages,
-  signal
+  signal,
+  systemPrompt
 }): HostedChatStream => {
   const configuration = getHostedChatConfiguration();
   const openai = createOpenAI({
@@ -29,7 +29,7 @@ export const startHostedChat: StartHostedChat = ({
 
   const result = streamText({
     model: openai.chat(HOSTED_CHAT_MODEL),
-    system: buildSystemPrompt(),
+    system: systemPrompt,
     messages: modelMessages,
     reasoning: HOSTED_CHAT_REASONING,
     providerOptions: {

@@ -1,5 +1,6 @@
 import { APICallError } from 'ai';
 import { describe, expect, it, vi } from 'vitest';
+import { CHAT_SYSTEM_PROMPT } from '../content';
 import { ChatConfigurationError, MAX_REQUEST_BYTES } from './config';
 import type {
   ChatCompletionMetadata,
@@ -124,7 +125,7 @@ describe('handleChatRequest', () => {
     expect(startChat).not.toHaveBeenCalled();
   });
 
-  it('passes only trimmed validated messages and the request signal to the provider', async () => {
+  it('passes trimmed messages, the request signal, and the budgeted prompt to the provider', async () => {
     const messages: ChatMessage[] = [
       { role: 'user', content: 'a'.repeat(1_800) },
       { role: 'assistant', content: 'b'.repeat(1_800) },
@@ -144,7 +145,8 @@ describe('handleChatRequest', () => {
 
     expect(startChat).toHaveBeenCalledWith({
       messages: messages.slice(2),
-      signal: expect.any(AbortSignal)
+      signal: expect.any(AbortSignal),
+      systemPrompt: CHAT_SYSTEM_PROMPT
     });
   });
 

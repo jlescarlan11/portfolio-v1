@@ -85,3 +85,5 @@ CANONICAL EXAMPLES:
 - "Write me a recipe for pancakes." → I only have info on John's professional background — try asking about his skills, experience, or projects.
 `;
 }
+
+export const CHAT_SYSTEM_PROMPT = buildSystemPrompt();
