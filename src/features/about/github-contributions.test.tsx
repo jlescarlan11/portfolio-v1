@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   fetchGitHubContributionData,
+  GITHUB_REQUEST_TIMEOUT_MS,
   parseGitHubContributionData
 } from './github-contributions';
 
@@ -18,6 +19,10 @@ const validCalendar = {
     }
   ]
 };
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe('GitHub contribution data', () => {
   it('requests once without using the raw response as a Next.js cache entry', async () => {
@@ -46,9 +51,37 @@ describe('GitHub contribution data', () => {
       'https://api.github.com/graphql',
       expect.objectContaining({
         method: 'POST',
-        cache: 'no-store'
+        cache: 'no-store',
+        signal: expect.any(AbortSignal)
       })
     );
+  });
+
+  it('aborts a stalled GitHub request without retrying', async () => {
+    vi.useFakeTimers();
+    const fetcher = vi.fn(
+      async (_input: string | URL | Request, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener(
+            'abort',
+            () => reject(init.signal?.reason),
+            { once: true }
+          );
+        })
+    );
+
+    const request = fetchGitHubContributionData(
+      'jlescarlan11',
+      'test-placeholder-token',
+      fetcher
+    );
+    const rejection = expect(request).rejects.toThrow(
+      'GitHub contribution data is unavailable.'
+    );
+
+    await vi.advanceTimersByTimeAsync(GITHUB_REQUEST_TIMEOUT_MS);
+    await rejection;
+    expect(fetcher).toHaveBeenCalledOnce();
   });
 
   it('rejects HTTP-200 GraphQL errors before validated data can be cached', () => {

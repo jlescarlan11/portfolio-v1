@@ -20,6 +20,8 @@ type Fetcher = (
   init?: RequestInit
 ) => Promise<Response>;
 
+export const GITHUB_REQUEST_TIMEOUT_MS = 5_000;
+
 const CONTRIBUTION_QUERY = `
   query($username: String!) {
     user(login: $username) {
@@ -131,31 +133,40 @@ export async function fetchGitHubContributionData(
   token: string,
   fetcher: Fetcher = fetch
 ): Promise<GitHubContributionData> {
-  const response = await fetcher('https://api.github.com/graphql', {
-    method: 'POST',
-    headers: {
-      Authorization: `bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      query: CONTRIBUTION_QUERY,
-      variables: { username }
-    }),
-    cache: 'no-store'
-  });
+  const abortController = new AbortController();
+  const timeoutId = setTimeout(() => {
+    abortController.abort();
+  }, GITHUB_REQUEST_TIMEOUT_MS);
 
-  if (!response.ok) {
-    throw new GitHubContributionDataError();
-  }
-
-  let payload: unknown;
   try {
-    payload = await response.json();
-  } catch {
-    throw new GitHubContributionDataError();
-  }
+    const response = await fetcher('https://api.github.com/graphql', {
+      method: 'POST',
+      headers: {
+        Authorization: `bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query: CONTRIBUTION_QUERY,
+        variables: { username }
+      }),
+      cache: 'no-store',
+      signal: abortController.signal
+    });
 
-  return parseGitHubContributionData(payload);
+    if (!response.ok) {
+      throw new GitHubContributionDataError();
+    }
+
+    const payload = (await response.json()) as unknown;
+    return parseGitHubContributionData(payload);
+  } catch (error: unknown) {
+    if (error instanceof GitHubContributionDataError) {
+      throw error;
+    }
+    throw new GitHubContributionDataError();
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 const getCachedGitHubContributionData = unstable_cache(
