@@ -19,4 +19,4 @@ export const config = {
     windowLimit: 20,
     windowSize: 60
   }
-} as const;
+};
