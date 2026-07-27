@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   MAX_STREAM_FRAME_CHARACTERS,
+  MAX_STREAM_RESPONSE_CHARACTERS,
   type ChatMessage,
   type ChatStreamFrame
 } from '../server/contracts';
@@ -340,6 +341,12 @@ export function useOnlineChat(): UseOnlineChatResult {
 
           if (frame.type === 'text-delta') {
             if (sawFinish) throw new ChatProtocolError();
+            if (
+              fullAssistantResponse.length + frame.delta.length >
+              MAX_STREAM_RESPONSE_CHARACTERS
+            ) {
+              throw new ChatProtocolError();
+            }
             fullAssistantResponse += frame.delta;
             bufferedText += frame.delta;
             scheduleFlush();

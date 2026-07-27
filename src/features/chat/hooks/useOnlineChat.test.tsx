@@ -5,7 +5,10 @@ import {
   waitFor
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MAX_STREAM_FRAME_CHARACTERS } from '../server/contracts';
+import {
+  MAX_STREAM_FRAME_CHARACTERS,
+  MAX_STREAM_RESPONSE_CHARACTERS
+} from '../server/contracts';
 import { useOnlineChat, WELCOME_MESSAGE } from './useOnlineChat';
 
 function frame(value: unknown): string {
@@ -371,6 +374,36 @@ describe('useOnlineChat', () => {
       await sendPromise;
     });
 
+    expect(requestSignal?.aborted).toBe(true);
+  });
+
+  it('aborts when many valid deltas exceed the assembled response cap', async () => {
+    let requestSignal: AbortSignal | null | undefined;
+    const delta = 'x'.repeat(1_024);
+    const chunks = [
+      ...Array.from(
+        { length: MAX_STREAM_RESPONSE_CHARACTERS / delta.length + 1 },
+        () => frame({ type: 'text-delta', delta })
+      ),
+      frame({ type: 'finish', finishReason: 'stop' })
+    ];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        requestSignal = init?.signal;
+        return streamResponse(chunks);
+      })
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error?.kind).toBe('protocol');
+    expect(result.current.messages.at(-1)?.content.length).toBeLessThanOrEqual(
+      MAX_STREAM_RESPONSE_CHARACTERS
+    );
     expect(requestSignal?.aborted).toBe(true);
   });
 
