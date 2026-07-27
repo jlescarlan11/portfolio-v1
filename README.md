@@ -8,7 +8,11 @@
 
 > Personal developer portfolio showcasing full-stack builds across product, backend, and developer tooling.
 
-**Live →** [johnlesterescarlan.netlify.app](https://johnlesterescarlan.netlify.app)
+**Live →** [johnlesterescarlan.pro](https://johnlesterescarlan.pro)
+
+Netlify hosts the application, but `https://johnlesterescarlan.pro` is the
+canonical public address. The generated `.netlify.app` URL is a deployment
+fallback, not the preferred portfolio URL.
 
 ---
 
@@ -53,7 +57,7 @@ npm install
 Create a `.env.local` file in the root directory:
 
 ```env
-NEXT_PUBLIC_SITE_URL=https://johnlesterescarlan.netlify.app
+NEXT_PUBLIC_SITE_URL=https://johnlesterescarlan.pro
 NEXT_PUBLIC_CONTACT_EMAIL=your-email@example.com
 
 # Server-only hosted chat values. Never use NEXT_PUBLIC_ for these.
@@ -190,7 +194,7 @@ src/
 ## Contact
 
 - **GitHub:** [@jlescarlan11](https://github.com/jlescarlan11)
-- **Portfolio:** [johnlesterescarlan.netlify.app](https://johnlesterescarlan.netlify.app)
+- **Portfolio:** [johnlesterescarlan.pro](https://johnlesterescarlan.pro)
 - **Email:** Available via the contact section on the live site
 
 ---
