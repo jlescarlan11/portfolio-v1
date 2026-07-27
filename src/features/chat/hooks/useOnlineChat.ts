@@ -276,7 +276,19 @@ export function useOnlineChat(): UseOnlineChatResult {
 
       const scheduleFlush = (): void => {
         if (animationFrameId !== null) return;
+        if (typeof window.requestAnimationFrame !== 'function') {
+          flushBufferedText();
+          return;
+        }
         animationFrameId = window.requestAnimationFrame(flushBufferedText);
+      };
+
+      const cancelScheduledFlush = (): void => {
+        if (animationFrameId === null) return;
+        if (typeof window.cancelAnimationFrame === 'function') {
+          window.cancelAnimationFrame(animationFrameId);
+        }
+        animationFrameId = null;
       };
 
       try {
@@ -357,10 +369,7 @@ export function useOnlineChat(): UseOnlineChatResult {
           throw new ChatProtocolError();
         }
 
-        if (animationFrameId !== null) {
-          window.cancelAnimationFrame(animationFrameId);
-          animationFrameId = null;
-        }
+        cancelScheduledFlush();
         flushBufferedText();
 
         if (operationId !== operationIdRef.current) return;
@@ -378,10 +387,7 @@ export function useOnlineChat(): UseOnlineChatResult {
           { role: 'assistant', content: fullAssistantResponse }
         ];
       } catch (caught: unknown) {
-        if (animationFrameId !== null) {
-          window.cancelAnimationFrame(animationFrameId);
-          animationFrameId = null;
-        }
+        cancelScheduledFlush();
         flushBufferedText();
 
         if (operationId !== operationIdRef.current) return;

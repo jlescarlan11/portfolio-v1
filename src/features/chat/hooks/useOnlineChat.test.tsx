@@ -132,6 +132,23 @@ describe('useOnlineChat', () => {
     expect(result.current.isStreaming).toBe(false);
   });
 
+  it('streams successfully when animation frame APIs are unavailable', async () => {
+    vi.stubGlobal('requestAnimationFrame', undefined);
+    vi.stubGlobal('cancelAnimationFrame', undefined);
+    vi.stubGlobal('fetch', vi.fn(async () => successResponse('Fallback answer.')));
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'assistant',
+      content: 'Fallback answer.'
+    });
+    expect(result.current.error).toBeNull();
+  });
+
   it('ignores whitespace and duplicate submissions while a request is active', async () => {
     let streamController: ReadableStreamDefaultController<Uint8Array> | undefined;
     vi.stubGlobal(
