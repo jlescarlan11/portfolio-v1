@@ -88,6 +88,7 @@ export default function NavigationBar({
             <li key={item.href}>
               <Link
                 href={item.href}
+                aria-current={isActive ? 'location' : undefined}
                 onClick={() => {
                   isClicked.current = true;
                   setIsVisible(true);
