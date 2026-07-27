@@ -279,6 +279,7 @@ async function readRequestText(request: Request): Promise<string | Response> {
     );
   }
 
+  let declaredBytes: number | undefined;
   const declaredLength = request.headers.get('content-length');
   if (declaredLength !== null) {
     const normalizedLength = declaredLength.trim();
@@ -300,10 +301,13 @@ async function readRequestText(request: Request): Promise<string | Response> {
         'Please shorten your message and try again.'
       );
     }
+    declaredBytes = bytes;
   }
 
   if (!request.body) {
-    return '';
+    return declaredBytes === undefined || declaredBytes === 0
+      ? ''
+      : jsonError(400, 'VALIDATION_ERROR', 'Send a valid chat request.');
   }
 
   const reader = request.body.getReader();
@@ -358,6 +362,9 @@ async function readRequestText(request: Request): Promise<string | Response> {
         );
       }
       text += decoder.decode(value, { stream: true });
+    }
+    if (declaredBytes !== undefined && receivedBytes !== declaredBytes) {
+      return jsonError(400, 'VALIDATION_ERROR', 'Send a valid chat request.');
     }
     text += decoder.decode();
     return text;
