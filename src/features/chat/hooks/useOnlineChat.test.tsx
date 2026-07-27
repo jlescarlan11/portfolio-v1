@@ -12,6 +12,7 @@ import {
 } from '../server/contracts';
 import {
   API_ERROR_RESPONSE_TIMEOUT_MS,
+  MAX_CHAT_STREAM_RESPONSE_BYTES,
   MAX_API_ERROR_RESPONSE_BYTES,
   useOnlineChat,
   WELCOME_MESSAGE
@@ -518,6 +519,28 @@ describe('useOnlineChat', () => {
 
     expect(cancelBody).toHaveBeenCalledOnce();
     expect(requestSignal?.aborted).toBe(true);
+  });
+
+  it('rejects an oversized declared stream without reading its body', async () => {
+    const response = successResponse();
+    response.headers.set(
+      'Content-Length',
+      String(MAX_CHAT_STREAM_RESPONSE_BYTES + 1)
+    );
+    const getReader = vi.spyOn(response.body!, 'getReader');
+    const cancelBody = vi.spyOn(response.body!, 'cancel');
+    vi.stubGlobal('fetch', vi.fn(async () => response));
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'protocol' })
+    );
+    expect(getReader).not.toHaveBeenCalled();
+    expect(cancelBody).toHaveBeenCalledOnce();
   });
 
   it('aborts an unterminated frame once its buffer exceeds the client cap', async () => {

@@ -16,6 +16,8 @@ const DEFAULT_RETRY_AFTER_SECONDS = 60;
 
 export const MAX_API_ERROR_RESPONSE_BYTES = 8 * 1024;
 export const API_ERROR_RESPONSE_TIMEOUT_MS = 2_000;
+export const MAX_CHAT_STREAM_RESPONSE_BYTES =
+  MAX_STREAM_FRAME_CHARACTERS * 4;
 
 export const WELCOME_MESSAGE: ChatMessage = {
   role: 'assistant',
@@ -123,6 +125,17 @@ function isJsonResponse(response: Response): boolean {
     ?.split(';', 1)[0]
     .trim()
     .toLowerCase() === 'application/json';
+}
+
+function hasAcceptableDeclaredStreamLength(response: Response): boolean {
+  const value = response.headers.get('content-length');
+  if (value === null) return true;
+  if (!/^\d+$/.test(value)) return false;
+
+  const bytes = Number(value);
+  return (
+    Number.isSafeInteger(bytes) && bytes <= MAX_CHAT_STREAM_RESPONSE_BYTES
+  );
 }
 
 function errorCodeFromStatus(status: number): string | undefined {
@@ -402,6 +415,11 @@ export function useOnlineChat(): UseOnlineChatResult {
         }
 
         if (!isChatStreamResponse(response)) {
+          void response.body?.cancel().catch(() => undefined);
+          throw new ChatProtocolError();
+        }
+
+        if (!hasAcceptableDeclaredStreamLength(response)) {
           void response.body?.cancel().catch(() => undefined);
           throw new ChatProtocolError();
         }
