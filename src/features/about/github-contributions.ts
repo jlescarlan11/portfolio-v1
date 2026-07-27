@@ -190,6 +190,9 @@ export async function getGitHubContributionData(
   try {
     return await getCachedGitHubContributionData(username);
   } catch {
+    console.warn(
+      'GitHub contribution data unavailable — contribution graph will not render.'
+    );
     return null;
   }
 }

@@ -2,8 +2,17 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   fetchGitHubContributionData,
   GITHUB_REQUEST_TIMEOUT_MS,
+  getGitHubContributionData,
   parseGitHubContributionData
 } from './github-contributions';
+
+const cacheMocks = vi.hoisted(() => ({
+  read: vi.fn()
+}));
+
+vi.mock('next/cache', () => ({
+  unstable_cache: vi.fn(() => cacheMocks.read)
+}));
 
 const validCalendar = {
   totalContributions: 7,
@@ -22,6 +31,9 @@ const validCalendar = {
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.unstubAllEnvs();
+  vi.restoreAllMocks();
+  cacheMocks.read.mockReset();
 });
 
 describe('GitHub contribution data', () => {
@@ -91,6 +103,22 @@ describe('GitHub contribution data', () => {
         data: { user: null }
       })
     ).toThrow('GitHub contribution data is unavailable.');
+  });
+
+  it('logs a sanitized warning when cached contribution data is unavailable', async () => {
+    const sensitive = 'SENSITIVE_GITHUB_PROVIDER_DETAIL';
+    vi.stubEnv('GITHUB_TOKEN', 'test-placeholder-token');
+    cacheMocks.read.mockRejectedValueOnce(new Error(sensitive));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    await expect(
+      getGitHubContributionData('jlescarlan11')
+    ).resolves.toBeNull();
+
+    expect(warn).toHaveBeenCalledWith(
+      'GitHub contribution data unavailable — contribution graph will not render.'
+    );
+    expect(JSON.stringify(warn.mock.calls)).not.toContain(sensitive);
   });
 
   it.each([
