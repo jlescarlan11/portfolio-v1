@@ -40,6 +40,11 @@ export function getHostedChatConfiguration(
     };
   }
 
+  const isNetlifyRuntime = Boolean(environment.SITE_ID?.trim());
+  if (isNetlifyRuntime || netlifyApiKey || netlifyBaseUrl) {
+    throw new ChatConfigurationError();
+  }
+
   const openAiApiKey = environment.OPENAI_API_KEY?.trim();
   const openAiBaseUrl = environment.OPENAI_BASE_URL?.trim();
   if (openAiApiKey) {

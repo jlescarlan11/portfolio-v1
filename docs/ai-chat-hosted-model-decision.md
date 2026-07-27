@@ -52,10 +52,12 @@ Production and deploy previews use Netlify-injected values:
 Local development can receive those values through `netlify dev`, or use
 `OPENAI_API_KEY` for the official OpenAI endpoint. `OPENAI_BASE_URL` is an
 optional override for a different OpenAI-compatible endpoint. The server
-prefers the collision-free Netlify pair so an existing provider-specific
-project setting cannot bypass the gateway. None of these values may use a
-`NEXT_PUBLIC_` prefix or appear in client code, logs, errors, fixtures, or
-committed environment files.
+prefers the collision-free Netlify pair and uses Netlify's reserved `SITE_ID`
+runtime variable to fail closed if the pair is missing or incomplete, so an
+existing provider-specific project setting cannot bypass the gateway.
+Provider-specific fallback credentials are accepted only outside Netlify.
+None of these values may use a `NEXT_PUBLIC_` prefix or appear in client code,
+logs, errors, fixtures, or committed environment files.
 
 The model and request budgets are application-owned constants:
 

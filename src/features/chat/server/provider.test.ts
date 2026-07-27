@@ -37,6 +37,7 @@ import { startHostedChat } from './provider';
 
 describe('startHostedChat', () => {
   beforeEach(() => {
+    vi.stubEnv('SITE_ID', '');
     vi.stubEnv('NETLIFY_AI_GATEWAY_KEY', '');
     vi.stubEnv('NETLIFY_AI_GATEWAY_BASE_URL', '');
     vi.stubEnv('OPENAI_API_KEY', 'test-placeholder-key');
@@ -104,6 +105,35 @@ describe('startHostedChat', () => {
       baseURL: 'https://netlify-gateway.invalid/v1',
       name: 'netlify-ai-gateway'
     });
+  });
+
+  it('fails closed on Netlify when the injected gateway pair is unavailable', () => {
+    vi.stubEnv('SITE_ID', 'netlify-site-id');
+
+    expect(() =>
+      startHostedChat({
+        messages: [{ role: 'user', content: 'Hello' }],
+        signal: new AbortController().signal
+      })
+    ).toThrow('Hosted chat configuration is unavailable.');
+    expect(mocks.createOpenAI).not.toHaveBeenCalled();
+    expect(mocks.streamText).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['gateway key only', 'netlify-test-placeholder-key', ''],
+    ['gateway base URL only', '', 'https://netlify-gateway.invalid/']
+  ])('rejects an incomplete %s configuration', (_name, apiKey, baseUrl) => {
+    vi.stubEnv('NETLIFY_AI_GATEWAY_KEY', apiKey);
+    vi.stubEnv('NETLIFY_AI_GATEWAY_BASE_URL', baseUrl);
+
+    expect(() =>
+      startHostedChat({
+        messages: [{ role: 'user', content: 'Hello' }],
+        signal: new AbortController().signal
+      })
+    ).toThrow('Hosted chat configuration is unavailable.');
+    expect(mocks.createOpenAI).not.toHaveBeenCalled();
   });
 
   it('uses the official OpenAI endpoint when the fallback key has no custom base URL', () => {
