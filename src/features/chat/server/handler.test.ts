@@ -535,6 +535,42 @@ describe('handleChatRequest', () => {
     );
   });
 
+  it('finishes the output-limit response without waiting for provider cleanup', async () => {
+    vi.useFakeTimers();
+    try {
+      const returnUpstream = vi.fn(
+        () => new Promise<IteratorResult<string>>(() => undefined)
+      );
+      const response = await handleChatRequest(request(validBody()), {
+        startChat: () => ({
+          iterator: {
+            next: async () => ({
+              done: false as const,
+              value: 'x'.repeat(MAX_STREAM_OUTPUT_BYTES + 1)
+            }),
+            return: returnUpstream
+          },
+          getCompletion: async () => ({
+            finishReason: 'stop'
+          })
+        })
+      });
+      let responseText: string | undefined;
+      void response.text().then(value => {
+        responseText = value;
+      });
+
+      await vi.advanceTimersByTimeAsync(50);
+
+      expect(responseText).toBe(
+        `${JSON.stringify({ type: 'finish', finishReason: 'length' })}\n`
+      );
+      expect(returnUpstream).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('normalizes an unrecognized provider finish reason before emitting it', async () => {
     const telemetry: ChatTelemetryEvent[] = [];
     const providerValue = `stop\n${'x'.repeat(2_000)}`;

@@ -107,6 +107,15 @@ function encodeFrame(frame: ChatStreamFrame): Uint8Array {
   return TEXT_ENCODER.encode(`${JSON.stringify(frame)}\n`);
 }
 
+function releaseHostedStream(hostedStream: HostedChatStream): void {
+  try {
+    const cleanup = hostedStream.iterator.return?.();
+    void cleanup?.catch(() => undefined);
+  } catch {
+    // The abort signal is authoritative for best-effort upstream cleanup.
+  }
+}
+
 function isNamedError(error: unknown, name: string): boolean {
   return error instanceof Error && error.name === name;
 }
@@ -323,15 +332,11 @@ function createStreamResponse(
           return true;
         };
 
-        const stopAtOutputLimit = async (): Promise<void> => {
+        const stopAtOutputLimit = (): void => {
           abortController.abort(
             new DOMException('Provider output exceeded the response limit.', 'AbortError')
           );
-          try {
-            await hostedStream.iterator.return?.();
-          } catch {
-            // The abort signal is authoritative for upstream cleanup.
-          }
+          releaseHostedStream(hostedStream);
           emitOutcome('output_limit', { finishReason: 'length' });
           controller.enqueue(
             encodeFrame({ type: 'finish', finishReason: 'length' })
@@ -343,7 +348,7 @@ function createStreamResponse(
         try {
           if (!firstChunk.done && firstChunk.value) {
             if (!enqueueDelta(firstChunk.value)) {
-              await stopAtOutputLimit();
+              stopAtOutputLimit();
               return;
             }
           }
@@ -355,7 +360,7 @@ function createStreamResponse(
           while (!nextChunk.done) {
             if (nextChunk.value) {
               if (!enqueueDelta(nextChunk.value)) {
-                await stopAtOutputLimit();
+                stopAtOutputLimit();
                 return;
               }
             }
@@ -423,18 +428,12 @@ function createStreamResponse(
     },
     cancel(): void {
       abortController.abort(new DOMException('Client cancelled the stream.', 'AbortError'));
-      try {
-        const cleanup = hostedStream.iterator.return?.();
-        void cleanup?.catch(() => undefined);
-      } catch {
-        // Cancellation cleanup is best-effort; the abort signal is authoritative.
-      } finally {
-        if (!completed) {
-          emitOutcome('cancelled', { errorCategory: 'cancelled' });
-          completed = true;
-        }
-        removeAbortListener();
+      releaseHostedStream(hostedStream);
+      if (!completed) {
+        emitOutcome('cancelled', { errorCategory: 'cancelled' });
+        completed = true;
       }
+      removeAbortListener();
     }
   });
 
