@@ -914,6 +914,50 @@ describe('handleChatRequest', () => {
     }
   });
 
+  it('rejects a non-string provider chunk as a protocol failure', async () => {
+    let providerSignal: AbortSignal | undefined;
+    let nextCall = 0;
+    const telemetry: ChatTelemetryEvent[] = [];
+    const returnUpstream = vi.fn(async () => ({
+      done: true as const,
+      value: undefined
+    }));
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: ({ signal }) => {
+        providerSignal = signal;
+        return {
+          iterator: {
+            next: async () => {
+              nextCall += 1;
+              return nextCall === 1
+                ? { done: false as const, value: 123 as unknown as string }
+                : { done: true as const, value: undefined };
+            },
+            return: returnUpstream
+          },
+          getCompletion: async () => ({ finishReason: 'stop' })
+        };
+      },
+      writeTelemetry: event => telemetry.push(event)
+    });
+
+    expect(await readFrames(response)).toEqual([
+      {
+        type: 'error',
+        code: 'STREAM_ERROR',
+        message: 'The AI service stopped responding. Please try again.'
+      }
+    ]);
+    expect(providerSignal?.aborted).toBe(true);
+    expect(returnUpstream).toHaveBeenCalledOnce();
+    expect(telemetry).toEqual([
+      expect.objectContaining({
+        status: 'failed',
+        errorCategory: 'provider_protocol'
+      })
+    ]);
+  });
+
   it('marks a provider length finish as an output-limit event', async () => {
     const telemetry: ChatTelemetryEvent[] = [];
     const response = await handleChatRequest(request(validBody()), {

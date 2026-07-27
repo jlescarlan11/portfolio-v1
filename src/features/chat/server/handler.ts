@@ -489,10 +489,15 @@ function createStreamResponse(
         };
 
         try {
-          if (!firstChunk.done && firstChunk.value) {
-            if (!enqueueDelta(firstChunk.value)) {
-              stopAtOutputLimit();
-              return;
+          if (!firstChunk.done) {
+            if (typeof firstChunk.value !== 'string') {
+              throw new ProviderStreamProtocolError();
+            }
+            if (firstChunk.value) {
+              if (!enqueueDelta(firstChunk.value)) {
+                stopAtOutputLimit();
+                return;
+              }
             }
           }
 
@@ -503,6 +508,9 @@ function createStreamResponse(
           while (!nextChunk.done) {
             providerChunkCount += 1;
             if (providerChunkCount > MAX_PROVIDER_CHUNK_COUNT) {
+              throw new ProviderStreamProtocolError();
+            }
+            if (typeof nextChunk.value !== 'string') {
               throw new ProviderStreamProtocolError();
             }
             if (nextChunk.value) {
