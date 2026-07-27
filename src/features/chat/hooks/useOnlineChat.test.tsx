@@ -9,7 +9,11 @@ import {
   MAX_STREAM_FRAME_CHARACTERS,
   MAX_STREAM_RESPONSE_CHARACTERS
 } from '../server/contracts';
-import { useOnlineChat, WELCOME_MESSAGE } from './useOnlineChat';
+import {
+  MAX_API_ERROR_RESPONSE_BYTES,
+  useOnlineChat,
+  WELCOME_MESSAGE
+} from './useOnlineChat';
 
 function frame(value: unknown): string {
   return `${JSON.stringify(value)}\n`;
@@ -241,6 +245,46 @@ describe('useOnlineChat', () => {
       ]);
     }
   );
+
+  it('bounds a chunked API error body that never closes', async () => {
+    const cancelBody = vi.fn();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller): void {
+              controller.enqueue(
+                new TextEncoder().encode(
+                  JSON.stringify({
+                    error: { code: 'RATE_LIMITED' },
+                    padding: 'x'.repeat(MAX_API_ERROR_RESPONSE_BYTES)
+                  })
+                )
+              );
+            },
+            cancel: cancelBody
+          }),
+          { status: 418 }
+        )
+      )
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    let sendPromise: Promise<void> | undefined;
+    act(() => {
+      sendPromise = result.current.send('Hello');
+    });
+
+    await waitFor(() => {
+      expect(result.current.error?.kind).toBe('unavailable');
+    });
+    await act(async () => {
+      await sendPromise;
+    });
+
+    expect(cancelBody).toHaveBeenCalledOnce();
+  });
 
   it('distinguishes an offline fetch failure', async () => {
     vi.spyOn(window.navigator, 'onLine', 'get').mockReturnValue(false);

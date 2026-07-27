@@ -13,6 +13,8 @@ const CLIENT_TIMEOUT_MS = 30_000;
 const MAX_CONTEXT_MESSAGES = 10;
 const DEFAULT_RETRY_AFTER_SECONDS = 60;
 
+export const MAX_API_ERROR_RESPONSE_BYTES = 8 * 1024;
+
 export const WELCOME_MESSAGE: ChatMessage = {
   role: 'assistant',
   content:
@@ -106,11 +108,38 @@ function parseRetryAfter(response: Response): number {
 }
 
 async function readApiErrorCode(response: Response): Promise<string | undefined> {
+  if (!response.body) return undefined;
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let receivedBytes = 0;
+  let text = '';
+
   try {
-    const body = (await response.json()) as ApiErrorBody;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      receivedBytes += value.byteLength;
+      if (receivedBytes > MAX_API_ERROR_RESPONSE_BYTES) {
+        void reader.cancel().catch(() => undefined);
+        return undefined;
+      }
+
+      text += decoder.decode(value, { stream: true });
+    }
+
+    text += decoder.decode();
+    const body = JSON.parse(text) as ApiErrorBody;
     return typeof body.error?.code === 'string' ? body.error.code : undefined;
   } catch {
     return undefined;
+  } finally {
+    try {
+      reader.releaseLock();
+    } catch {
+      // The response classification still has a safe status-code fallback.
+    }
   }
 }
 
