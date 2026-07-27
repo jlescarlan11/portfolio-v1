@@ -424,7 +424,16 @@ async function readRequestText(request: Request): Promise<string | Response> {
       : jsonError(400, 'VALIDATION_ERROR', 'Send a valid chat request.');
   }
 
-  const reader = request.body.getReader();
+  let reader: ReadableStreamDefaultReader<Uint8Array>;
+  try {
+    reader = request.body.getReader();
+  } catch {
+    return jsonError(
+      400,
+      'VALIDATION_ERROR',
+      'Check your conversation and try again.'
+    );
+  }
   const decoder = new TextDecoder('utf-8', { fatal: true });
   let receivedBytes = 0;
   let text = '';

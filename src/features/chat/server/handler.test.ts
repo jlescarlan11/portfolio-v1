@@ -205,6 +205,28 @@ describe('handleChatRequest', () => {
     expect(startChat).not.toHaveBeenCalled();
   });
 
+  it('rejects a pre-locked request body without throwing', async () => {
+    const body = new ReadableStream<Uint8Array>();
+    const bodyLock = body.getReader();
+    const inboundRequest = {
+      method: 'POST',
+      headers: new Headers({ 'Content-Type': 'application/json' }),
+      body,
+      signal: new AbortController().signal
+    } as Request;
+    const startChat = vi.fn<StartHostedChat>();
+
+    try {
+      const response = await handleChatRequest(inboundRequest, { startChat });
+
+      expect(response.status).toBe(400);
+      expect(startChat).not.toHaveBeenCalled();
+    } finally {
+      await bodyLock.cancel();
+      bodyLock.releaseLock();
+    }
+  });
+
   it('rejects an oversized declared body without reading or calling the provider', async () => {
     const startChat = vi.fn<StartHostedChat>();
     const telemetry: ChatTelemetryEvent[] = [];
