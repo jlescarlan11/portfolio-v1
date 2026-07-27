@@ -1317,6 +1317,44 @@ describe('useOnlineChat', () => {
     expect(requestSignal?.aborted).toBe(true);
   });
 
+  it('aborts a stream that makes no byte progress across many chunks', async () => {
+    let requestSignal: AbortSignal | null | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        requestSignal = init?.signal;
+        const encoder = new TextEncoder();
+        return new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller): void {
+              for (let index = 0; index < 64; index += 1) {
+                controller.enqueue(new Uint8Array());
+              }
+              controller.enqueue(
+                encoder.encode(
+                  frame({ type: 'text-delta', delta: 'Eventually' }) +
+                    frame({ type: 'finish', finishReason: 'stop' })
+                )
+              );
+              controller.close();
+            }
+          }),
+          { status: 200, headers: STREAM_RESPONSE_HEADERS }
+        );
+      })
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'protocol' })
+    );
+    expect(requestSignal?.aborted).toBe(true);
+  });
+
   it('aborts when many valid deltas exceed the assembled response cap', async () => {
     let requestSignal: AbortSignal | null | undefined;
     const delta = 'x'.repeat(1_024);

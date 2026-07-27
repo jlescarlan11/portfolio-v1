@@ -13,6 +13,7 @@ const CHAT_ENDPOINT = '/api/chat';
 const CLIENT_TIMEOUT_MS = 30_000;
 const MAX_CONTEXT_MESSAGES = 10;
 const DEFAULT_RETRY_AFTER_SECONDS = 60;
+const MAX_CONSECUTIVE_EMPTY_STREAM_CHUNKS = 32;
 
 export const MAX_API_ERROR_RESPONSE_BYTES = 8 * 1024;
 export const API_ERROR_RESPONSE_TIMEOUT_MS = 2_000;
@@ -627,6 +628,7 @@ export function useOnlineChat(): UseOnlineChatResult {
         let finishReason: string | null = null;
         let frameCount = 0;
         let receivedResponseBytes = 0;
+        let consecutiveEmptyChunks = 0;
 
         const processLine = (line: string): void => {
           frameCount += 1;
@@ -661,7 +663,19 @@ export function useOnlineChat(): UseOnlineChatResult {
 
         while (true) {
           const { done, value } = await reader.read();
-          receivedResponseBytes += value?.byteLength ?? 0;
+          const chunkBytes = value?.byteLength ?? 0;
+          if (!done && chunkBytes === 0) {
+            consecutiveEmptyChunks += 1;
+            if (
+              consecutiveEmptyChunks >
+              MAX_CONSECUTIVE_EMPTY_STREAM_CHUNKS
+            ) {
+              throw new ChatProtocolError();
+            }
+          } else {
+            consecutiveEmptyChunks = 0;
+          }
+          receivedResponseBytes += chunkBytes;
           if (
             receivedResponseBytes > MAX_CHAT_STREAM_RESPONSE_BYTES ||
             (declaredResponseBytes !== undefined &&
