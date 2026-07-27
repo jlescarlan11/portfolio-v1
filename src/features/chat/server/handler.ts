@@ -338,7 +338,7 @@ async function readRequestText(request: Request): Promise<string | Response> {
   }
 
   const reader = request.body.getReader();
-  const decoder = new TextDecoder();
+  const decoder = new TextDecoder('utf-8', { fatal: true });
   let receivedBytes = 0;
   let text = '';
   let timeoutId: ReturnType<typeof setTimeout> | undefined;

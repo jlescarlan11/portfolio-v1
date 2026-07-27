@@ -152,6 +152,37 @@ describe('handleChatRequest', () => {
     ]);
   });
 
+  it('rejects invalid request UTF-8 without calling the provider', async () => {
+    const encoder = new TextEncoder();
+    const prefix = encoder.encode(
+      '{"messages":[{"role":"user","content":"'
+    );
+    const suffix = encoder.encode('"}]}');
+    const bytes = new Uint8Array(prefix.length + suffix.length + 1);
+    bytes.set(prefix);
+    bytes[prefix.length] = 0xff;
+    bytes.set(suffix, prefix.length + 1);
+    const inboundRequest = {
+      method: 'POST',
+      headers: new Headers({ 'Content-Type': 'application/json' }),
+      body: new ReadableStream<Uint8Array>({
+        start(controller): void {
+          controller.enqueue(bytes);
+          controller.close();
+        }
+      }),
+      signal: new AbortController().signal
+    } as Request;
+    const startChat = vi.fn<StartHostedChat>(() =>
+      createHostedStream(['should not run'])
+    );
+
+    const response = await handleChatRequest(inboundRequest, { startChat });
+
+    expect(response.status).toBe(400);
+    expect(startChat).not.toHaveBeenCalled();
+  });
+
   it('rejects an oversized declared body without reading or calling the provider', async () => {
     const startChat = vi.fn<StartHostedChat>();
     const telemetry: ChatTelemetryEvent[] = [];
