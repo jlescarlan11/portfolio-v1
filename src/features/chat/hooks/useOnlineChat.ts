@@ -108,6 +108,14 @@ function parseRetryAfter(response: Response): number {
     : DEFAULT_RETRY_AFTER_SECONDS;
 }
 
+function isChatStreamResponse(response: Response): boolean {
+  return response.headers
+    .get('content-type')
+    ?.split(';', 1)[0]
+    .trim()
+    .toLowerCase() === 'application/x-ndjson';
+}
+
 function errorCodeFromStatus(status: number): string | undefined {
   if (status === 400 || status === 413) return 'VALIDATION_ERROR';
   if (status === 429) return 'RATE_LIMITED';
@@ -364,6 +372,11 @@ export function useOnlineChat(): UseOnlineChatResult {
           }
           setError(classified);
           return;
+        }
+
+        if (!isChatStreamResponse(response)) {
+          void response.body?.cancel().catch(() => undefined);
+          throw new ChatProtocolError();
         }
 
         if (!response.body) {

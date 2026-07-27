@@ -16,6 +16,10 @@ import {
   WELCOME_MESSAGE
 } from './useOnlineChat';
 
+const STREAM_RESPONSE_HEADERS = {
+  'Content-Type': 'application/x-ndjson'
+} as const;
+
 function frame(value: unknown): string {
   return `${JSON.stringify(value)}\n`;
 }
@@ -95,7 +99,7 @@ describe('useOnlineChat', () => {
             streamController = controller;
           }
         }),
-        { status: 200 }
+        { status: 200, headers: STREAM_RESPONSE_HEADERS }
       )
     );
     vi.stubGlobal('fetch', fetchMock);
@@ -173,7 +177,7 @@ describe('useOnlineChat', () => {
               streamController = controller;
             }
           }),
-          { status: 200 }
+          { status: 200, headers: STREAM_RESPONSE_HEADERS }
         )
       )
     );
@@ -402,6 +406,47 @@ describe('useOnlineChat', () => {
     expect(requestSignal?.aborted).toBe(true);
   });
 
+  it('rejects an unexpected success media type without reading its body', async () => {
+    let requestSignal: AbortSignal | null | undefined;
+    const cancelBody = vi.fn();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        requestSignal = init?.signal;
+        return new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller): void {
+              controller.enqueue(
+                new TextEncoder().encode('<html>gateway error</html>')
+              );
+            },
+            cancel: cancelBody
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'text/html; charset=utf-8' }
+          }
+        );
+      })
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    let sendPromise: Promise<void> | undefined;
+    act(() => {
+      sendPromise = result.current.send('Hello');
+    });
+
+    await waitFor(() => {
+      expect(result.current.error?.kind).toBe('protocol');
+    });
+    await act(async () => {
+      await sendPromise;
+    });
+
+    expect(cancelBody).toHaveBeenCalledOnce();
+    expect(requestSignal?.aborted).toBe(true);
+  });
+
   it('aborts an unterminated frame once its buffer exceeds the client cap', async () => {
     let requestSignal: AbortSignal | null | undefined;
     vi.stubGlobal(
@@ -422,7 +467,7 @@ describe('useOnlineChat', () => {
               );
             }
           }),
-          { status: 200 }
+          { status: 200, headers: STREAM_RESPONSE_HEADERS }
         );
       })
     );
@@ -468,7 +513,7 @@ describe('useOnlineChat', () => {
               );
             }
           }),
-          { status: 200 }
+          { status: 200, headers: STREAM_RESPONSE_HEADERS }
         );
       })
     );
@@ -770,7 +815,7 @@ describe('useOnlineChat', () => {
             );
           }
         }),
-        { status: 200 }
+        { status: 200, headers: STREAM_RESPONSE_HEADERS }
       );
     });
     vi.stubGlobal('fetch', fetchMock);
@@ -804,7 +849,7 @@ describe('useOnlineChat', () => {
               );
             }
           }),
-          { status: 200 }
+          { status: 200, headers: STREAM_RESPONSE_HEADERS }
         );
       })
     );
