@@ -6,6 +6,7 @@ export const MAX_MESSAGE_COUNT = 12;
 export const MAX_USER_CHARACTERS = 2_000;
 export const MAX_CONTEXT_TOKENS = 8_000;
 export const MAX_OUTPUT_TOKENS = 256;
+export const MAX_PROVIDER_CHUNK_COUNT = 512;
 export const MAX_STREAM_OUTPUT_BYTES = 16 * 1024;
 export const REQUEST_BODY_TIMEOUT_MS = 5_000;
 export const COMPLETION_TIMEOUT_MS = 5_000;

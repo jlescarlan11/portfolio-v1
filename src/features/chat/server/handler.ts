@@ -3,6 +3,7 @@ import { CHAT_SYSTEM_PROMPT } from '../content';
 import {
   ChatConfigurationError,
   COMPLETION_TIMEOUT_MS,
+  MAX_PROVIDER_CHUNK_COUNT,
   MAX_REQUEST_BYTES,
   MAX_STREAM_OUTPUT_BYTES,
   PROVIDER_TIMEOUT_MS,
@@ -65,6 +66,13 @@ const FINISH_REASONS = new Set<FinishReason>([
   'error',
   'other'
 ]);
+
+class ProviderStreamProtocolError extends Error {
+  constructor() {
+    super('Provider stream exceeded its protocol budget.');
+    this.name = 'ProviderStreamProtocolError';
+  }
+}
 
 function normalizeFinishReason(value: string): FinishReason {
   return FINISH_REASONS.has(value as FinishReason)
@@ -362,6 +370,7 @@ function createStreamResponse(
   ) => void
 ): Response {
   let completed = false;
+  let providerChunkCount = firstChunk.done ? 0 : 1;
   let streamedOutputBytes = 0;
 
   const stream = new ReadableStream<Uint8Array>({
@@ -402,6 +411,10 @@ function createStreamResponse(
             : await getNextHostedChunk(hostedStream);
 
           while (!nextChunk.done) {
+            providerChunkCount += 1;
+            if (providerChunkCount > MAX_PROVIDER_CHUNK_COUNT) {
+              throw new ProviderStreamProtocolError();
+            }
             if (nextChunk.value) {
               if (!enqueueDelta(nextChunk.value)) {
                 stopAtOutputLimit();
@@ -450,13 +463,17 @@ function createStreamResponse(
             return;
           }
 
+          const providerProtocolFailure =
+            error instanceof ProviderStreamProtocolError;
           const classified = classifyProviderError(error);
-          if (classified.category === 'timeout') {
+          if (classified.category === 'timeout' || providerProtocolFailure) {
             abortController.abort(error);
             releaseHostedStream(hostedStream);
           }
           emitOutcome(classified.telemetryStatus, {
-            errorCategory: classified.category
+            errorCategory: providerProtocolFailure
+              ? 'provider_protocol'
+              : classified.category
           });
           controller.enqueue(
             encodeFrame({

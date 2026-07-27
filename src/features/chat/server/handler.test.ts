@@ -4,6 +4,7 @@ import { CHAT_SYSTEM_PROMPT } from '../content';
 import {
   ChatConfigurationError,
   COMPLETION_TIMEOUT_MS,
+  MAX_PROVIDER_CHUNK_COUNT,
   MAX_REQUEST_BYTES,
   MAX_STREAM_OUTPUT_BYTES,
   PROVIDER_TIMEOUT_MS,
@@ -572,6 +573,62 @@ describe('handleChatRequest', () => {
         expect.objectContaining({
           status: 'failed',
           errorCategory: 'timeout'
+        })
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('aborts a provider stream that exceeds the chunk-count budget', async () => {
+    vi.useFakeTimers();
+    try {
+      let providerSignal: AbortSignal | undefined;
+      let nextCall = 0;
+      const telemetry: ChatTelemetryEvent[] = [];
+      const returnUpstream = vi.fn(async () => ({
+        done: true as const,
+        value: undefined
+      }));
+      const response = await handleChatRequest(request(validBody()), {
+        startChat: ({ signal }) => {
+          providerSignal = signal;
+          return {
+            iterator: {
+              next: async () => {
+                nextCall += 1;
+                if (nextCall <= MAX_PROVIDER_CHUNK_COUNT + 1) {
+                  return { done: false as const, value: '' };
+                }
+                return new Promise<IteratorResult<string>>(() => undefined);
+              },
+              return: returnUpstream
+            },
+            getCompletion: async () => ({ finishReason: 'stop' })
+          };
+        },
+        writeTelemetry: event => telemetry.push(event)
+      });
+      let responseText: string | undefined;
+      void response.text().then(value => {
+        responseText = value;
+      });
+
+      await vi.advanceTimersByTimeAsync(50);
+
+      expect(responseText).toBe(
+        `${JSON.stringify({
+          type: 'error',
+          code: 'STREAM_ERROR',
+          message: 'The AI service stopped responding. Please try again.'
+        })}\n`
+      );
+      expect(providerSignal?.aborted).toBe(true);
+      expect(returnUpstream).toHaveBeenCalledOnce();
+      expect(telemetry).toEqual([
+        expect.objectContaining({
+          status: 'failed',
+          errorCategory: 'provider_protocol'
         })
       ]);
     } finally {
