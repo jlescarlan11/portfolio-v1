@@ -27,10 +27,11 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
 
   const prevMsgCount = useRef(messages.length);
   useEffect(() => {
-    if (!bottomRef.current) return;
+    const bottom = bottomRef.current;
     const newMessage = messages.length !== prevMsgCount.current;
     prevMsgCount.current = messages.length;
-    bottomRef.current.scrollIntoView({
+    if (!bottom || typeof bottom.scrollIntoView !== 'function') return;
+    bottom.scrollIntoView({
       behavior: newMessage || !isStreaming ? 'smooth' : 'auto'
     });
   }, [messages, isStreaming]);

@@ -59,6 +59,42 @@ describe('ChatWindow', () => {
     expect(queryByText(/Download.*Start/i)).toBeNull();
   });
 
+  it('opens when scrollIntoView is unavailable', () => {
+    const descriptor = Object.getOwnPropertyDescriptor(
+      window.HTMLElement.prototype,
+      'scrollIntoView'
+    );
+    Object.defineProperty(window.HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      writable: true,
+      value: undefined
+    });
+
+    try {
+      const { getByRole, getByPlaceholderText } = render(
+        <ChatWindow onClose={vi.fn()} />
+      );
+
+      expect(
+        getByRole('dialog', { name: "John's AI Assistant" })
+      ).toBeInTheDocument();
+      expect(getByPlaceholderText(/ask a question/i)).toHaveFocus();
+    } finally {
+      if (descriptor) {
+        Object.defineProperty(
+          window.HTMLElement.prototype,
+          'scrollIntoView',
+          descriptor
+        );
+      } else {
+        Reflect.deleteProperty(
+          window.HTMLElement.prototype,
+          'scrollIntoView'
+        );
+      }
+    }
+  });
+
   it('trims and submits one non-empty message', () => {
     const { getByPlaceholderText, getByRole } = render(
       <ChatWindow onClose={vi.fn()} />
