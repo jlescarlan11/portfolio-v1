@@ -1,5 +1,6 @@
 export const HOSTED_CHAT_MODEL = 'gpt-5-nano';
 export const HOSTED_CHAT_REASONING = 'minimal' as const;
+export const HOSTED_CHAT_VERBOSITY = 'low' as const;
 export const MAX_REQUEST_BYTES = 16 * 1024;
 export const MAX_MESSAGE_COUNT = 12;
 export const MAX_USER_CHARACTERS = 2_000;

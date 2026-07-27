@@ -3,6 +3,7 @@ import { buildSystemPrompt } from '../content';
 import {
   HOSTED_CHAT_MODEL,
   HOSTED_CHAT_REASONING,
+  HOSTED_CHAT_VERBOSITY,
   MAX_OUTPUT_TOKENS,
   PROVIDER_TIMEOUT_MS
 } from './config';
@@ -63,6 +64,11 @@ describe('startHostedChat', () => {
         system: buildSystemPrompt(),
         messages,
         reasoning: HOSTED_CHAT_REASONING,
+        providerOptions: {
+          openai: {
+            textVerbosity: HOSTED_CHAT_VERBOSITY
+          }
+        },
         maxOutputTokens: MAX_OUTPUT_TOKENS,
         maxRetries: 0,
         abortSignal: signal,
