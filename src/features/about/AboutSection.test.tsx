@@ -33,6 +33,22 @@ describe('AboutSection progressive enhancement', () => {
     }
   });
 
+  it('nests subsection and timeline headings without skipping a level', () => {
+    render(<AboutSection content={aboutContent} />);
+
+    for (const name of ['Skills', 'Credentials', 'Experience', 'Education']) {
+      expect(
+        screen.getByRole('heading', { level: 3, name })
+      ).toBeInTheDocument();
+    }
+    expect(
+      screen.getByRole('heading', {
+        level: 4,
+        name: aboutContent.experience[0].title
+      })
+    ).toBeInTheDocument();
+  });
+
   it('renders declared skills even when they have no bespoke icon', () => {
     const markup = renderToStaticMarkup(<AboutSection content={aboutContent} />);
 
