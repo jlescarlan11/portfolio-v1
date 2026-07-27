@@ -26,6 +26,19 @@ describe('chat App Router fallback', () => {
     expect(handleChatRequest).not.toHaveBeenCalled();
   });
 
+  it('fails closed when only the Netlify runtime marker is available', async () => {
+    vi.stubEnv('SITE_ID', '');
+    vi.stubEnv('NETLIFY', 'true');
+    const request = new Request('https://example.com/api/chat', {
+      method: 'POST'
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(404);
+    expect(handleChatRequest).not.toHaveBeenCalled();
+  });
+
   it('retains the direct handler for local and non-Netlify runtimes', async () => {
     vi.stubEnv('SITE_ID', '');
     const request = new Request('http://localhost:3000/api/chat', {

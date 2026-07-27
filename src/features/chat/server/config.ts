@@ -23,6 +23,13 @@ export class ChatConfigurationError extends Error {
   }
 }
 
+export function isNetlifyRuntime(
+  environment: NodeJS.ProcessEnv = process.env
+): boolean {
+  return Boolean(environment.SITE_ID?.trim()) ||
+    environment.NETLIFY?.trim().toLowerCase() === 'true';
+}
+
 function validateSecureBaseUrl(baseUrl: string): string {
   try {
     const parsed = new URL(baseUrl);
@@ -60,8 +67,7 @@ export function getHostedChatConfiguration(
     };
   }
 
-  const isNetlifyRuntime = Boolean(environment.SITE_ID?.trim());
-  if (isNetlifyRuntime || netlifyApiKey || netlifyBaseUrl) {
+  if (isNetlifyRuntime(environment) || netlifyApiKey || netlifyBaseUrl) {
     throw new ChatConfigurationError();
   }
 

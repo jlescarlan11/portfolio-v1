@@ -1,10 +1,11 @@
 import { handleChatRequest } from '@/features/chat/server/handler';
+import { isNetlifyRuntime } from '@/features/chat/server/config';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
 export async function POST(request: Request): Promise<Response> {
-  if (process.env.SITE_ID?.trim()) {
+  if (isNetlifyRuntime()) {
     return new Response(null, {
       status: 404,
       headers: {

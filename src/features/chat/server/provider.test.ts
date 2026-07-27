@@ -39,6 +39,7 @@ const TEST_SYSTEM_PROMPT = 'Use this exact cached system prompt.';
 describe('startHostedChat', () => {
   beforeEach(() => {
     vi.stubEnv('SITE_ID', '');
+    vi.stubEnv('NETLIFY', '');
     vi.stubEnv('NETLIFY_AI_GATEWAY_KEY', '');
     vi.stubEnv('NETLIFY_AI_GATEWAY_BASE_URL', '');
     vi.stubEnv('OPENAI_API_KEY', 'test-placeholder-key');
@@ -115,6 +116,20 @@ describe('startHostedChat', () => {
 
   it('fails closed on Netlify when the injected gateway pair is unavailable', () => {
     vi.stubEnv('SITE_ID', 'netlify-site-id');
+
+    expect(() =>
+      startHostedChat({
+        messages: [{ role: 'user', content: 'Hello' }],
+        signal: new AbortController().signal,
+        systemPrompt: TEST_SYSTEM_PROMPT
+      })
+    ).toThrow('Hosted chat configuration is unavailable.');
+    expect(mocks.createOpenAI).not.toHaveBeenCalled();
+    expect(mocks.streamText).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when only the Netlify runtime marker is available', () => {
+    vi.stubEnv('NETLIFY', 'true');
 
     expect(() =>
       startHostedChat({
