@@ -74,6 +74,23 @@ class ProviderStreamProtocolError extends Error {
   }
 }
 
+function assertProviderChunkResult(
+  result: unknown
+): asserts result is IteratorResult<string> {
+  if (
+    typeof result !== 'object' ||
+    result === null ||
+    typeof (result as { done?: unknown }).done !== 'boolean'
+  ) {
+    throw new ProviderStreamProtocolError();
+  }
+
+  const chunk = result as { done: boolean; value?: unknown };
+  if (!chunk.done && typeof chunk.value !== 'string') {
+    throw new ProviderStreamProtocolError();
+  }
+}
+
 function normalizeFinishReason(value: string): FinishReason {
   return FINISH_REASONS.has(value as FinishReason)
     ? value as FinishReason
@@ -177,14 +194,16 @@ function getHostedCompletion(
   );
 }
 
-function getNextHostedChunk(
+async function getNextHostedChunk(
   hostedStream: HostedChatStream
 ): Promise<IteratorResult<string>> {
-  return withTimeout(
+  const result: unknown = await withTimeout(
     hostedStream.iterator.next(),
     PROVIDER_TIMEOUT_MS,
     'Provider stream chunk timed out.'
   );
+  assertProviderChunkResult(result);
+  return result;
 }
 
 function isNamedError(error: unknown, name: string): boolean {
@@ -490,9 +509,6 @@ function createStreamResponse(
 
         try {
           if (!firstChunk.done) {
-            if (typeof firstChunk.value !== 'string') {
-              throw new ProviderStreamProtocolError();
-            }
             if (firstChunk.value) {
               if (!enqueueDelta(firstChunk.value)) {
                 stopAtOutputLimit();
@@ -508,9 +524,6 @@ function createStreamResponse(
           while (!nextChunk.done) {
             providerChunkCount += 1;
             if (providerChunkCount > MAX_PROVIDER_CHUNK_COUNT) {
-              throw new ProviderStreamProtocolError();
-            }
-            if (typeof nextChunk.value !== 'string') {
               throw new ProviderStreamProtocolError();
             }
             if (nextChunk.value) {
@@ -695,9 +708,11 @@ export async function handleChatRequest(
           systemPrompt: CHAT_SYSTEM_PROMPT
         });
         pendingHostedStream = hostedStream;
+        const firstChunk: unknown = await hostedStream.iterator.next();
+        assertProviderChunkResult(firstChunk);
         return {
           hostedStream,
-          firstChunk: await hostedStream.iterator.next()
+          firstChunk
         };
       })(),
       PROVIDER_TIMEOUT_MS,
@@ -725,13 +740,17 @@ export async function handleChatRequest(
       return cancelledResponse();
     }
 
+    const providerProtocolFailure =
+      error instanceof ProviderStreamProtocolError;
     const classified = classifyProviderError(error, resolved.now());
-    if (classified.category === 'timeout') {
+    if (classified.category === 'timeout' || providerProtocolFailure) {
       abortController.abort(error);
       if (pendingHostedStream) releaseHostedStream(pendingHostedStream);
     }
     emitOutcome(classified.telemetryStatus, {
-      errorCategory: classified.category
+      errorCategory: providerProtocolFailure
+        ? 'provider_protocol'
+        : classified.category
     });
     return jsonError(
       classified.status,
