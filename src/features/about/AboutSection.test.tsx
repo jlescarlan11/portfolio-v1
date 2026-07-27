@@ -47,6 +47,11 @@ describe('AboutSection progressive enhancement', () => {
         name: aboutContent.experience[0].title
       })
     ).toBeInTheDocument();
+    for (const { category } of aboutContent.techCategories) {
+      expect(
+        screen.getByRole('heading', { level: 4, name: category })
+      ).toBeInTheDocument();
+    }
   });
 
   it('renders declared skills even when they have no bespoke icon', () => {

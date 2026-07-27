@@ -260,7 +260,7 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
                 <div key={category}>
                   <Typography
                     variant="caption"
-                    as="p"
+                    as="h4"
                     className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-foreground/25"
                   >
                     {category}
