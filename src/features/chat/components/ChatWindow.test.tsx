@@ -54,7 +54,7 @@ describe('ChatWindow', () => {
     expect(getByRole('dialog', { name: "John's AI Assistant" })).toBeTruthy();
     expect(getByText(/Hi! I'm John's AI assistant/)).toBeTruthy();
     expect(getByPlaceholderText(/ask a question/i)).toHaveFocus();
-    expect(getByText(/online/i)).toBeTruthy();
+    expect(getByText(/online/i)).toHaveClass('text-subtle-foreground');
     expect(queryByText(/WebGPU/i)).toBeNull();
     expect(queryByText(/Download.*Start/i)).toBeNull();
   });
@@ -125,7 +125,12 @@ describe('ChatWindow', () => {
       { role: 'user', content: 'Hello' },
       { role: 'assistant', content: '' }
     ];
-    const { container, getByLabelText, getByPlaceholderText } = render(
+    const {
+      container,
+      getByLabelText,
+      getByPlaceholderText,
+      getByText
+    } = render(
       <ChatWindow onClose={vi.fn()} />
     );
 
@@ -134,6 +139,7 @@ describe('ChatWindow', () => {
       'true'
     );
     expect(getByLabelText('Thinking')).toBeTruthy();
+    expect(getByText(/answering/i)).toHaveClass('text-subtle-foreground');
     expect(getByPlaceholderText(/ask a question/i)).toHaveProperty('disabled', true);
     expect(getByLabelText(/send message/i)).toHaveProperty('disabled', true);
   });

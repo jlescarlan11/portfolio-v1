@@ -81,11 +81,11 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
           </p>
           <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.12em]">
             {isStreaming ? (
-              <span className="text-foreground/50">● Answering</span>
+              <span className="text-subtle-foreground">● Answering</span>
             ) : error ? (
               <span className="text-subtle-foreground">● Attention</span>
             ) : (
-              <span className="text-foreground/50">● Online</span>
+              <span className="text-subtle-foreground">● Online</span>
             )}
           </p>
         </div>
