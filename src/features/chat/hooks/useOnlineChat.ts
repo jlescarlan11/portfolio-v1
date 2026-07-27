@@ -434,6 +434,7 @@ export function useOnlineChat(): UseOnlineChatResult {
         let sawFinish = false;
         let finishReason: string | null = null;
         let frameCount = 0;
+        let receivedResponseBytes = 0;
 
         const processLine = (line: string): void => {
           frameCount += 1;
@@ -468,6 +469,12 @@ export function useOnlineChat(): UseOnlineChatResult {
 
         while (true) {
           const { done, value } = await reader.read();
+          receivedResponseBytes += value?.byteLength ?? 0;
+          if (receivedResponseBytes > MAX_CHAT_STREAM_RESPONSE_BYTES) {
+            void reader.cancel().catch(() => undefined);
+            throw new ChatProtocolError();
+          }
+
           pendingLine += decoder.decode(value, { stream: !done });
           const lines = pendingLine.split('\n');
           pendingLine = lines.pop() ?? '';

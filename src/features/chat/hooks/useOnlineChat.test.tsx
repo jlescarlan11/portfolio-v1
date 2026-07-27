@@ -543,6 +543,44 @@ describe('useOnlineChat', () => {
     expect(cancelBody).toHaveBeenCalledOnce();
   });
 
+  it('aborts a chunked stream when its actual bytes exceed the transport cap', async () => {
+    let requestSignal: AbortSignal | null | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        requestSignal = init?.signal;
+        const padding = Array.from(
+          { length: 4 },
+          () => `${' '.repeat(MAX_STREAM_FRAME_CHARACTERS)}\n`
+        ).join('');
+        const body =
+          padding +
+          frame({ type: 'text-delta', delta: 'Hello' }) +
+          frame({ type: 'finish', finishReason: 'stop' });
+
+        return new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller): void {
+              controller.enqueue(new TextEncoder().encode(body));
+              controller.close();
+            }
+          }),
+          { status: 200, headers: STREAM_RESPONSE_HEADERS }
+        );
+      })
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'protocol' })
+    );
+    expect(requestSignal?.aborted).toBe(true);
+  });
+
   it('aborts an unterminated frame once its buffer exceeds the client cap', async () => {
     let requestSignal: AbortSignal | null | undefined;
     vi.stubGlobal(
