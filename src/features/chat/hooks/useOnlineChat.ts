@@ -105,9 +105,20 @@ function parseStreamFrame(line: string): ChatStreamFrame {
 }
 
 function parseRetryAfter(response: Response): number {
-  const value = Number(response.headers.get('retry-after'));
-  return Number.isFinite(value) && value > 0
-    ? Math.min(Math.ceil(value), 3_600)
+  const value = response.headers.get('retry-after');
+  if (value === null) return DEFAULT_RETRY_AFTER_SECONDS;
+
+  const delaySeconds = Number(value);
+  if (Number.isFinite(delaySeconds)) {
+    return delaySeconds > 0
+      ? Math.min(Math.ceil(delaySeconds), 3_600)
+      : DEFAULT_RETRY_AFTER_SECONDS;
+  }
+
+  const retryAt = Date.parse(value);
+  const dateDelaySeconds = Math.ceil((retryAt - Date.now()) / 1_000);
+  return Number.isFinite(dateDelaySeconds) && dateDelaySeconds > 0
+    ? Math.min(dateDelaySeconds, 3_600)
     : DEFAULT_RETRY_AFTER_SECONDS;
 }
 

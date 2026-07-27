@@ -274,6 +274,29 @@ describe('useOnlineChat', () => {
     expect(cancelBody).toHaveBeenCalledOnce();
   });
 
+  it('honors an HTTP-date Retry-After value', async () => {
+    vi.useFakeTimers();
+    const now = new Date('2026-01-01T00:00:00.000Z');
+    vi.setSystemTime(now);
+    const retryAt = new Date(now.getTime() + 10_000).toUTCString();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => errorResponse(429, 'RATE_LIMITED', retryAt))
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({
+        kind: 'rate_limit',
+        retryAfterSeconds: 10
+      })
+    );
+  });
+
   it('rejects a non-JSON API error without reading its response body', async () => {
     const response = new Response('<html>gateway error</html>', {
       status: 418,
