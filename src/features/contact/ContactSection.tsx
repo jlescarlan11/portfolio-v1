@@ -3,6 +3,7 @@ import SectionFrame from '@/shared/components/SectionFrame';
 import { Typography } from '@/shared/components/Typography';
 import { FadeIn } from '@/shared/components/FadeIn';
 import { TYPOGRAPHY_STYLES } from '@/shared/styles/shared';
+import { CopyEmailButton } from './CopyEmailButton';
 
 interface ContactSectionProps {
   content: ContactContent;
@@ -62,15 +63,7 @@ export default function ContactSection({
 
         {/* ── Secondary actions row ── */}
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          {/* Email address — copyable fallback */}
-          <Typography
-            variant="caption"
-            as="span"
-            className="font-mono text-[11px] text-subtle-foreground/60 select-all"
-            title="Click to select and copy"
-          >
-            {content.email}
-          </Typography>
+          <CopyEmailButton email={content.email} />
 
           <span
             className="hidden h-3 w-px bg-surface-divider sm:block"
