@@ -2,6 +2,8 @@
 
 **Date:** 2026-07-27
 
+**Pricing and limits rechecked:** 2026-07-28
+
 **Status:** Provisionally selected; release blocked on the live quality gate
 
 **Issues:** #6, #7, #8, #9, #10
@@ -29,6 +31,14 @@ Rates and model availability are provider-controlled and must be rechecked
 before a future model change. “Unlimited use” is not possible; this design
 instead bounds every request, rate-limits abusive clients, and exposes usage
 through Netlify's gateway monitoring.
+
+Netlify bills successful AI Gateway requests from actual token usage and
+converts each $1 of provider usage to 180 credits. At the application ceilings
+of 8,000 estimated input tokens and 256 output tokens, one `gpt-5-nano` request
+is budgeted at approximately $0.0005024 in model usage, or 0.090432 Netlify
+credits, before any future pricing change. This is a conservative calculation,
+not measured production usage; provider tokenization can differ and actual
+requests are normally lower.
 
 ## Server-only configuration
 
@@ -72,8 +82,20 @@ nominal threshold before the counter converges. The live verifier races two
 boundary requests, requires enforcement after propagation, waits for the
 advertised retry window, and confirms that traffic is accepted again. Treat the
 20-request limit as abuse protection rather than an exact account-budget
-control; the gateway's account limits and the 80% usage alert remain the
-authoritative cost backstops.
+control. Netlify's current `gpt-5-nano` account limits are 300,000 TPM on Free,
+600,000 TPM on Personal, and 900,000 TPM on Pro, with both input and output
+tokens counting toward the limit. The application budgets up to 165,120
+estimated tokens per minute for 20 sequential worst-case requests from one
+client, so a small number of independent clients can still exhaust the
+account-level allowance.
+
+Netlify's AI Credit Usage Limit is an Agent Runner control and does not stop AI
+Gateway traffic on self-serve plans. Netlify currently sends account-credit
+notifications at 50%, 75%, and 100%; on a Free plan the monthly credit limit is
+hard, while paid plans can exceed their included balance only when auto recharge
+is enabled. Keep auto recharge disabled when a hard account-credit ceiling is
+required. Credit exhaustion can pause every project on the account, so it is a
+last-resort ceiling rather than a chat-specific graceful fallback.
 
 The 8,000-token application limit is intentionally much smaller than the model
 and Netlify gateway context limits. It provides predictable cost and leaves
@@ -191,9 +213,10 @@ and billing. Application logs supplement it with request outcomes and latency.
 Operational counters are grouped by `status`: `success`, `failed`, `cancelled`,
 `output_limit`, `provider_quota`, and `application_rate_limited`. Review them
 alongside gateway token usage after each release and daily for the first seven
-days. The owner should configure an account credit-usage notification at 80% of
-the monthly budget where the current Netlify plan exposes that control; if it
-does not, the same threshold is a manual release checklist item. Investigate
+days. Confirm that the documented 50%, 75%, and 100% account-credit
+notifications reach the owner, review AI Gateway inference separately in
+account usage insights, and keep paid-plan auto recharge disabled unless the
+owner intentionally accepts spend beyond the selected credit tier. Investigate
 unexpected growth in output tokens or any sustained provider/application
 rate-limit events before increasing limits.
 
@@ -233,7 +256,11 @@ the assembled profile.
   https://docs.netlify.com/build/ai-gateway/overview/
 - Netlify AI model pricing:
   https://docs.netlify.com/manage/accounts-and-billing/billing/billing-for-credit-based-plans/pricing-for-ai-features/
+- Netlify credit limits and notifications:
+  https://www.netlify.com/pricing/
 - Netlify rate limiting:
   https://docs.netlify.com/manage/security/secure-access-to-sites/rate-limiting/
+- OpenAI `gpt-5-nano` pricing and provider rate limits:
+  https://developers.openai.com/api/docs/models/gpt-5-nano
 - Netlify Next.js support and response streaming:
   https://docs.netlify.com/build/frameworks/framework-setup-guides/nextjs/overview/

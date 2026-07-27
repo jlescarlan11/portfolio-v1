@@ -124,7 +124,10 @@ Application limits are deliberately conservative:
 Netlify's edge counter can admit requests that are already in flight at the
 boundary, so this is abuse protection rather than a strict billing cap. The
 live verifier checks convergence and retry-window recovery; gateway account
-limits and the documented 80% usage alert are the cost backstops.
+TPM limits and Netlify's documented 50%, 75%, and 100% account-credit
+notifications are the cost backstops. Netlify's Agent Runner AI Credit Usage
+Limit does not stop AI Gateway traffic, so keep paid-plan auto recharge disabled
+when a hard account-credit ceiling is required.
 
 Pre-stream errors use JSON with `400`, `413`, `429`, `503`, or `504`. A stream
 that fails after text begins ends with a sanitized error frame. Application
@@ -151,8 +154,8 @@ full contract and operational policy.
    may receive prompt content, and no gateway credential or legacy model asset
    may be present.
 6. After production release, repeat the corpus and review Netlify gateway usage,
-   application outcomes, and the 80% account-credit notification described in
-   the decision record.
+   application outcomes, and the account-credit notifications described in the
+   decision record.
 
 `CHAT_BASE_URL` is only the public preview/production origin; it is not a
 credential. The verification script makes seven real model requests, so do not
