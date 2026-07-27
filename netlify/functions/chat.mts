@@ -15,8 +15,10 @@ export const config = {
     to: '/api/chat/rate-limited',
     aggregateBy: ['ip', 'domain'],
     // Netlify requires inline config declarations to contain static literals.
-    // The companion test guards these values against server-config drift.
-    windowLimit: 20,
+    // It starts blocking after this count is exceeded, so 19 implements the
+    // product boundary of 20 allowed requests and a blocked request 21.
+    // The companion test guards this translation against server-config drift.
+    windowLimit: 19,
     windowSize: 60
   }
 };

@@ -13,7 +13,7 @@ describe('chat Netlify function', () => {
         action: 'rewrite',
         to: '/api/chat/rate-limited',
         aggregateBy: ['ip', 'domain'],
-        windowLimit: RATE_LIMIT_REQUESTS,
+        windowLimit: RATE_LIMIT_REQUESTS - 1,
         windowSize: RATE_LIMIT_WINDOW_SECONDS
       }
     });

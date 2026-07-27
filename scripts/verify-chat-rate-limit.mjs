@@ -26,7 +26,7 @@ if (!baseUrl) {
   } else {
     // Netlify's globally distributed counter can lag completed requests
     // briefly even after every response has reached the client.
-    await new Promise(resolve => setTimeout(resolve, 20_000));
+    await new Promise(resolve => setTimeout(resolve, 2_000));
 
     const limited = await sendInvalidRequest();
     const retryAfter = limited.headers.get('retry-after');

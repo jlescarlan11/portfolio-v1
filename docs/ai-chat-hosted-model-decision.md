@@ -60,6 +60,11 @@ The model and request budgets are application-owned constants:
 - Anonymous rate limit: 20 POST requests per IP and domain per 60 seconds
 - Rate-limit retry interval: 60 seconds
 
+Netlify begins blocking after its configured `windowLimit` is exceeded. The
+deployed rule therefore uses the static platform value `19`, which the live
+boundary verifier confirms as 20 allowed requests followed by a blocked request
+21.
+
 The 8,000-token application limit is intentionally much smaller than the model
 and Netlify gateway context limits. It provides predictable cost and leaves
 room for tokenizer-estimation differences.
