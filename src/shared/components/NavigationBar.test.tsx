@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import NavigationBar from './NavigationBar';
 
@@ -28,6 +28,7 @@ function rectangle(top: number): DOMRect {
 
 beforeEach(() => {
   vi.stubGlobal('React', React);
+  vi.stubGlobal('requestAnimationFrame', undefined);
   Object.defineProperty(window, 'scrollY', {
     configurable: true,
     value: 0,
@@ -84,5 +85,33 @@ describe('NavigationBar visibility', () => {
     fireEvent.scroll(window);
     expect(workLink).not.toHaveAttribute('aria-current');
     expect(aboutLink).toHaveAttribute('aria-current', 'location');
+  });
+
+  it('coalesces burst scroll events into one animation frame', () => {
+    let frameCallback: FrameRequestCallback | undefined;
+    const requestFrame = vi.fn((callback: FrameRequestCallback) => {
+      frameCallback = callback;
+      return 1;
+    });
+    vi.stubGlobal('requestAnimationFrame', requestFrame);
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+
+    render(<NavigationBar items={ITEMS} />);
+    const navigation = screen.getByRole('navigation', {
+      name: 'main navigation'
+    });
+    window.scrollY = 100;
+
+    fireEvent.scroll(window);
+    fireEvent.scroll(window);
+    fireEvent.scroll(window);
+
+    expect(requestFrame).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      frameCallback?.(0);
+    });
+
+    expect(navigation).toHaveAttribute('inert');
   });
 });

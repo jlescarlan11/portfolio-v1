@@ -20,7 +20,12 @@ export default function NavigationBar({
   const isClicked = useRef(false);
 
   useEffect(() => {
-    const handleScroll = (): void => {
+    const sectionIds = items
+      .map((item) => item.href.split('#')[1] ?? '')
+      .filter(Boolean);
+    let animationFrameId: number | null = null;
+
+    const updateNavigation = (): void => {
       const currentScrollY = window.scrollY;
 
       if (currentScrollY > lastScrollY.current && currentScrollY > 80 && !isClicked.current) {
@@ -32,18 +37,7 @@ export default function NavigationBar({
 
       setIsPastHero(currentScrollY > window.innerHeight * 0.5);
       lastScrollY.current = currentScrollY;
-    };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const sectionIds = items
-      .map((item) => item.href.split('#')[1] ?? '')
-      .filter(Boolean);
-
-    const updateActive = (): void => {
       const mid = window.innerHeight / 2;
       let active = '';
       for (const id of sectionIds) {
@@ -53,9 +47,30 @@ export default function NavigationBar({
       setActiveSection(active);
     };
 
-    window.addEventListener('scroll', updateActive, { passive: true });
-    updateActive();
-    return () => window.removeEventListener('scroll', updateActive);
+    const handleScroll = (): void => {
+      if (typeof window.requestAnimationFrame !== 'function') {
+        updateNavigation();
+        return;
+      }
+      if (animationFrameId !== null) return;
+
+      animationFrameId = window.requestAnimationFrame(() => {
+        animationFrameId = null;
+        updateNavigation();
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    updateNavigation();
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (
+        animationFrameId !== null
+        && typeof window.cancelAnimationFrame === 'function'
+      ) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+    };
   }, [items]);
 
   const pillBase = [
