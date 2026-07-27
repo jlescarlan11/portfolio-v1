@@ -1,8 +1,7 @@
 'use client';
 
 import type { JSX } from 'react';
-import React, { useEffect, useRef, useState } from 'react';
-import type { CSSProperties } from 'react';
+import React from 'react';
 import { FaAws, FaJava } from 'react-icons/fa6';
 import {
   SiDart,
@@ -166,38 +165,17 @@ interface TimelineRowProps {
 }
 
 function TimelineRow({ title, subtitle, startDate, endDate, isCurrent, bullets, staggerDelay = 0 }: TimelineRowProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLLIElement>(null);
   const start = formatMonthYear(startDate);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <li ref={ref} className="group relative py-7 first:pt-0 last:pb-0">
+    <li className="group relative py-7 first:pt-0 last:pb-0">
       <span
         className="absolute left-0 top-7 bottom-7 w-px bg-foreground/0 transition-all duration-300 group-hover:bg-foreground/10"
         aria-hidden="true"
       />
-      <div
-        className={[
-          'pl-0 transition-all duration-300 group-hover:pl-4',
-          isVisible ? 'animate-enter' : 'opacity-0'
-        ].join(' ')}
-        style={isVisible ? ({ '--enter-delay': `${staggerDelay}ms` } as CSSProperties) : {}}
+      <FadeIn
+        delay={staggerDelay}
+        className="pl-0 transition-all duration-300 group-hover:pl-4"
       >
         <div className="mb-1 flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
           <Typography
@@ -245,7 +223,7 @@ function TimelineRow({ title, subtitle, startDate, endDate, isCurrent, bullets, 
             ))}
           </ul>
         )}
-      </div>
+      </FadeIn>
     </li>
   );
 }
