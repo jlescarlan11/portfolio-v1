@@ -6,6 +6,7 @@ import {
   COMPLETION_TIMEOUT_MS,
   MAX_REQUEST_BYTES,
   MAX_STREAM_OUTPUT_BYTES,
+  PROVIDER_TIMEOUT_MS,
   REQUEST_BODY_TIMEOUT_MS
 } from './config';
 import type {
@@ -327,6 +328,55 @@ describe('handleChatRequest', () => {
       signal: expect.any(AbortSignal),
       systemPrompt: CHAT_SYSTEM_PROMPT
     });
+  });
+
+  it('times out when the first provider chunk never settles', async () => {
+    vi.useFakeTimers();
+    try {
+      let providerSignal: AbortSignal | undefined;
+      const telemetry: ChatTelemetryEvent[] = [];
+      const returnUpstream = vi.fn(async () => ({
+        done: true as const,
+        value: undefined
+      }));
+      let response: Response | undefined;
+      void handleChatRequest(request(validBody()), {
+        startChat: ({ signal }) => {
+          providerSignal = signal;
+          return {
+            iterator: {
+              next: () =>
+                new Promise<IteratorResult<string>>(() => undefined),
+              return: returnUpstream
+            },
+            getCompletion: async () => ({ finishReason: 'stop' })
+          };
+        },
+        writeTelemetry: event => telemetry.push(event)
+      }).then(value => {
+        response = value;
+      });
+
+      await vi.advanceTimersByTimeAsync(PROVIDER_TIMEOUT_MS);
+
+      expect(response?.status).toBe(504);
+      expect(await response?.json()).toEqual({
+        error: {
+          code: 'TIMEOUT',
+          message: 'The AI service took too long to respond. Please try again.'
+        }
+      });
+      expect(providerSignal?.aborted).toBe(true);
+      expect(returnUpstream).toHaveBeenCalledOnce();
+      expect(telemetry).toEqual([
+        expect.objectContaining({
+          status: 'failed',
+          errorCategory: 'timeout'
+        })
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('returns a sanitized unavailable response for missing server configuration', async () => {

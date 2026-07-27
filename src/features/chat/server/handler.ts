@@ -5,6 +5,7 @@ import {
   COMPLETION_TIMEOUT_MS,
   MAX_REQUEST_BYTES,
   MAX_STREAM_OUTPUT_BYTES,
+  PROVIDER_TIMEOUT_MS,
   REQUEST_BODY_TIMEOUT_MS
 } from './config';
 import type {
@@ -118,23 +119,35 @@ function releaseHostedStream(hostedStream: HostedChatStream): void {
   }
 }
 
-async function getHostedCompletion(
-  hostedStream: HostedChatStream
-): Promise<ChatCompletionMetadata> {
+async function withTimeout<T>(
+  operation: PromiseLike<T>,
+  timeoutMs: number,
+  message: string
+): Promise<T> {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<never>((_resolve, reject) => {
     timeoutId = setTimeout(() => {
-      const error = new Error('Provider completion metadata timed out.');
+      const error = new Error(message);
       error.name = 'TimeoutError';
       reject(error);
-    }, COMPLETION_TIMEOUT_MS);
+    }, timeoutMs);
   });
 
   try {
-    return await Promise.race([hostedStream.getCompletion(), timeout]);
+    return await Promise.race([Promise.resolve(operation), timeout]);
   } finally {
     if (timeoutId !== undefined) clearTimeout(timeoutId);
   }
+}
+
+function getHostedCompletion(
+  hostedStream: HostedChatStream
+): Promise<ChatCompletionMetadata> {
+  return withTimeout(
+    hostedStream.getCompletion(),
+    COMPLETION_TIMEOUT_MS,
+    'Provider completion metadata timed out.'
+  );
 }
 
 function isNamedError(error: unknown, name: string): boolean {
@@ -540,14 +553,25 @@ export async function handleChatRequest(
 
   const abortController = new AbortController();
   const removeAbortListener = linkAbortSignal(request.signal, abortController);
+  let pendingHostedStream: HostedChatStream | undefined;
 
   try {
-    const hostedStream = await resolved.startChat({
-      messages,
-      signal: abortController.signal,
-      systemPrompt: CHAT_SYSTEM_PROMPT
-    });
-    const firstChunk = await hostedStream.iterator.next();
+    const started = await withTimeout(
+      (async () => {
+        const hostedStream = await resolved.startChat({
+          messages,
+          signal: abortController.signal,
+          systemPrompt: CHAT_SYSTEM_PROMPT
+        });
+        pendingHostedStream = hostedStream;
+        return {
+          hostedStream,
+          firstChunk: await hostedStream.iterator.next()
+        };
+      })(),
+      PROVIDER_TIMEOUT_MS,
+      'Provider startup timed out.'
+    );
 
     if (abortController.signal.aborted) {
       emitOutcome('cancelled', { errorCategory: 'cancelled' });
@@ -556,8 +580,8 @@ export async function handleChatRequest(
     }
 
     return createStreamResponse(
-      hostedStream,
-      firstChunk,
+      started.hostedStream,
+      started.firstChunk,
       abortController,
       removeAbortListener,
       emitOutcome
@@ -571,6 +595,10 @@ export async function handleChatRequest(
     }
 
     const classified = classifyProviderError(error, resolved.now());
+    if (classified.category === 'timeout') {
+      abortController.abort(error);
+      if (pendingHostedStream) releaseHostedStream(pendingHostedStream);
+    }
     emitOutcome(classified.telemetryStatus, {
       errorCategory: classified.category
     });
