@@ -281,6 +281,14 @@ async function readRequestText(request: Request): Promise<string | Response> {
 
   let declaredBytes: number | undefined;
   const declaredLength = request.headers.get('content-length');
+  if (
+    declaredLength !== null &&
+    request.headers.has('transfer-encoding')
+  ) {
+    cancelUnreadRequestBody(request);
+    return jsonError(400, 'VALIDATION_ERROR', 'Send a valid chat request.');
+  }
+
   if (declaredLength !== null) {
     const normalizedLength = declaredLength.trim();
     if (!/^\d+$/.test(normalizedLength)) {

@@ -203,6 +203,33 @@ describe('handleChatRequest', () => {
     expect(startChat).not.toHaveBeenCalled();
   });
 
+  it('rejects conflicting length and transfer framing before reading', async () => {
+    const startChat = vi.fn<StartHostedChat>();
+    const encodedBody = new TextEncoder().encode(validBody());
+    const body = new ReadableStream<Uint8Array>({
+      start(controller): void {
+        controller.enqueue(encodedBody);
+        controller.close();
+      }
+    });
+    const getReader = vi.spyOn(body, 'getReader');
+    const inboundRequest = {
+      headers: new Headers({
+        'Content-Length': String(encodedBody.byteLength),
+        'Content-Type': 'application/json',
+        'Transfer-Encoding': 'chunked'
+      }),
+      body,
+      signal: new AbortController().signal
+    } as Request;
+
+    const response = await handleChatRequest(inboundRequest, { startChat });
+
+    expect(response.status).toBe(400);
+    expect(getReader).not.toHaveBeenCalled();
+    expect(startChat).not.toHaveBeenCalled();
+  });
+
   it('cancels an unread body when its declared length is oversized', async () => {
     const startChat = vi.fn<StartHostedChat>();
     const cancelBody = vi.fn();
