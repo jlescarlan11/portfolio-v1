@@ -1,4 +1,4 @@
-import { APICallError } from 'ai';
+import { APICallError, type FinishReason } from 'ai';
 import { CHAT_SYSTEM_PROMPT } from '../content';
 import {
   ChatConfigurationError,
@@ -45,6 +45,20 @@ const DEFAULT_DEPENDENCIES: ChatHandlerDependencies = {
 };
 
 const STREAM_ERROR_MESSAGE = 'The AI service stopped responding. Please try again.';
+const FINISH_REASONS = new Set<FinishReason>([
+  'stop',
+  'length',
+  'content-filter',
+  'tool-calls',
+  'error',
+  'other'
+]);
+
+function normalizeFinishReason(value: string): FinishReason {
+  return FINISH_REASONS.has(value as FinishReason)
+    ? value as FinishReason
+    : 'other';
+}
 
 function jsonError(
   status: number,
@@ -255,7 +269,8 @@ function createStreamResponse(
           }
 
           const completion = await hostedStream.getCompletion();
-          if (completion.finishReason === 'error') {
+          const finishReason = normalizeFinishReason(completion.finishReason);
+          if (finishReason === 'error') {
             emitOutcome('failed', { errorCategory: 'provider' });
             controller.enqueue(
               encodeFrame({
@@ -269,16 +284,16 @@ function createStreamResponse(
             return;
           }
 
-          const reachedOutputLimit = completion.finishReason === 'length';
+          const reachedOutputLimit = finishReason === 'length';
           emitOutcome(reachedOutputLimit ? 'output_limit' : 'success', {
             inputTokens: completion.inputTokens,
             outputTokens: completion.outputTokens,
-            finishReason: completion.finishReason
+            finishReason
           });
           controller.enqueue(
             encodeFrame({
               type: 'finish',
-              finishReason: completion.finishReason
+              finishReason
             })
           );
           completed = true;

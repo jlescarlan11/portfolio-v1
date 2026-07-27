@@ -365,6 +365,32 @@ describe('handleChatRequest', () => {
     );
   });
 
+  it('normalizes an unrecognized provider finish reason before emitting it', async () => {
+    const telemetry: ChatTelemetryEvent[] = [];
+    const providerValue = `stop\n${'x'.repeat(2_000)}`;
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: () =>
+        createHostedStream(['Complete'], {
+          finishReason: providerValue,
+          inputTokens: 10,
+          outputTokens: 20
+        }),
+      writeTelemetry: event => telemetry.push(event)
+    });
+
+    expect(await readFrames(response)).toContainEqual({
+      type: 'finish',
+      finishReason: 'other'
+    });
+    expect(telemetry[0]).toEqual(
+      expect.objectContaining({
+        status: 'success',
+        finishReason: 'other'
+      })
+    );
+    expect(JSON.stringify(telemetry)).not.toContain(providerValue);
+  });
+
   it('treats a provider error finish as a sanitized failed stream', async () => {
     const telemetry: ChatTelemetryEvent[] = [];
     const response = await handleChatRequest(request(validBody()), {
