@@ -1,6 +1,7 @@
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render } from '@testing-library/react';
+import type { ChatClientError } from '../hooks/useOnlineChat';
 import type { ChatMessage } from '../server/contracts';
 import { ChatWindow } from './ChatWindow';
 
@@ -17,11 +18,7 @@ const hookResult = vi.hoisted(() => ({
   ] as ChatMessage[],
   isStreaming: false,
   retryBlocked: false,
-  error: null as {
-    kind: 'unavailable';
-    message: string;
-    canRetry: boolean;
-  } | null,
+  error: null as ChatClientError | null,
   send: vi.fn(async () => undefined),
   retry: vi.fn(async () => undefined),
   reset: vi.fn()
@@ -93,6 +90,24 @@ describe('ChatWindow', () => {
 
     fireEvent.click(getByRole('button', { name: /retry/i }));
     expect(hookResult.retry).toHaveBeenCalledOnce();
+  });
+
+  it('keeps input available without retrying a truncated answer', () => {
+    hookResult.error = {
+      kind: 'output_limit',
+      message: 'The answer was cut off. Please ask a more specific question.',
+      canRetry: false
+    };
+    const { getByPlaceholderText, getByText, queryByRole } = render(
+      <ChatWindow onClose={vi.fn()} />
+    );
+
+    expect(getByText(/answer was cut off/i)).toBeTruthy();
+    expect(queryByRole('button', { name: /retry/i })).toBeNull();
+    expect(getByPlaceholderText(/ask a question/i)).not.toHaveProperty(
+      'disabled',
+      true
+    );
   });
 
   it('resets active chat state before closing', () => {

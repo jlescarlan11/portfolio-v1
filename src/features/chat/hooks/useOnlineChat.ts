@@ -18,6 +18,7 @@ export type ChatClientErrorKind =
   | 'rate_limit'
   | 'offline'
   | 'timeout'
+  | 'output_limit'
   | 'unavailable'
   | 'network'
   | 'protocol';
@@ -314,6 +315,7 @@ export function useOnlineChat(): UseOnlineChatResult {
         const decoder = new TextDecoder();
         let pendingLine = '';
         let sawFinish = false;
+        let finishReason: string | null = null;
 
         const processLine = (line: string): void => {
           if (!line.trim()) return;
@@ -333,6 +335,7 @@ export function useOnlineChat(): UseOnlineChatResult {
 
           if (sawFinish) throw new ChatProtocolError();
           sawFinish = true;
+          finishReason = frame.finishReason;
         };
 
         while (true) {
@@ -360,6 +363,15 @@ export function useOnlineChat(): UseOnlineChatResult {
         flushBufferedText();
 
         if (operationId !== operationIdRef.current) return;
+        if (finishReason === 'length') {
+          failedConversationRef.current = conversation;
+          setError({
+            kind: 'output_limit',
+            message: 'The answer was cut off. Please ask a more specific question.',
+            canRetry: false
+          });
+          return;
+        }
         successfulConversationRef.current = [
           ...conversation,
           { role: 'assistant', content: fullAssistantResponse }

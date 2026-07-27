@@ -436,6 +436,33 @@ describe('useOnlineChat', () => {
     });
   });
 
+  it('reports output-token exhaustion instead of accepting truncated text as success', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        streamResponse([
+          frame({ type: 'text-delta', delta: 'Truncated answer' }),
+          frame({ type: 'finish', finishReason: 'length' })
+        ])
+      )
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Tell me everything.');
+    });
+
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'assistant',
+      content: 'Truncated answer'
+    });
+    expect(result.current.error).toEqual({
+      kind: 'output_limit',
+      message: 'The answer was cut off. Please ask a more specific question.',
+      canRetry: false
+    });
+  });
+
   it('retries the same failed request without duplicating the user message', async () => {
     const fetchMock = vi
       .fn()
