@@ -1,5 +1,6 @@
 export type ChatRole = 'user' | 'assistant';
 export const MAX_STREAM_FRAME_CHARACTERS = 128 * 1024;
+export const MAX_STREAM_FRAME_COUNT = 512;
 export const MAX_STREAM_RESPONSE_CHARACTERS = 64 * 1024;
 
 export interface ChatMessage {

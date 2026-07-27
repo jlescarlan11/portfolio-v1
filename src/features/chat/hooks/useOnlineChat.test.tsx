@@ -7,6 +7,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   MAX_STREAM_FRAME_CHARACTERS,
+  MAX_STREAM_FRAME_COUNT,
   MAX_STREAM_RESPONSE_CHARACTERS
 } from '../server/contracts';
 import {
@@ -413,6 +414,52 @@ describe('useOnlineChat', () => {
             start(controller): void {
               controller.enqueue(
                 encoder.encode('x'.repeat(MAX_STREAM_FRAME_CHARACTERS + 1))
+              );
+              requestSignal?.addEventListener(
+                'abort',
+                () => controller.error(requestSignal?.reason),
+                { once: true }
+              );
+            }
+          }),
+          { status: 200 }
+        );
+      })
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    let sendPromise: Promise<void> | undefined;
+    act(() => {
+      sendPromise = result.current.send('Hello');
+    });
+
+    await waitFor(() => {
+      expect(result.current.error?.kind).toBe('protocol');
+    });
+    await act(async () => {
+      await sendPromise;
+    });
+
+    expect(requestSignal?.aborted).toBe(true);
+  });
+
+  it('aborts a stream that exceeds the protocol frame count', async () => {
+    let requestSignal: AbortSignal | null | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        requestSignal = init?.signal;
+        const encoder = new TextEncoder();
+        return new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller): void {
+              controller.enqueue(
+                encoder.encode(
+                  Array.from(
+                    { length: MAX_STREAM_FRAME_COUNT + 1 },
+                    () => frame({ type: 'text-delta', delta: '' })
+                  ).join('')
+                )
               );
               requestSignal?.addEventListener(
                 'abort',

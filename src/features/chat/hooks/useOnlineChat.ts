@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   MAX_STREAM_FRAME_CHARACTERS,
+  MAX_STREAM_FRAME_COUNT,
   MAX_STREAM_RESPONSE_CHARACTERS,
   type ChatMessage,
   type ChatStreamFrame
@@ -374,8 +375,13 @@ export function useOnlineChat(): UseOnlineChatResult {
         let pendingLine = '';
         let sawFinish = false;
         let finishReason: string | null = null;
+        let frameCount = 0;
 
         const processLine = (line: string): void => {
+          frameCount += 1;
+          if (frameCount > MAX_STREAM_FRAME_COUNT) {
+            throw new ChatProtocolError();
+          }
           if (!line.trim()) return;
           const frame = parseStreamFrame(line);
 
