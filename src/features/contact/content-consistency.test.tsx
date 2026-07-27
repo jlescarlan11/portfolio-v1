@@ -30,4 +30,20 @@ describe('contact identity consistency', () => {
     expect(systemPrompt).toContain(configuredEmail);
     expect(systemPrompt).not.toContain(DEFAULT_EMAIL);
   });
+
+  it.each([
+    ['   ', DEFAULT_EMAIL],
+    ['not-an-email', DEFAULT_EMAIL],
+    [' owner@example.com ', 'owner@example.com']
+  ])(
+    'normalizes configured email %j to %j',
+    async (configuredEmail, expectedEmail) => {
+      vi.stubEnv('NEXT_PUBLIC_CONTACT_EMAIL', configuredEmail);
+      vi.resetModules();
+
+      const { contactContent } = await import('./content');
+
+      expect(contactContent.email).toBe(expectedEmail);
+    }
+  );
 });
