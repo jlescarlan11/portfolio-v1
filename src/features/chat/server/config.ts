@@ -8,6 +8,7 @@ export const MAX_CONTEXT_TOKENS = 8_000;
 export const MAX_OUTPUT_TOKENS = 256;
 export const MAX_STREAM_OUTPUT_BYTES = 16 * 1024;
 export const REQUEST_BODY_TIMEOUT_MS = 5_000;
+export const COMPLETION_TIMEOUT_MS = 5_000;
 export const PROVIDER_TIMEOUT_MS = 25_000;
 export const RATE_LIMIT_WINDOW_SECONDS = 60;
 export const RATE_LIMIT_REQUESTS = 20;

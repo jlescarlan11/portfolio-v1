@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { CHAT_SYSTEM_PROMPT } from '../content';
 import {
   ChatConfigurationError,
+  COMPLETION_TIMEOUT_MS,
   MAX_REQUEST_BYTES,
   MAX_STREAM_OUTPUT_BYTES,
   REQUEST_BODY_TIMEOUT_MS
@@ -566,6 +567,54 @@ describe('handleChatRequest', () => {
         `${JSON.stringify({ type: 'finish', finishReason: 'length' })}\n`
       );
       expect(returnUpstream).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('times out when provider completion metadata never settles', async () => {
+    vi.useFakeTimers();
+    try {
+      let providerSignal: AbortSignal | undefined;
+      const telemetry: ChatTelemetryEvent[] = [];
+      const response = await handleChatRequest(request(validBody()), {
+        startChat: ({ signal }) => {
+          providerSignal = signal;
+          return {
+            iterator: (async function* stream(): AsyncGenerator<string> {
+              yield 'Partial answer';
+            })(),
+            getCompletion: () =>
+              new Promise<ChatCompletionMetadata>(() => undefined)
+          };
+        },
+        writeTelemetry: event => telemetry.push(event)
+      });
+      let responseText: string | undefined;
+      void response.text().then(value => {
+        responseText = value;
+      });
+
+      await vi.advanceTimersByTimeAsync(COMPLETION_TIMEOUT_MS);
+
+      expect(responseText).toBe(
+        [
+          JSON.stringify({ type: 'text-delta', delta: 'Partial answer' }),
+          JSON.stringify({
+            type: 'error',
+            code: 'STREAM_ERROR',
+            message: 'The AI service stopped responding. Please try again.'
+          }),
+          ''
+        ].join('\n')
+      );
+      expect(providerSignal?.aborted).toBe(true);
+      expect(telemetry).toEqual([
+        expect.objectContaining({
+          status: 'failed',
+          errorCategory: 'timeout'
+        })
+      ]);
     } finally {
       vi.useRealTimers();
     }

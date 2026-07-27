@@ -2,11 +2,13 @@ import { APICallError, type FinishReason } from 'ai';
 import { CHAT_SYSTEM_PROMPT } from '../content';
 import {
   ChatConfigurationError,
+  COMPLETION_TIMEOUT_MS,
   MAX_REQUEST_BYTES,
   MAX_STREAM_OUTPUT_BYTES,
   REQUEST_BODY_TIMEOUT_MS
 } from './config';
 import type {
+  ChatCompletionMetadata,
   ChatErrorBody,
   ChatErrorCode,
   ChatStreamFrame,
@@ -113,6 +115,25 @@ function releaseHostedStream(hostedStream: HostedChatStream): void {
     void cleanup?.catch(() => undefined);
   } catch {
     // The abort signal is authoritative for best-effort upstream cleanup.
+  }
+}
+
+async function getHostedCompletion(
+  hostedStream: HostedChatStream
+): Promise<ChatCompletionMetadata> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_resolve, reject) => {
+    timeoutId = setTimeout(() => {
+      const error = new Error('Provider completion metadata timed out.');
+      error.name = 'TimeoutError';
+      reject(error);
+    }, COMPLETION_TIMEOUT_MS);
+  });
+
+  try {
+    return await Promise.race([hostedStream.getCompletion(), timeout]);
+  } finally {
+    if (timeoutId !== undefined) clearTimeout(timeoutId);
   }
 }
 
@@ -367,7 +388,7 @@ function createStreamResponse(
             nextChunk = await hostedStream.iterator.next();
           }
 
-          const completion = await hostedStream.getCompletion();
+          const completion = await getHostedCompletion(hostedStream);
           const finishReason = normalizeFinishReason(completion.finishReason);
           if (finishReason === 'error') {
             emitOutcome('failed', { errorCategory: 'provider' });
@@ -407,6 +428,10 @@ function createStreamResponse(
           }
 
           const classified = classifyProviderError(error);
+          if (classified.category === 'timeout') {
+            abortController.abort(error);
+            releaseHostedStream(hostedStream);
+          }
           emitOutcome(classified.telemetryStatus, {
             errorCategory: classified.category
           });
