@@ -484,6 +484,7 @@ async function readRequestText(request: Request): Promise<string | Response> {
     return text;
   } catch {
     if (request.signal.aborted) return cancelledResponse();
+    void reader.cancel().catch(() => undefined);
     return jsonError(400, 'VALIDATION_ERROR', 'Check your conversation and try again.');
   } finally {
     if (timeoutId !== undefined) clearTimeout(timeoutId);

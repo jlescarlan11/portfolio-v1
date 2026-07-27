@@ -183,6 +183,28 @@ describe('handleChatRequest', () => {
     expect(startChat).not.toHaveBeenCalled();
   });
 
+  it('cancels a request body that yields a non-byte chunk', async () => {
+    const cancelBody = vi.fn();
+    const inboundRequest = {
+      method: 'POST',
+      headers: new Headers({ 'Content-Type': 'application/json' }),
+      body: new ReadableStream<Uint8Array>({
+        start(controller): void {
+          controller.enqueue('not bytes' as unknown as Uint8Array);
+        },
+        cancel: cancelBody
+      }),
+      signal: new AbortController().signal
+    } as Request;
+    const startChat = vi.fn<StartHostedChat>();
+
+    const response = await handleChatRequest(inboundRequest, { startChat });
+
+    expect(response.status).toBe(400);
+    expect(cancelBody).toHaveBeenCalledOnce();
+    expect(startChat).not.toHaveBeenCalled();
+  });
+
   it('rejects an oversized declared body without reading or calling the provider', async () => {
     const startChat = vi.fn<StartHostedChat>();
     const telemetry: ChatTelemetryEvent[] = [];
