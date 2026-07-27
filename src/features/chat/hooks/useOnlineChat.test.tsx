@@ -272,6 +272,27 @@ describe('useOnlineChat', () => {
     expect(cancelBody).toHaveBeenCalledOnce();
   });
 
+  it('rejects a non-JSON API error without reading its response body', async () => {
+    const response = new Response('<html>gateway error</html>', {
+      status: 418,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' }
+    });
+    const getReader = vi.spyOn(response.body!, 'getReader');
+    const cancelBody = vi.spyOn(response.body!, 'cancel');
+    vi.stubGlobal('fetch', vi.fn(async () => response));
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'unavailable' })
+    );
+    expect(getReader).not.toHaveBeenCalled();
+    expect(cancelBody).toHaveBeenCalledOnce();
+  });
+
   it('bounds a chunked API error body that never closes', async () => {
     const cancelBody = vi.fn();
     vi.stubGlobal(

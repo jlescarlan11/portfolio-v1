@@ -116,6 +116,14 @@ function isChatStreamResponse(response: Response): boolean {
     .toLowerCase() === 'application/x-ndjson';
 }
 
+function isJsonResponse(response: Response): boolean {
+  return response.headers
+    .get('content-type')
+    ?.split(';', 1)[0]
+    .trim()
+    .toLowerCase() === 'application/json';
+}
+
 function errorCodeFromStatus(status: number): string | undefined {
   if (status === 400 || status === 413) return 'VALIDATION_ERROR';
   if (status === 429) return 'RATE_LIMITED';
@@ -124,6 +132,10 @@ function errorCodeFromStatus(status: number): string | undefined {
 }
 
 async function readApiErrorCode(response: Response): Promise<string | undefined> {
+  if (!isJsonResponse(response)) {
+    void response.body?.cancel().catch(() => undefined);
+    return undefined;
+  }
   if (!response.body) return undefined;
 
   const reader = response.body.getReader();
