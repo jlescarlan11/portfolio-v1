@@ -8,7 +8,8 @@ import chat, { config } from '../functions/chat.mts';
 describe('chat Netlify function', () => {
   it('declares a distributed IP-and-domain rule with the documented boundary', () => {
     expect(config).toEqual({
-      path: '/api/chat',
+      path: '/api/*',
+      excludedPath: '/api/chat/rate-limited',
       method: 'POST',
       rateLimit: {
         action: 'rewrite',
@@ -40,5 +41,34 @@ describe('chat Netlify function', () => {
         message: 'Check your conversation and try again.'
       }
     });
+  });
+
+  it.each(['/api/chat/', '/api//chat'])(
+    'normalizes the equivalent chat path %s before handling it',
+    async (path) => {
+      const response = await chat(
+        new Request(`https://example.com${path}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{'
+        }),
+        {}
+      );
+
+      expect(response.status).toBe(400);
+    }
+  );
+
+  it('rejects non-chat API paths before they reach the provider handler', async () => {
+    const response = await chat(
+      new Request('https://example.com/api/not-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{'
+      }),
+      {}
+    );
+
+    expect(response.status).toBe(404);
   });
 });
