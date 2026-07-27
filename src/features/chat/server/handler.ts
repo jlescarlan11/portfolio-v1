@@ -107,14 +107,31 @@ function parseProviderChunkResult(result: unknown): IteratorResult<string> {
   }
 }
 
-function assertProviderCompletion(
-  result: unknown
-): asserts result is ChatCompletionMetadata {
-  if (
-    typeof result !== 'object' ||
-    result === null ||
-    typeof (result as { finishReason?: unknown }).finishReason !== 'string'
-  ) {
+function parseProviderCompletion(result: unknown): ChatCompletionMetadata {
+  if (typeof result !== 'object' || result === null) {
+    throw new ProviderStreamProtocolError();
+  }
+
+  try {
+    const completion = result as {
+      finishReason?: unknown;
+      inputTokens?: unknown;
+      outputTokens?: unknown;
+    };
+    const finishReason = completion.finishReason;
+    if (typeof finishReason !== 'string') {
+      throw new ProviderStreamProtocolError();
+    }
+
+    const inputTokens = completion.inputTokens;
+    const outputTokens = completion.outputTokens;
+    return {
+      finishReason,
+      ...(typeof inputTokens === 'number' ? { inputTokens } : {}),
+      ...(typeof outputTokens === 'number' ? { outputTokens } : {})
+    };
+  } catch (error: unknown) {
+    if (error instanceof ProviderStreamProtocolError) throw error;
     throw new ProviderStreamProtocolError();
   }
 }
@@ -255,8 +272,7 @@ async function getHostedCompletion(
     COMPLETION_TIMEOUT_MS,
     'Provider completion metadata timed out.'
   );
-  assertProviderCompletion(result);
-  return result;
+  return parseProviderCompletion(result);
 }
 
 async function getNextHostedChunk(
