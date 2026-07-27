@@ -9,7 +9,6 @@ export default async function chatRateLimit(
 
 export const config: Config = {
   path: '/api/chat',
-  method: 'POST',
   rateLimit: {
     action: 'rewrite',
     to: '/api/chat/rate-limited',

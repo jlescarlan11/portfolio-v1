@@ -10,7 +10,6 @@ describe('chat rate limit edge function', () => {
   it('declares a distributed IP-and-domain rule with the documented boundary', () => {
     expect(config).toEqual({
       path: '/api/chat',
-      method: 'POST',
       rateLimit: {
         action: 'rewrite',
         to: '/api/chat/rate-limited',
