@@ -7,10 +7,5 @@ export const TYPOGRAPHY_STYLES = {
 } as const;
 
 export const SURFACE = {
-  hairline: 'border-surface',
-  hairlineStrong: 'border-surface-strong',
-  divider: 'bg-surface-divider',
-  subtle: 'text-muted-foreground',
-  muted: 'text-subtle-foreground',
-  quiet: 'text-subtle-foreground'
+  hairline: 'border-surface'
 } as const;
