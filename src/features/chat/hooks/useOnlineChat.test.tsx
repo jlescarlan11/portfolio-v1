@@ -983,6 +983,24 @@ describe('useOnlineChat', () => {
     expect(cancelBody).toHaveBeenCalledOnce();
   });
 
+  it('does not compare encoded Content-Length to decoded stream bytes', async () => {
+    const response = successResponse('A decoded response that is longer.');
+    response.headers.set('Content-Encoding', 'gzip');
+    response.headers.set('Content-Length', '20');
+    vi.stubGlobal('fetch', vi.fn(async () => response));
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toBeNull();
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'assistant',
+      content: 'A decoded response that is longer.'
+    });
+  });
+
   it('rejects a declared-empty success stream without waiting', async () => {
     vi.useFakeTimers();
     const cancelBody = vi.fn();

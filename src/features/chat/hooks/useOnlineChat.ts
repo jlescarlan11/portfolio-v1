@@ -184,6 +184,26 @@ function hasAcceptableDeclaredLength(
   return Number.isSafeInteger(bytes) && bytes <= maxBytes;
 }
 
+function getComparableDeclaredLength(response: Response): number | undefined {
+  const value = response.headers.get('content-length');
+  if (value === null) return undefined;
+
+  const bytes = Number(value);
+  if (bytes === 0) return 0;
+
+  const contentEncoding = response.headers.get('content-encoding');
+  if (
+    contentEncoding !== null &&
+    contentEncoding
+      .split(',')
+      .some(encoding => encoding.trim().toLowerCase() !== 'identity')
+  ) {
+    return undefined;
+  }
+
+  return bytes;
+}
+
 function errorCodeFromStatus(status: number): string | undefined {
   if (status === 400 || status === 413) return 'VALIDATION_ERROR';
   if (status === 429) return 'RATE_LIMITED';
@@ -203,9 +223,7 @@ async function readApiErrorCode(
     void response.body?.cancel().catch(() => undefined);
     return undefined;
   }
-  const declaredLength = response.headers.get('content-length');
-  const declaredResponseBytes =
-    declaredLength === null ? undefined : Number(declaredLength);
+  const declaredResponseBytes = getComparableDeclaredLength(response);
   if (declaredResponseBytes === 0) {
     void response.body?.cancel().catch(() => undefined);
     return undefined;
@@ -585,9 +603,7 @@ export function useOnlineChat(): UseOnlineChatResult {
           void response.body?.cancel().catch(() => undefined);
           throw new ChatProtocolError();
         }
-        const declaredLength = response.headers.get('content-length');
-        const declaredResponseBytes =
-          declaredLength === null ? undefined : Number(declaredLength);
+        const declaredResponseBytes = getComparableDeclaredLength(response);
         if (declaredResponseBytes === 0) {
           void response.body?.cancel().catch(() => undefined);
           throw new ChatProtocolError();
