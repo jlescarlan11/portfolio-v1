@@ -391,6 +391,29 @@ describe('handleChatRequest', () => {
     expect(JSON.stringify(telemetry)).not.toContain(providerValue);
   });
 
+  it('omits invalid provider token counts from telemetry', async () => {
+    const telemetry: ChatTelemetryEvent[] = [];
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: () =>
+        createHostedStream(['Complete'], {
+          finishReason: 'stop',
+          inputTokens: -1,
+          outputTokens: Number.POSITIVE_INFINITY
+        }),
+      writeTelemetry: event => telemetry.push(event)
+    });
+    await response.text();
+
+    expect(telemetry[0]).toEqual(
+      expect.objectContaining({
+        status: 'success',
+        finishReason: 'stop'
+      })
+    );
+    expect(telemetry[0]).not.toHaveProperty('inputTokens');
+    expect(telemetry[0]).not.toHaveProperty('outputTokens');
+  });
+
   it('treats a provider error finish as a sanitized failed stream', async () => {
     const telemetry: ChatTelemetryEvent[] = [];
     const response = await handleChatRequest(request(validBody()), {

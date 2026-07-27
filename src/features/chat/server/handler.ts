@@ -60,6 +60,14 @@ function normalizeFinishReason(value: string): FinishReason {
     : 'other';
 }
 
+function normalizeTokenCount(value: number | undefined): number | undefined {
+  return typeof value === 'number' &&
+    Number.isSafeInteger(value) &&
+    value >= 0
+    ? value
+    : undefined;
+}
+
 function jsonError(
   status: number,
   code: ChatErrorCode,
@@ -285,9 +293,11 @@ function createStreamResponse(
           }
 
           const reachedOutputLimit = finishReason === 'length';
+          const inputTokens = normalizeTokenCount(completion.inputTokens);
+          const outputTokens = normalizeTokenCount(completion.outputTokens);
           emitOutcome(reachedOutputLimit ? 'output_limit' : 'success', {
-            inputTokens: completion.inputTokens,
-            outputTokens: completion.outputTokens,
+            ...(inputTokens !== undefined ? { inputTokens } : {}),
+            ...(outputTokens !== undefined ? { outputTokens } : {}),
             finishReason
           });
           controller.enqueue(
