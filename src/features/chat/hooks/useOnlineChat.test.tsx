@@ -597,6 +597,54 @@ describe('useOnlineChat', () => {
     });
   });
 
+  it('settles the client deadline when a response reader ignores abort', async () => {
+    vi.useFakeTimers();
+    const cancelBody = vi.fn();
+    let streamController:
+      | ReadableStreamDefaultController<Uint8Array>
+      | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(
+            new ReadableStream<Uint8Array>({
+              start(controller): void {
+                streamController = controller;
+              },
+              cancel: cancelBody
+            }),
+            { status: 200, headers: STREAM_RESPONSE_HEADERS }
+          )
+      )
+    );
+    const { result } = renderHook(() => useOnlineChat());
+    let settled = false;
+
+    let sendPromise: Promise<void> | undefined;
+    act(() => {
+      sendPromise = result.current.send('Hello').finally(() => {
+        settled = true;
+      });
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(30_000);
+    });
+    const settledAtDeadline = settled;
+
+    if (!settled) streamController?.close();
+    await act(async () => {
+      await sendPromise;
+    });
+
+    expect(settledAtDeadline).toBe(true);
+    expect(cancelBody).toHaveBeenCalledOnce();
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'timeout' })
+    );
+  });
+
   it('treats malformed or interrupted NDJSON as a retryable protocol error', async () => {
     let requestSignal: AbortSignal | null | undefined;
     vi.stubGlobal(

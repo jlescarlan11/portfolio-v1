@@ -381,20 +381,21 @@ export function useOnlineChat(): UseOnlineChatResult {
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
       abortReasonRef.current = null;
+      let responseReader:
+        | ReadableStreamDefaultReader<Uint8Array>
+        | undefined;
       const timeoutId = window.setTimeout(() => {
         if (operationId !== operationIdRef.current) return;
         abortReasonRef.current = 'timeout';
         abortController.abort(
           new DOMException('The chat request timed out.', 'TimeoutError')
         );
+        void responseReader?.cancel().catch(() => undefined);
       }, CLIENT_TIMEOUT_MS);
 
       let fullAssistantResponse = '';
       let bufferedText = '';
       let animationFrameId: number | null = null;
-      let responseReader:
-        | ReadableStreamDefaultReader<Uint8Array>
-        | undefined;
 
       const flushBufferedText = (): void => {
         if (!bufferedText || operationId !== operationIdRef.current) return;
