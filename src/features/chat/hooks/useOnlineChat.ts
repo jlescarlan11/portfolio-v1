@@ -552,7 +552,12 @@ export function useOnlineChat(): UseOnlineChatResult {
           throw new ChatProtocolError();
         }
 
-        const reader = response.body.getReader();
+        let reader: ReadableStreamDefaultReader<Uint8Array>;
+        try {
+          reader = response.body.getReader();
+        } catch {
+          throw new ChatProtocolError();
+        }
         responseReader = reader;
         responseReaderRef.current = reader;
         const decoder = new TextDecoder('utf-8', { fatal: true });

@@ -616,6 +616,34 @@ describe('useOnlineChat', () => {
     });
   });
 
+  it('treats a locked success body as a protocol failure and aborts', async () => {
+    let requestSignal: AbortSignal | null | undefined;
+    let responseLock: ReadableStreamDefaultReader<Uint8Array> | undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        requestSignal = init?.signal;
+        const response = successResponse();
+        responseLock = response.body?.getReader();
+        return response;
+      })
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    try {
+      await act(async () => {
+        await result.current.send('Hello');
+      });
+
+      expect(result.current.error).toEqual(
+        expect.objectContaining({ kind: 'protocol', canRetry: true })
+      );
+      expect(requestSignal?.aborted).toBe(true);
+    } finally {
+      responseLock?.releaseLock();
+    }
+  });
+
   it('aborts a client-side timeout and exposes a retryable timeout error', async () => {
     vi.useFakeTimers();
     let requestSignal: AbortSignal | undefined;
