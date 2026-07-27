@@ -149,6 +149,38 @@ describe('handleChatRequest', () => {
     ]);
   });
 
+  it('does not wait for oversized body cancellation to settle', async () => {
+    vi.useFakeTimers();
+    try {
+      const startChat = vi.fn<StartHostedChat>();
+      const cancelBody = vi.fn(() => new Promise<void>(() => undefined));
+      const inboundRequest = {
+        headers: new Headers({ 'Content-Type': 'application/json' }),
+        body: new ReadableStream<Uint8Array>({
+          start(controller): void {
+            controller.enqueue(
+              new Uint8Array(MAX_REQUEST_BYTES + 1)
+            );
+          },
+          cancel: cancelBody
+        }),
+        signal: new AbortController().signal
+      } as Request;
+      let response: Response | undefined;
+      void handleChatRequest(inboundRequest, { startChat }).then(value => {
+        response = value;
+      });
+
+      await vi.advanceTimersByTimeAsync(50);
+
+      expect(response?.status).toBe(413);
+      expect(cancelBody).toHaveBeenCalledOnce();
+      expect(startChat).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('times out and cancels a request body that never closes', async () => {
     vi.useFakeTimers();
     const startChat = vi.fn<StartHostedChat>();
