@@ -64,7 +64,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
           handleClose();
         }
       }}
-      className="relative flex h-[min(520px,calc(100dvh-7rem))] w-80 flex-col overflow-hidden border border-surface bg-background shadow-2xl sm:w-96"
+      className="relative flex h-[min(520px,calc(100dvh-7rem))] w-[calc(100vw-3rem)] max-w-80 flex-col overflow-hidden border border-surface bg-background shadow-2xl sm:w-96 sm:max-w-none"
     >
       {/* corner brackets */}
       <span className="pointer-events-none absolute left-2 top-2 z-10 h-4 w-4 border-l border-t border-foreground/20" aria-hidden="true" />

@@ -95,6 +95,16 @@ describe('ChatWindow', () => {
     }
   });
 
+  it('reserves mobile viewport gutters before applying desktop widths', () => {
+    const { getByRole } = render(<ChatWindow onClose={vi.fn()} />);
+    const dialog = getByRole('dialog', { name: "John's AI Assistant" });
+
+    expect(dialog).toHaveClass('w-[calc(100vw-3rem)]');
+    expect(dialog).toHaveClass('max-w-80');
+    expect(dialog).toHaveClass('sm:w-96');
+    expect(dialog).toHaveClass('sm:max-w-none');
+  });
+
   it('trims and submits one non-empty message', () => {
     const { getByPlaceholderText, getByRole } = render(
       <ChatWindow onClose={vi.fn()} />
