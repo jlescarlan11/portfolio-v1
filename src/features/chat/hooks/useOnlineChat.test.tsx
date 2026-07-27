@@ -297,6 +297,31 @@ describe('useOnlineChat', () => {
     );
   });
 
+  it('uses the response date when the client clock is skewed', async () => {
+    vi.useFakeTimers();
+    const serverNow = new Date('2026-01-01T00:00:00.000Z');
+    vi.setSystemTime(new Date(serverNow.getTime() + 5 * 60_000));
+    const response = errorResponse(
+      429,
+      'RATE_LIMITED',
+      new Date(serverNow.getTime() + 10_000).toUTCString()
+    );
+    response.headers.set('Date', serverNow.toUTCString());
+    vi.stubGlobal('fetch', vi.fn(async () => response));
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({
+        kind: 'rate_limit',
+        retryAfterSeconds: 10
+      })
+    );
+  });
+
   it('rejects a non-JSON API error without reading its response body', async () => {
     const response = new Response('<html>gateway error</html>', {
       status: 418,

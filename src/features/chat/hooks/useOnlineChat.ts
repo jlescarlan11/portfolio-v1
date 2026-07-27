@@ -116,7 +116,11 @@ function parseRetryAfter(response: Response): number {
   }
 
   const retryAt = Date.parse(value);
-  const dateDelaySeconds = Math.ceil((retryAt - Date.now()) / 1_000);
+  const responseDate = Date.parse(response.headers.get('date') ?? '');
+  const referenceTime = Number.isFinite(responseDate)
+    ? responseDate
+    : Date.now();
+  const dateDelaySeconds = Math.ceil((retryAt - referenceTime) / 1_000);
   return Number.isFinite(dateDelaySeconds) && dateDelaySeconds > 0
     ? Math.min(dateDelaySeconds, 3_600)
     : DEFAULT_RETRY_AFTER_SECONDS;
