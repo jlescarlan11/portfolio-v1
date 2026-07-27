@@ -30,15 +30,15 @@ describe('ChatBubble', () => {
     expect(getByRole('button', { name: /open ai chat/i })).toBeTruthy();
   });
 
-  it('mounts ChatWindow when button is clicked', () => {
-    const { getByRole, getByText } = render(<ChatBubble />);
+  it('mounts ChatWindow when button is clicked', async () => {
+    const { getByRole } = render(<ChatBubble />);
     const launcher = getByRole('button', { name: /open ai chat/i });
     expect(launcher).toHaveAttribute('aria-expanded', 'false');
     expect(launcher).toHaveAttribute('aria-controls', 'portfolio-chat-window');
 
     fireEvent.click(launcher);
 
-    expect(getByText("John's AI Assistant")).toBeTruthy();
+    expect(await screen.findByText("John's AI Assistant")).toBeTruthy();
     expect(getByRole('dialog', { name: "John's AI Assistant" })).toHaveAttribute(
       'id',
       'portfolio-chat-window'
@@ -50,10 +50,10 @@ describe('ChatBubble', () => {
     expect(screen.getByPlaceholderText(/ask a question/i)).toHaveFocus();
   });
 
-  it('unmounts ChatWindow when close button is triggered', () => {
-    const { getByRole, getByLabelText, queryByTestId } = render(<ChatBubble />);
+  it('unmounts ChatWindow when close button is triggered', async () => {
+    const { getByRole, queryByTestId } = render(<ChatBubble />);
     fireEvent.click(getByRole('button', { name: /open ai chat/i }));
-    fireEvent.click(getByLabelText('Close chat'));
+    fireEvent.click(await screen.findByLabelText('Close chat'));
     expect(queryByTestId('chat-window-wrapper')).toBeNull();
     expect(getByRole('button', { name: /open ai chat/i })).toHaveFocus();
   });

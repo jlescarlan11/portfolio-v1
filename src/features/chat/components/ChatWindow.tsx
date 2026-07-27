@@ -3,8 +3,8 @@
 import React, { useEffect, useRef, useState, FormEvent } from 'react';
 import { useOnlineChat } from '../hooks/useOnlineChat';
 import { ChatMessage } from './ChatMessage';
+import { CHAT_WINDOW_ID } from './chat-window-contract';
 
-export const CHAT_WINDOW_ID = 'portfolio-chat-window';
 const CHAT_WINDOW_TITLE_ID = 'portfolio-chat-window-title';
 
 interface ChatWindowProps {

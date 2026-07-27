@@ -1,8 +1,14 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { RiRobot2Line } from 'react-icons/ri';
-import { CHAT_WINDOW_ID, ChatWindow } from './ChatWindow';
+import { CHAT_WINDOW_ID } from './chat-window-contract';
+
+const ChatWindow = dynamic(
+  () => import('./ChatWindow').then(module => module.ChatWindow),
+  { ssr: false }
+);
 
 export function ChatBubble() {
   const [isOpen, setIsOpen] = useState(false);
