@@ -102,6 +102,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
         <div
           className="no-scrollbar flex flex-1 flex-col gap-4 overflow-y-auto p-4"
           aria-live="polite"
+          aria-busy={isStreaming}
         >
           {messages.map((msg, i) => (
             <ChatMessage

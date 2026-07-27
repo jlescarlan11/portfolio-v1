@@ -39,10 +39,18 @@ describe('ChatWindow', () => {
   });
 
   it('opens ready with the welcome message and input on a non-WebGPU browser', () => {
-    const { getByRole, getByText, getByPlaceholderText, queryByText } = render(
-      <ChatWindow onClose={vi.fn()} />
-    );
+    const {
+      container,
+      getByRole,
+      getByText,
+      getByPlaceholderText,
+      queryByText
+    } = render(<ChatWindow onClose={vi.fn()} />);
 
+    expect(container.querySelector('[aria-live="polite"]')).toHaveAttribute(
+      'aria-busy',
+      'false'
+    );
     expect(getByRole('dialog', { name: "John's AI Assistant" })).toBeTruthy();
     expect(getByText(/Hi! I'm John's AI assistant/)).toBeTruthy();
     expect(getByPlaceholderText(/ask a question/i)).toHaveFocus();
@@ -71,10 +79,14 @@ describe('ChatWindow', () => {
       { role: 'user', content: 'Hello' },
       { role: 'assistant', content: '' }
     ];
-    const { getByLabelText, getByPlaceholderText } = render(
+    const { container, getByLabelText, getByPlaceholderText } = render(
       <ChatWindow onClose={vi.fn()} />
     );
 
+    expect(container.querySelector('[aria-live="polite"]')).toHaveAttribute(
+      'aria-busy',
+      'true'
+    );
     expect(getByLabelText('Thinking')).toBeTruthy();
     expect(getByPlaceholderText(/ask a question/i)).toHaveProperty('disabled', true);
     expect(getByLabelText(/send message/i)).toHaveProperty('disabled', true);
