@@ -936,6 +936,34 @@ describe('handleChatRequest', () => {
     );
   });
 
+  it('treats a content-filter finish as a sanitized failed stream', async () => {
+    const telemetry: ChatTelemetryEvent[] = [];
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: () =>
+        createHostedStream(['Partial'], {
+          finishReason: 'content-filter',
+          inputTokens: 10,
+          outputTokens: 1
+        }),
+      writeTelemetry: event => telemetry.push(event)
+    });
+
+    expect(await readFrames(response)).toEqual([
+      { type: 'text-delta', delta: 'Partial' },
+      {
+        type: 'error',
+        code: 'STREAM_ERROR',
+        message: 'The AI service stopped responding. Please try again.'
+      }
+    ]);
+    expect(telemetry).toEqual([
+      expect.objectContaining({
+        status: 'failed',
+        errorCategory: 'provider'
+      })
+    ]);
+  });
+
   it('stops provider output that exceeds the independent stream byte cap', async () => {
     const telemetry: ChatTelemetryEvent[] = [];
     let providerSignal: AbortSignal | undefined;
@@ -1113,7 +1141,7 @@ describe('handleChatRequest', () => {
     }
   });
 
-  it('normalizes an unrecognized provider finish reason before emitting it', async () => {
+  it('sanitizes an unrecognized provider finish reason as a failed stream', async () => {
     const telemetry: ChatTelemetryEvent[] = [];
     const providerValue = `stop\n${'x'.repeat(2_000)}`;
     const response = await handleChatRequest(request(validBody()), {
@@ -1126,14 +1154,18 @@ describe('handleChatRequest', () => {
       writeTelemetry: event => telemetry.push(event)
     });
 
-    expect(await readFrames(response)).toContainEqual({
-      type: 'finish',
-      finishReason: 'other'
-    });
+    expect(await readFrames(response)).toEqual([
+      { type: 'text-delta', delta: 'Complete' },
+      {
+        type: 'error',
+        code: 'STREAM_ERROR',
+        message: 'The AI service stopped responding. Please try again.'
+      }
+    ]);
     expect(telemetry[0]).toEqual(
       expect.objectContaining({
-        status: 'success',
-        finishReason: 'other'
+        status: 'failed',
+        errorCategory: 'provider'
       })
     );
     expect(JSON.stringify(telemetry)).not.toContain(providerValue);

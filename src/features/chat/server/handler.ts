@@ -516,7 +516,7 @@ function createStreamResponse(
 
           const completion = await getHostedCompletion(hostedStream);
           const finishReason = normalizeFinishReason(completion.finishReason);
-          if (finishReason === 'error') {
+          if (finishReason !== 'stop' && finishReason !== 'length') {
             emitOutcome('failed', { errorCategory: 'provider' });
             controller.enqueue(
               encodeFrame({
