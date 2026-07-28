@@ -37,7 +37,6 @@ function getProjectCopy(project: ProjectRecord): string {
     ...project.caseStudy.learnings.lessons,
     ...project.caseStudy.learnings.improvements,
     ...project.caseStudy.learnings.unvalidated,
-    ...project.caseStudy.overview,
     ...project.caseStudy.impact.flatMap(impact => [
       impact.value,
       impact.label,
@@ -139,11 +138,6 @@ test('all projects provide complete case-study content', () => {
         `${project.title} should have non-empty learnings.${field}`
       );
     }
-    assert.ok(
-      project.caseStudy.overview.length > 0 &&
-        project.caseStudy.overview.every(paragraph => paragraph.trim()),
-      `${project.title} should have non-empty overview paragraphs`
-    );
     assert.ok(
       project.caseStudy.roleScope.role.trim(),
       `${project.title} should have a role`
@@ -511,7 +505,6 @@ test('each short description stays aligned with visible case-study positioning',
       ...project.caseStudy.learnings.lessons,
       ...project.caseStudy.learnings.improvements,
       ...project.caseStudy.learnings.unvalidated,
-      ...project.caseStudy.overview,
       ...project.caseStudy.highlights
     ].join(' ');
 
@@ -553,10 +546,10 @@ test('Rent N Roll migrates its existing screenshots to contextual visual metadat
   const rentNRoll = projects.find(project => project.slug === 'rent-n-roll');
   assert.ok(rentNRoll, 'Rent N Roll should exist');
 
-  assert.deepEqual(
-    rentNRoll.caseStudy.visuals.map(visual => visual.src),
-    rentNRoll.caseStudy.gallery
-  );
+  assert.deepEqual(rentNRoll.caseStudy.visuals.map(visual => visual.src), [
+    '/project/rent-n-roll.jpg',
+    '/project/rent-n-roll-listing.jpg'
+  ]);
   assert.equal(
     rentNRoll.caseStudy.visuals.filter(visual => visual.kind === 'hero').length,
     1

@@ -72,12 +72,10 @@ export interface ProjectCaseStudy {
   problem: ProjectProblem;
   solution: ProjectSolution;
   learnings: ProjectLearnings;
-  overview: string[];
   impact: ProjectImpact[];
   decisions: ProjectDecision[];
   highlights: string[];
   visuals: ProjectVisual[];
-  gallery?: string[];
 }
 
 export interface ProjectLinks {

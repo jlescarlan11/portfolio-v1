@@ -67,10 +67,6 @@ export const projects: ProjectRecord[] = [
           'Marketplace adoption and live operating behavior remain unvalidated because the project is pre-launch.'
         ]
       },
-      overview: [
-        'Built the marketplace end to end with Next.js, React, TypeScript, Supabase, and PostgreSQL, supporting equipment owners and renters across listing, discovery, booking, and handoff workflows.',
-        'Refactored 24 untyped database queries into typed Supabase RPC patterns with generated types, reducing data-layer ambiguity and improving maintainability before launch.'
-      ],
       impact: [
         {
           kind: 'implementation',
@@ -132,10 +128,6 @@ export const projects: ProjectRecord[] = [
           caption:
             'The listing view keeps product media, price, deposit information, booking constraints, and availability in one decision point.'
         }
-      ],
-      gallery: [
-        '/project/rent-n-roll.jpg',
-        '/project/rent-n-roll-listing.jpg'
       ]
     }
   },
@@ -197,10 +189,6 @@ export const projects: ProjectRecord[] = [
           'The hackathon result does not validate clinical effectiveness, resident adoption, or production reliability.'
         ]
       },
-      overview: [
-        'Led a five-person team in building a React Native and Expo application that guides Naga City residents through symptom assessment, local-facility discovery, medication records, and YAKAP enrollment information.',
-        'Combined SQLite-based offline data with a Node.js, Express, Prisma, and PostgreSQL backend, while deterministic emergency and mental-health checks run before eligible requests reach Gemini.'
-      ],
       impact: [
         {
           kind: 'product',
@@ -291,7 +279,8 @@ export const projects: ProjectRecord[] = [
         workflow: [
           'A business records ingredients, labor, overhead, and shared recipe costs, then compares markup and profit-margin pricing.',
           'Related variants reuse a base recipe so shared costs remain consistent across products.',
-          'Captured receipt lines stay editable until the user confirms catalog or price-history updates, while local changes remain available offline and can synchronize after sign-in.'
+          'Captured receipt lines stay editable until the user confirms catalog or price-history updates, while local changes remain available offline and can synchronize after sign-in.',
+          'Authenticated records synchronize through Supabase with Row-Level Security, while guest-data migration and JSON import and export preserve continuity and portability.'
         ]
       },
       learnings: {
@@ -306,11 +295,6 @@ export const projects: ProjectRecord[] = [
           'User adoption, pricing time saved, and business-margin improvement have not been measured.'
         ]
       },
-      overview: [
-        'Built PriceCraft to replace spreadsheet-heavy pricing workflows with immediate cost breakdowns, markup and profit-margin strategies, and visual margin indicators.',
-        'Expanded the calculator into an installable PWA with reusable recipe variants, offline operation, Supabase authentication and synchronization, Row-Level Security, guest-data migration, and JSON import and export.',
-        'Added camera and image-based receipt capture, OCR-assisted line extraction, an editable confirmation step, catalog matching, price history, and user-confirmed recipe price-drift updates.'
-      ],
       impact: [
         {
           kind: 'product',
@@ -439,11 +423,6 @@ export const projects: ProjectRecord[] = [
           'The disabled-by-default validation proves deterministic behavior, not live conversion improvement or provider reliability.'
         ]
       },
-      overview: [
-        'Built a resume-driven n8n system that runs 22 evidence-linked discovery queries, reconciles active and archived history, evaluates qualification and opportunity, and generates instruction-aware application packs grounded in one versioned candidate profile.',
-        'Expanded the original scraper, generator, and archiver into seven workflows that also provide idempotent Slack alerts, explicit review actions, deduplicated conversion analytics, and guarded weekly recommendations.',
-        'Generated workflow exports and Google Apps Script from versioned configuration, then validated artifact drift and the full synthetic lifecycle without making live OnlineJobs.ph, Google Sheets, Groq, or n8n calls by default.'
-      ],
       impact: [
         {
           kind: 'product',

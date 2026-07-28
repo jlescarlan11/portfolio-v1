@@ -9,8 +9,7 @@ describe('portfolio media assets', () => {
       heroContent.profileImage.src,
       ...projects.flatMap(project => [
         ...(project.logo ? [project.logo] : []),
-        ...project.caseStudy.visuals.map(visual => visual.src),
-        ...(project.caseStudy.gallery ?? [])
+        ...project.caseStudy.visuals.map(visual => visual.src)
       ])
     ];
 

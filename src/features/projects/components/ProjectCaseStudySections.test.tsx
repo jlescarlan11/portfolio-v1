@@ -7,8 +7,9 @@ import {
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  ProjectEvidenceSections,
-  ProjectMetaStrip
+  ProjectExternalLinks,
+  ProjectMetaStrip,
+  ProjectNarrativeSections
 } from './ProjectCaseStudySections';
 
 beforeEach(() => {
@@ -28,6 +29,37 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+describe('ProjectExternalLinks', () => {
+  it('renders only safe destinations as secure new-tab links', () => {
+    render(
+      <ProjectExternalLinks
+        liveUrl="javascript:alert(1)"
+        githubUrl="https://github.com/example/project"
+      />
+    );
+
+    expect(
+      screen.queryByRole('link', { name: /View live/ })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('link', {
+        name: 'GitHub (opens in new tab)'
+      })
+    ).toMatchObject({
+      target: '_blank',
+      rel: 'noopener noreferrer'
+    });
+  });
+
+  it('omits the link group when neither destination is renderable', () => {
+    const { container } = render(
+      <ProjectExternalLinks liveUrl="REPLACE_WITH_URL" />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+});
+
 describe('ProjectMetaStrip', () => {
   it('renders required ownership details without empty optional facts or links', () => {
     render(
@@ -38,13 +70,10 @@ describe('ProjectMetaStrip', () => {
         }}
         completedAt="2026-07"
         technologies={['TypeScript']}
-        liveUrl="javascript:alert(1)"
       />
     );
 
-    expect(screen.getByText('Role')).toBeVisible();
     expect(screen.getByText('Platform Engineer')).toBeVisible();
-    expect(screen.getByText('Owned')).toBeVisible();
     expect(
       screen.getByText('Owned the typed integration boundary.')
     ).toBeVisible();
@@ -56,7 +85,7 @@ describe('ProjectMetaStrip', () => {
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
-  it('renders populated optional facts and secure evidence links', () => {
+  it('renders every populated optional project fact', () => {
     render(
       <ProjectMetaStrip
         roleScope={{
@@ -69,8 +98,6 @@ describe('ProjectMetaStrip', () => {
         client="Example client"
         completedAt="2026-07"
         technologies={['TypeScript']}
-        liveUrl="https://example.com"
-        githubUrl="https://github.com/example/project"
       />
     );
 
@@ -82,93 +109,103 @@ describe('ProjectMetaStrip', () => {
     ]) {
       expect(screen.getByText(value)).toBeVisible();
     }
-    for (const link of screen.getAllByRole('link')) {
-      expect(link).toHaveAttribute('target', '_blank');
-      expect(link).toHaveAttribute('rel', 'noopener noreferrer');
-      expect(link.className).toContain('focus-visible:outline');
-    }
   });
 });
 
-describe('ProjectEvidenceSections', () => {
-  it('omits empty evidence sections', () => {
-    const { container } = render(
-      <ProjectEvidenceSections impact={[]} decisions={[]} />
-    );
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('omits an empty sibling section without hiding populated evidence', () => {
+describe('ProjectNarrativeSections', () => {
+  it('renders the problem-first sequence, decision evidence, outcomes, learnings, and contextual visual', () => {
     render(
-      <ProjectEvidenceSections
-        impact={[
-          {
-            kind: 'product',
-            value: 'One result',
-            label: 'Verified outcome',
-            context: 'The supported context.'
-          }
-        ]}
-        decisions={[]}
-      />
-    );
-
-    expect(screen.getByRole('region', { name: 'Impact' })).toBeVisible();
-    expect(
-      screen.queryByRole('region', { name: 'Engineering Decisions' })
-    ).not.toBeInTheDocument();
-  });
-
-  it('renders impact and decision evidence in source order with optional details', () => {
-    render(
-      <ProjectEvidenceSections
-        impact={[
-          {
-            kind: 'product',
-            value: 'First value',
-            label: 'First label',
-            context: 'First context'
-          },
-          {
-            kind: 'implementation',
-            value: 'Second value',
-            label: 'Second label',
-            context: 'Second context'
-          }
-        ]}
+      <ProjectNarrativeSections
+        problem={{
+          audience: 'Operators',
+          challenge: 'Records were fragmented.',
+          stakes: 'Decisions were delayed.',
+          constraints: ['Connectivity was unreliable.']
+        }}
+        solution={{
+          summary: 'One workflow coordinates the records.',
+          workflow: ['Capture the record.', 'Review the result.']
+        }}
         decisions={[
           {
             title: 'Typed boundary',
             constraint: 'The contract was ambiguous.',
             decision: 'Introduce an explicit type boundary.',
             rationale: 'Keep both sides aligned.',
-            tradeoff: 'Requires deliberate schema updates.',
+            tradeoff: 'Schema changes must be deliberate.',
             validation: 'The contract test passes.'
+          }
+        ]}
+        impact={[
+          {
+            kind: 'product',
+            value: 'One workflow',
+            label: 'Delivered value',
+            context: 'Operators can complete the supported flow.'
+          },
+          {
+            kind: 'implementation',
+            value: '40 tests',
+            label: 'Regression evidence',
+            context: 'The workflow has deterministic coverage.'
+          }
+        ]}
+        learnings={{
+          lessons: ['Boundaries should be explicit.'],
+          improvements: ['Broaden field validation.'],
+          unvalidated: ['Adoption is not measured.']
+        }}
+        visuals={[
+          {
+            kind: 'supporting',
+            section: 'solution',
+            src: '/project/example.jpg',
+            alt: 'Workflow review screen',
+            caption: 'The review screen keeps the decision in context.'
           }
         ]}
       />
     );
 
-    const impactRegion = screen.getByRole('region', { name: 'Impact' });
-    const impactItems = within(impactRegion).getAllByRole('listitem');
-    expect(impactItems).toHaveLength(2);
-    expect(impactItems[0]).toHaveTextContent(
-      'First valueFirst labelFirst context'
-    );
-    expect(impactItems[1]).toHaveTextContent(
-      'Second valueSecond labelSecond context'
+    const headingNames = [
+      'Problem',
+      'Solution',
+      'Engineering Decisions',
+      'Outcomes',
+      'Learnings and Next Steps'
+    ];
+    const headings = headingNames.map(name =>
+      screen.getByRole('heading', { level: 2, name })
     );
 
-    const decisionsRegion = screen.getByRole('region', {
+    for (let index = 0; index < headings.length - 1; index += 1) {
+      expect(
+        headings[index].compareDocumentPosition(headings[index + 1]) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    }
+
+    for (const name of headingNames) {
+      expect(screen.getByRole('region', { name })).toBeVisible();
+    }
+
+    const productGroup = screen
+      .getByRole('heading', { level: 3, name: 'Product and delivery' })
+      .closest('div');
+    const implementationGroup = screen
+      .getByRole('heading', { level: 3, name: 'Implementation evidence' })
+      .closest('div');
+    expect(productGroup).not.toBeNull();
+    expect(implementationGroup).not.toBeNull();
+    expect(within(productGroup!).getByText('One workflow')).toBeVisible();
+    expect(within(productGroup!).queryByText('40 tests')).not.toBeInTheDocument();
+    expect(
+      within(implementationGroup!).getByText('40 tests')
+    ).toBeVisible();
+
+    const decisions = screen.getByRole('region', {
       name: 'Engineering Decisions'
     });
-    expect(
-      within(decisionsRegion).getByRole('heading', {
-        level: 3,
-        name: 'Typed boundary'
-      })
-    ).toBeVisible();
     for (const label of [
       'Constraint',
       'Decision',
@@ -176,12 +213,14 @@ describe('ProjectEvidenceSections', () => {
       'Trade-off',
       'Validation'
     ]) {
-      expect(
-        within(decisionsRegion).getByText(label, { selector: 'dt' })
-      ).toBeVisible();
+      expect(within(decisions).getByText(label, { selector: 'dt' })).toBeVisible();
     }
-    for (const decorativeIndex of screen.getAllByText('01')) {
-      expect(decorativeIndex).toHaveAttribute('aria-hidden', 'true');
-    }
+
+    expect(
+      screen.getByRole('img', { name: 'Workflow review screen' })
+    ).toBeVisible();
+    expect(
+      screen.getByText('The review screen keeps the decision in context.')
+    ).toBeVisible();
   });
 });
