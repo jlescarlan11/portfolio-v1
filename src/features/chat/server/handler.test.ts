@@ -89,7 +89,7 @@ describe('handleChatRequest', () => {
       expect.objectContaining({
         requestId: 'request-1',
         status: 'success',
-        model: 'gpt-5-nano',
+        model: 'openai/gpt-5-nano',
         inputTokens: 20,
         outputTokens: 4,
         finishReason: 'stop'

@@ -30,7 +30,7 @@ This is the source code for my personal portfolio site — built with Next.js 15
 | UI        | React 19                                                     |
 | Language  | TypeScript                                                   |
 | Styling   | Tailwind CSS 4                                               |
-| AI chat   | Netlify AI Gateway · AI SDK · OpenAI `gpt-5-nano`           |
+| AI chat   | Vercel AI Gateway · AI SDK · OpenAI `gpt-5-nano`            |
 | Icons     | React Icons                                                  |
 | Testing   | Vitest · Node Test Runner · React Testing Library · Jest DOM |
 | Tooling   | ESLint · Turbopack                                           |
@@ -59,23 +59,21 @@ Create a `.env.local` file in the root directory:
 ```env
 NEXT_PUBLIC_SITE_URL=https://johnlesterescarlan.pro
 NEXT_PUBLIC_CONTACT_EMAIL=your-email@example.com
-
-# Server-only hosted chat values. Never use NEXT_PUBLIC_ for these.
-OPENAI_API_KEY=replace-with-a-local-development-key
-# Optional: omit for the official OpenAI API.
-# OPENAI_BASE_URL=https://replace-with-an-openai-compatible-v1-endpoint
 ```
 
-Netlify deploys inject the collision-free `NETLIFY_AI_GATEWAY_KEY` and
-`NETLIFY_AI_GATEWAY_BASE_URL` values at runtime; the server prefers that pair so
-existing provider-specific project settings cannot bypass the gateway. A
-Netlify runtime fails closed if that pair is missing or incomplete; it never
-falls back to provider-specific credentials there. `OPENAI_API_KEY` is the
-local or non-Netlify fallback and uses the official OpenAI endpoint by default.
-Set `OPENAI_BASE_URL` only for a different OpenAI-compatible endpoint.
-Do not set the `NETLIFY_AI_GATEWAY_*` values by hand or copy any runtime value
-into the repository, browser code, fixtures, logs, or screenshots. If the
-required configuration for the current runtime is unavailable,
+Vercel deployments inject a short-lived `VERCEL_OIDC_TOKEN` automatically, so
+the hosted chat does not require an OpenAI API key. For local chat development,
+link this clone to the existing Vercel project and pull a short-lived OIDC token:
+
+```bash
+vercel link --yes --scope lester-s-projects4 --project portfolio-v1
+vercel env pull .env.local --yes
+```
+
+Re-run the environment pull when the local token expires. Keep
+`VERCEL_OIDC_TOKEN` and the optional server-only `AI_GATEWAY_API_KEY` out of Git,
+browser code, fixtures, logs, and screenshots. Never prefix either credential
+with `NEXT_PUBLIC_`. If server-side gateway authentication is unavailable,
 `POST /api/chat` intentionally returns a sanitized `503`.
 
 ### Development
@@ -114,7 +112,7 @@ request needs gateway configuration.
 The browser posts validated `user`/`assistant` history to `POST /api/chat`.
 The server prepends the trusted portfolio prompt, trims the oldest complete
 turns to the input budget, and streams newline-delimited JSON text frames from
-Netlify AI Gateway. Closing the widget aborts the browser request and forwards
+Vercel AI Gateway. Closing the widget aborts the browser request and forwards
 the cancellation signal upstream.
 
 Application limits are deliberately conservative:
