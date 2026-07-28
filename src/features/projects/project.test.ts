@@ -186,9 +186,15 @@ test('all projects provide complete case-study content', () => {
     const heroVisuals = project.caseStudy.visuals.filter(
       visual => visual.kind === 'hero'
     );
-    assert.ok(
-      heroVisuals.length <= 1,
-      `${project.title} should not have duplicate hero visuals`
+    assert.equal(
+      heroVisuals.length,
+      1,
+      `${project.title} should have exactly one hero visual`
+    );
+    assert.match(
+      heroVisuals[0].src,
+      /\.(?:jpe?g|png|webp)$/i,
+      `${project.title} should use a raster hero visual`
     );
     for (const [index, visual] of project.caseStudy.visuals.entries()) {
       assert.ok(

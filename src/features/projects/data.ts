@@ -232,7 +232,16 @@ export const projects: ProjectRecord[] = [
         'Gated emergency and mental-health inputs with deterministic checks before any Gemini request.',
         'Persisted assessments, medication records, and facility data locally, with synchronization when connectivity returns.'
       ],
-      visuals: []
+      visuals: [
+        {
+          kind: 'hero',
+          src: '/project/health-safety-check.png',
+          alt:
+            'HEALTH safety check warning residents to contact emergency services when someone is in immediate danger.',
+          caption:
+            'The symptom flow begins with a deterministic safety check so immediate-danger guidance appears before any assisted triage.'
+        }
+      ]
     }
   },
   {
@@ -362,7 +371,16 @@ export const projects: ProjectRecord[] = [
         'Captures receipts, extracts candidate items, and requires user confirmation before updating the ingredient catalog and price history.',
         'Supports installable PWA use, offline changes, authenticated cloud synchronization, account migration, and portable backups.'
       ],
-      visuals: []
+      visuals: [
+        {
+          kind: 'hero',
+          src: '/project/pricecraft-results.png',
+          alt:
+            'PriceCraft results screen for chocolate chip cookies showing recommended price, break-even price, margin, profit, and cost breakdown.',
+          caption:
+            'The results view keeps the recommended selling price beside break-even, margin, per-unit profit, batch profit, and the underlying cost breakdown.'
+        }
+      ]
     }
   },
   {
@@ -493,7 +511,16 @@ export const projects: ProjectRecord[] = [
         'Runs 22 evidence-linked searches, dual-score evaluation, instruction-aware application packs, and canonical cross-sheet reconciliation.',
         'Generates grounded application material and guarded learning output while keeping review, submission, and outcomes manual.'
       ],
-      visuals: []
+      visuals: [
+        {
+          kind: 'hero',
+          src: '/project/job-pipeline-workflows.png',
+          alt:
+            'Job Pipeline repository table listing seven workflow exports with their schedules and responsibilities.',
+          caption:
+            'The checked-in workflow inventory makes each independently scheduled export and its responsibility explicit before activation.'
+        }
+      ]
     }
   }
 ];

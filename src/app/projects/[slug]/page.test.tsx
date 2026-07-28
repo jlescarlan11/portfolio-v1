@@ -2,7 +2,6 @@ import React from 'react';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { projects } from '@/features/projects';
-import { siteConfig } from '@/shared/site/config';
 import ProjectPage, {
   generateMetadata,
   ProjectHero
@@ -68,6 +67,10 @@ describe('ProjectPage', () => {
       }
       for (const technology of project.technologies) {
         expect(screen.getByText(technology)).toBeVisible();
+      }
+      for (const visual of project.caseStudy.visuals) {
+        expect(screen.getByRole('img', { name: visual.alt })).toBeVisible();
+        expect(screen.getByText(visual.caption)).toBeVisible();
       }
     }
   );
@@ -228,37 +231,22 @@ describe('generateMetadata', () => {
     }
   );
 
-  it('uses a project hero visual for social metadata when one is available', async () => {
-    const metadata = await generateMetadata({
-      params: Promise.resolve({ slug: 'rent-n-roll' })
-    });
-
-    expect(metadata.openGraph).toMatchObject({
-      images: [
-        {
-          url: '/project/rent-n-roll.jpg',
-          alt: expect.stringContaining('Rent N Roll')
-        }
-      ]
-    });
-  });
-
-  it.each(['health', 'job-pipeline'])(
-    'uses the site social image when %s has no project hero',
-    async slug => {
+  it.each(projects)(
+    'uses the raster hero visual for $slug social metadata',
+    async project => {
       const metadata = await generateMetadata({
-        params: Promise.resolve({ slug })
+        params: Promise.resolve({ slug: project.slug })
       });
-      const expectedImage = {
-        url: siteConfig.seo.socialImage.path,
-        alt: siteConfig.seo.socialImage.alt
-      };
+      const hero = project.caseStudy.visuals.find(
+        visual => visual.kind === 'hero'
+      );
+      if (!hero) throw new Error(`${project.title} hero fixture is missing`);
 
       expect(metadata.openGraph).toMatchObject({
-        images: [expectedImage]
+        images: [{ url: hero.src, alt: hero.alt }]
       });
       expect(metadata.twitter).toMatchObject({
-        images: [expectedImage]
+        images: [{ url: hero.src, alt: hero.alt }]
       });
     }
   );
