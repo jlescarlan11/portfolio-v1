@@ -10,7 +10,7 @@ import {
 } from '../server/contracts';
 
 const CHAT_ENDPOINT = '/api/chat';
-const CLIENT_TIMEOUT_MS = 30_000;
+export const CLIENT_TIMEOUT_MS = 31_000;
 const MAX_CONTEXT_MESSAGES = 10;
 const DEFAULT_RETRY_AFTER_SECONDS = 60;
 const MAX_CONSECUTIVE_EMPTY_STREAM_CHUNKS = 32;

@@ -11,12 +11,17 @@ import {
   MAX_STREAM_RESPONSE_CHARACTERS
 } from '../server/contracts';
 import {
+  CLIENT_TIMEOUT_MS,
   API_ERROR_RESPONSE_TIMEOUT_MS,
   MAX_CHAT_STREAM_RESPONSE_BYTES,
   MAX_API_ERROR_RESPONSE_BYTES,
   useOnlineChat,
   WELCOME_MESSAGE
 } from './useOnlineChat';
+import {
+  PROVIDER_TIMEOUT_MS,
+  REQUEST_BODY_TIMEOUT_MS
+} from '../server/config';
 
 const STREAM_RESPONSE_HEADERS = {
   'Content-Type': 'application/x-ndjson'
@@ -76,6 +81,16 @@ describe('useOnlineChat', () => {
     vi.useRealTimers();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
+  });
+
+  it('reserves client time for terminal response transit', () => {
+    const requiredTransportHeadroomMs = 2_000;
+
+    expect(
+      CLIENT_TIMEOUT_MS -
+        REQUEST_BODY_TIMEOUT_MS -
+        PROVIDER_TIMEOUT_MS
+    ).toBeGreaterThanOrEqual(requiredTransportHeadroomMs);
   });
 
   it('starts locally with no persisted session or availability request', () => {
@@ -853,7 +868,7 @@ describe('useOnlineChat', () => {
       sendPromise = result.current.send('Hello');
     });
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(30_000);
+      await vi.advanceTimersByTimeAsync(CLIENT_TIMEOUT_MS);
       await sendPromise;
     });
 
@@ -897,7 +912,7 @@ describe('useOnlineChat', () => {
     });
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(30_000);
+      await vi.advanceTimersByTimeAsync(CLIENT_TIMEOUT_MS);
     });
     const settledAtDeadline = settled;
 
@@ -1183,7 +1198,7 @@ describe('useOnlineChat', () => {
     const settledBeforeTimeout = settled;
     if (!settled) {
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(30_000);
+        await vi.advanceTimersByTimeAsync(CLIENT_TIMEOUT_MS);
         await sendPromise;
       });
     }
@@ -1281,7 +1296,7 @@ describe('useOnlineChat', () => {
     const settledBeforeTimeout = settled;
     if (!settled) {
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(30_000);
+        await vi.advanceTimersByTimeAsync(CLIENT_TIMEOUT_MS);
         await sendPromise;
       });
     }
