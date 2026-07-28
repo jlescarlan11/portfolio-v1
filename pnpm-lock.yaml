@@ -12,6 +12,9 @@ importers:
 
   .:
     dependencies:
+      '@vercel/firewall':
+        specifier: 1.2.2
+        version: 1.2.2
       ai:
         specifier: ^7.0.37
         version: 7.0.37(zod@4.4.3)
@@ -1105,6 +1108,10 @@ packages:
     resolution: {integrity: sha512-lrW200hZdbfRtztbygyaq/6jP6AKE8qQN2KvPcJ+x7wiD038YtnYtZ82IMNJ69GJibV7bwL3y9FgK+5w/pYt6g==}
     cpu: [x64]
     os: [win32]
+
+  '@vercel/firewall@1.2.2':
+    resolution: {integrity: sha512-y5bzJ9xkYSKNVmGNjFvLB9Rv0mr+ZXsHZYF8Kw99NJpgo6Sahynk8epd+EGI3womRG0WhW9NZ7c92FfVY82cng==}
+    engines: {node: '>= 20'}
 
   '@vercel/oidc@3.2.0':
     resolution: {integrity: sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug==}
@@ -3686,6 +3693,8 @@ snapshots:
 
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
+
+  '@vercel/firewall@1.2.2': {}
 
   '@vercel/oidc@3.2.0': {}
 

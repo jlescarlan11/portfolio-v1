@@ -122,15 +122,20 @@ Application limits are deliberately conservative:
 - 8,000 estimated input tokens and 256 maximum output tokens
 - 25-second provider timeout
 - 20 anonymous POST requests per client IP across every site domain in a
-  60-second distributed Netlify rate-limit window
+  60-second Vercel Firewall fixed window
 
-Netlify's edge counter can admit requests that are already in flight at the
-boundary, so this is abuse protection rather than a strict billing cap. The
-live verifier checks convergence and retry-window recovery; gateway account
-TPM limits and Netlify's documented 50%, 75%, and 100% account-credit
-notifications are the cost backstops. Netlify's Agent Runner AI Credit Usage
-Limit does not stop AI Gateway traffic, so keep paid-plan auto recharge disabled
-when a hard account-credit ceiling is required.
+The server calls the `portfolio-chat` rule through `@vercel/firewall` before it
+parses the request or starts AI Gateway. Vercel derives the anonymous key from
+the connection IP; the application does not read, store, or log raw IP
+addresses. The fixed-window counter is shared across function instances within
+a Vercel region. Counters are regional rather than globally exact, so traffic
+that reaches multiple regions can receive a separate 20-request allowance in
+each region. This is abuse protection rather than a strict billing cap.
+
+If the rule is missing or the Firewall check fails, the route fails closed with
+a sanitized `503` and does not call the model. Keep the WAF rule on the Hobby
+plan's included allowance, AI Gateway automatic top-up disabled, and no paid
+fallback configured.
 
 Pre-stream errors use JSON with `400`, `413`, `429`, `503`, or `504`. A stream
 that fails after text begins ends with a sanitized error frame. Application

@@ -3,7 +3,7 @@ const windowLimit = 20;
 const expectedRetrySeconds = 60;
 
 if (!baseUrl) {
-  console.error('Set CHAT_BASE_URL to a Netlify deploy preview or production origin.');
+  console.error('Set CHAT_BASE_URL to a Vercel Preview or production origin.');
   process.exitCode = 1;
 } else {
   const sendInvalidRequest = () =>
@@ -25,7 +25,7 @@ if (!baseUrl) {
     );
     process.exitCode = 1;
   } else {
-    // Let Netlify's globally distributed counter settle before racing the two
+    // Let Vercel's regional fixed-window counter settle before racing the two
     // requests that straddle the configured boundary.
     await new Promise(resolve => setTimeout(resolve, 2_000));
 
@@ -37,8 +37,8 @@ if (!baseUrl) {
     let limited = boundaryResponses.find(response => response.status === 429);
 
     if (statuses[0] === 400 && statuses[1] === 400) {
-      // A distributed edge counter can admit requests already in flight. It
-      // must still converge before another request can reach the function.
+      // A concurrent regional counter may admit requests already in flight.
+      // It must still converge before another request reaches validation.
       await new Promise(resolve => setTimeout(resolve, 2_000));
       const afterPropagation = await sendInvalidRequest();
       statuses.push(afterPropagation.status);
