@@ -143,15 +143,22 @@ export function parseGitHubContributionData(
       throw new GitHubContributionDataError();
     }
 
+    let occupiedWeekdays = 0;
     const contributionDays = candidate.contributionDays.map(day => {
       const parsed = parseContributionDay(day);
+      if (!parsed) {
+        throw new GitHubContributionDataError();
+      }
+
+      const weekdayMask = 1 << parsed.weekday;
       if (
-        !parsed ||
+        (occupiedWeekdays & weekdayMask) !== 0 ||
         (previousDate !== null && parsed.date <= previousDate) ||
         parsed.contributionCount > Number.MAX_SAFE_INTEGER - parsedTotal
       ) {
         throw new GitHubContributionDataError();
       }
+      occupiedWeekdays |= weekdayMask;
       previousDate = parsed.date;
       parsedTotal += parsed.contributionCount;
       return parsed;

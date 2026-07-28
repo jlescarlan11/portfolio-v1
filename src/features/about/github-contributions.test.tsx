@@ -321,6 +321,34 @@ describe('GitHub contribution data', () => {
     ).toThrow('GitHub contribution data is unavailable.');
   });
 
+  it('rejects duplicate weekday slots within a contribution week', () => {
+    expect(() =>
+      parseGitHubContributionData({
+        data: {
+          user: {
+            contributionsCollection: {
+              contributionCalendar: {
+                totalContributions: 3,
+                weeks: [
+                  {
+                    contributionDays: [
+                      {
+                        date: '2026-07-21',
+                        contributionCount: 1,
+                        weekday: 2
+                      },
+                      validCalendar.weeks[0].contributionDays[0]
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      })
+    ).toThrow('GitHub contribution data is unavailable.');
+  });
+
   it('logs a sanitized warning when cached contribution data is unavailable', async () => {
     const sensitive = 'SENSITIVE_GITHUB_PROVIDER_DETAIL';
     vi.stubEnv('GITHUB_TOKEN', 'test-placeholder-token');
