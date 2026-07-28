@@ -283,25 +283,51 @@ async function withTimeout<T>(
 }
 
 async function getHostedCompletion(
-  hostedStream: HostedChatStream
+  hostedStream: HostedChatStream,
+  providerDeadline: number
 ): Promise<ChatCompletionMetadata> {
+  const timeoutMs = getRemainingTimeout(
+    providerDeadline,
+    COMPLETION_TIMEOUT_MS,
+    'Provider completion metadata timed out.'
+  );
   const result: unknown = await withTimeout(
     hostedStream.getCompletion(),
-    COMPLETION_TIMEOUT_MS,
+    timeoutMs,
     'Provider completion metadata timed out.'
   );
   return parseProviderCompletion(result);
 }
 
 async function getNextHostedChunk(
-  hostedStream: HostedChatStream
+  hostedStream: HostedChatStream,
+  providerDeadline: number
 ): Promise<IteratorResult<string>> {
-  const result: unknown = await withTimeout(
-    hostedStream.iterator.next(),
+  const timeoutMs = getRemainingTimeout(
+    providerDeadline,
     PROVIDER_TIMEOUT_MS,
     'Provider stream chunk timed out.'
   );
+  const result: unknown = await withTimeout(
+    hostedStream.iterator.next(),
+    timeoutMs,
+    'Provider stream chunk timed out.'
+  );
   return parseProviderChunkResult(result);
+}
+
+function getRemainingTimeout(
+  deadline: number,
+  maximumMs: number,
+  message: string
+): number {
+  const timeoutMs = Math.min(maximumMs, deadline - Date.now());
+  if (timeoutMs <= 0) {
+    const error = new Error(message);
+    error.name = 'TimeoutError';
+    throw error;
+  }
+  return timeoutMs;
 }
 
 function isNamedError(error: unknown, name: string): boolean {
@@ -604,6 +630,7 @@ async function readRequestText(request: Request): Promise<string | Response> {
 function createStreamResponse(
   hostedStream: HostedChatStream,
   firstChunk: IteratorResult<string>,
+  providerDeadline: number,
   abortController: AbortController,
   removeAbortListener: () => void,
   emitOutcome: (
@@ -664,7 +691,10 @@ function createStreamResponse(
 
           let nextChunk = firstChunk.done
             ? firstChunk
-            : await getNextHostedChunk(hostedStream);
+            : await getNextHostedChunk(
+                hostedStream,
+                providerDeadline
+              );
 
           while (!nextChunk.done) {
             providerChunkCount += 1;
@@ -677,10 +707,16 @@ function createStreamResponse(
                 return;
               }
             }
-            nextChunk = await getNextHostedChunk(hostedStream);
+            nextChunk = await getNextHostedChunk(
+              hostedStream,
+              providerDeadline
+            );
           }
 
-          const completion = await getHostedCompletion(hostedStream);
+          const completion = await getHostedCompletion(
+            hostedStream,
+            providerDeadline
+          );
           const finishReason = normalizeFinishReason(completion.finishReason);
           if (finishReason !== 'stop' && finishReason !== 'length') {
             emitOutcome('failed', { errorCategory: 'provider' });
@@ -841,6 +877,7 @@ export async function handleChatRequest(
   const abortController = new AbortController();
   const removeAbortListener = linkAbortSignal(request.signal, abortController);
   let pendingHostedStream: HostedChatStream | undefined;
+  const providerDeadline = Date.now() + PROVIDER_TIMEOUT_MS;
 
   try {
     const started = await withTimeout(
@@ -881,6 +918,7 @@ export async function handleChatRequest(
     return createStreamResponse(
       started.hostedStream,
       started.firstChunk,
+      providerDeadline,
       abortController,
       removeAbortListener,
       emitOutcome

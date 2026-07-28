@@ -1377,6 +1377,68 @@ describe('handleChatRequest', () => {
     }
   });
 
+  it('enforces one total provider deadline across slow chunks', async () => {
+    vi.useFakeTimers();
+    try {
+      let providerSignal: AbortSignal | undefined;
+      let nextCall = 0;
+      const returnUpstream = vi.fn(async () => ({
+        done: true as const,
+        value: undefined
+      }));
+      const response = await handleChatRequest(request(validBody()), {
+        startChat: ({ signal }) => {
+          providerSignal = signal;
+          return {
+            iterator: {
+              next: async () => {
+                nextCall += 1;
+                if (nextCall === 1) {
+                  return { done: false as const, value: 'First' };
+                }
+                return new Promise<IteratorResult<string>>(resolve => {
+                  setTimeout(
+                    () => resolve(
+                      nextCall === 2
+                        ? { done: false as const, value: 'Second' }
+                        : { done: true as const, value: undefined }
+                    ),
+                    20_000
+                  );
+                });
+              },
+              return: returnUpstream
+            },
+            getCompletion: async () => ({ finishReason: 'stop' })
+          };
+        }
+      });
+      let responseText: string | undefined;
+      void response.text().then(value => {
+        responseText = value;
+      });
+
+      await vi.advanceTimersByTimeAsync(PROVIDER_TIMEOUT_MS);
+
+      expect(responseText).toBe(
+        [
+          JSON.stringify({ type: 'text-delta', delta: 'First' }),
+          JSON.stringify({ type: 'text-delta', delta: 'Second' }),
+          JSON.stringify({
+            type: 'error',
+            code: 'STREAM_ERROR',
+            message: 'The AI service stopped responding. Please try again.'
+          }),
+          ''
+        ].join('\n')
+      );
+      expect(providerSignal?.aborted).toBe(true);
+      expect(returnUpstream).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('aborts a provider stream that exceeds the chunk-count budget', async () => {
     vi.useFakeTimers();
     try {
