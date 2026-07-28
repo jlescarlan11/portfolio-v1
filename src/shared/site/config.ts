@@ -38,6 +38,13 @@ function isNetlifyPreviewHostname(hostname: string): boolean {
   return hostname.endsWith('.netlify.app') && hostname.includes('--');
 }
 
+function isIpLiteralHostname(hostname: string): boolean {
+  return (
+    /^\d{1,3}(?:\.\d{1,3}){3}$/.test(hostname) ||
+    (hostname.startsWith('[') && hostname.endsWith(']'))
+  );
+}
+
 export function resolveSiteUrl(value?: string): string {
   const candidate = value?.trim();
 
@@ -51,6 +58,7 @@ export function resolveSiteUrl(value?: string): string {
     const hasCredentials = Boolean(url.username || url.password);
     const isUnsafeHost =
       UNSAFE_CANONICAL_HOSTS.has(url.hostname) ||
+      isIpLiteralHostname(url.hostname) ||
       isNetlifyPreviewHostname(url.hostname);
 
     if (!isSecureWebUrl || hasCredentials || isUnsafeHost) {

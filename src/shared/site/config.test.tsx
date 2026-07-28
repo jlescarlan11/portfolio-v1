@@ -25,6 +25,8 @@ describe('resolveSiteUrl', () => {
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     'http://[::1]:3000',
+    'https://10.0.0.8',
+    'https://[fd00::8]',
     'https://johnlester.vercel.app',
     'https://deploy-preview-15--portfolio.netlify.app',
     'https://feature-seo--portfolio.netlify.app'
