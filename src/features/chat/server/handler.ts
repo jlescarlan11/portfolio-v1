@@ -253,7 +253,9 @@ const TERMINAL_FRAME_BYTE_BUDGET = Math.max(
 function releaseHostedStream(hostedStream: HostedChatStream): void {
   try {
     const cleanup = hostedStream.iterator.return?.();
-    void cleanup?.catch(() => undefined);
+    if (cleanup !== undefined) {
+      void Promise.resolve(cleanup).catch(() => undefined);
+    }
   } catch {
     // The abort signal is authoritative for best-effort upstream cleanup.
   }

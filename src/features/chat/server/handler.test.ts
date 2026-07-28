@@ -874,6 +874,32 @@ describe('handleChatRequest', () => {
     ]);
   });
 
+  it('assimilates a PromiseLike upstream release', async () => {
+    let cleanupStarted = false;
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: () => ({
+        iterator: {
+          next: async () =>
+            null as unknown as IteratorResult<string>,
+          return: () =>
+            ({
+              then: (
+                resolve: (value: IteratorResult<string>) => void
+              ) => {
+                cleanupStarted = true;
+                resolve({ done: true, value: undefined });
+              }
+            }) as Promise<IteratorResult<string>>
+        },
+        getCompletion: async () => ({ finishReason: 'stop' })
+      })
+    });
+
+    expect(response.status).toBe(503);
+    await Promise.resolve();
+    expect(cleanupStarted).toBe(true);
+  });
+
   it('treats a throwing iterator result getter as a protocol failure', async () => {
     let providerSignal: AbortSignal | undefined;
     const telemetry: ChatTelemetryEvent[] = [];
