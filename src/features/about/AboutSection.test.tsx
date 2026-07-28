@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import AboutSection from './AboutSection';
 import { aboutContent } from './content';
@@ -56,6 +56,32 @@ describe('AboutSection progressive enhancement', () => {
       expect(heading).toHaveClass('text-subtle-foreground');
       expect(heading).not.toHaveClass('text-foreground/25');
     }
+  });
+
+  it('renders every resume-backed experience entry and current status', () => {
+    render(<AboutSection content={aboutContent} />);
+
+    const experienceRegion = screen.getByRole('region', {
+      name: aboutContent.experienceHeading
+    });
+
+    for (const experience of aboutContent.experience) {
+      expect(
+        within(experienceRegion).getByRole('heading', {
+          level: 4,
+          name: experience.title
+        })
+      ).toBeVisible();
+
+      for (const responsibility of experience.responsibilities) {
+        expect(
+          within(experienceRegion).getByText(responsibility)
+        ).toBeVisible();
+      }
+    }
+
+    expect(within(experienceRegion).getAllByText('Present')).toHaveLength(2);
+    expect(within(experienceRegion).getByText('Aug 2026')).toBeVisible();
   });
 
   it('renders declared skills even when they have no bespoke icon', () => {
