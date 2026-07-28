@@ -53,16 +53,18 @@ HOSTED_CHAT_PROVIDER=groq
 ```
 
 Groq is the default when `HOSTED_CHAT_PROVIDER` is unset. Store
-`GROQ_API_KEY` as a sensitive Vercel environment variable in each environment
-that needs live chat:
+`GROQ_API_KEY` as a sensitive Vercel environment variable in Preview and
+Production:
 
 ```bash
-vercel env add GROQ_API_KEY production,preview,development --sensitive
+vercel env add GROQ_API_KEY production,preview --sensitive
 ```
 
 Enter the value through the hidden CLI prompt or the Vercel dashboard. The key
 must never use a `NEXT_PUBLIC_` prefix or appear in browser code, committed
 environment files, fixtures, screenshots, error messages, or telemetry.
+Vercel does not permit sensitive variables in the Development environment; use
+the gitignored `.env.local` file for local development instead.
 `VERCEL_OIDC_TOKEN`, `AI_GATEWAY_API_KEY`, `OPENAI_API_KEY`,
 `OPENAI_BASE_URL`, and the former Netlify AI variables are not credential
 fallbacks.
@@ -260,8 +262,9 @@ the assembled profile.
 
 ## Release and rollback
 
-1. Add `GROQ_API_KEY` to Development, Preview, and Production as a sensitive
-   server-only variable. Do not upgrade the Groq organization from Free.
+1. Add `GROQ_API_KEY` to Preview and Production as a sensitive server-only
+   variable, and use `.env.local` for local development. Do not upgrade the
+   Groq organization from Free.
 2. Publish the staged Firewall rule in log-only mode and verify that Preview
    chat requests match the `portfolio-chat` rule.
 3. Change the rule's exceeded action to rate-limit in Preview scope, publish it,

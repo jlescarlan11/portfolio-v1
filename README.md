@@ -69,10 +69,10 @@ HOSTED_CHAT_PROVIDER=groq
 Create the key in the [Groq Console](https://console.groq.com/keys). The project
 uses Groq's Free plan directly, so no card or Vercel AI Gateway credit is
 required. Add the key to Vercel as a sensitive server-side variable for
-Development, Preview, and Production:
+Preview and Production:
 
 ```bash
-vercel env add GROQ_API_KEY production,preview,development --sensitive
+vercel env add GROQ_API_KEY production,preview --sensitive
 ```
 
 Enter the key only in the CLI's hidden prompt or Vercel dashboard; do not paste
@@ -80,6 +80,11 @@ it into source control or chat. Keep `GROQ_API_KEY` out of Git, browser code,
 fixtures, logs, and screenshots, and never prefix it with `NEXT_PUBLIC_`. If
 the selected provider or its credential is unavailable, `POST /api/chat`
 intentionally returns a sanitized `503`.
+
+For local development, place the same key in the gitignored `.env.local` file.
+Vercel does not support sensitive variables in its Development environment, so
+do not add the key there unless authorized project members need to retrieve it
+through Vercel.
 
 ### Development
 
