@@ -321,7 +321,10 @@ function getRemainingTimeout(
   maximumMs: number,
   message: string
 ): number {
-  const timeoutMs = Math.min(maximumMs, deadline - Date.now());
+  const timeoutMs = Math.min(
+    maximumMs,
+    deadline - performance.now()
+  );
   if (timeoutMs <= 0) {
     const error = new Error(message);
     error.name = 'TimeoutError';
@@ -877,7 +880,7 @@ export async function handleChatRequest(
   const abortController = new AbortController();
   const removeAbortListener = linkAbortSignal(request.signal, abortController);
   let pendingHostedStream: HostedChatStream | undefined;
-  const providerDeadline = Date.now() + PROVIDER_TIMEOUT_MS;
+  const providerDeadline = performance.now() + PROVIDER_TIMEOUT_MS;
 
   try {
     const started = await withTimeout(

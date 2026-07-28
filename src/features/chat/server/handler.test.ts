@@ -1439,6 +1439,63 @@ describe('handleChatRequest', () => {
     }
   });
 
+  it('does not extend the provider deadline after wall-clock rollback', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
+    try {
+      let nextCall = 0;
+      const returnUpstream = vi.fn(async () => ({
+        done: true as const,
+        value: undefined
+      }));
+      const response = await handleChatRequest(request(validBody()), {
+        startChat: () => ({
+          iterator: {
+            next: async () => {
+              nextCall += 1;
+              if (nextCall === 1) {
+                return { done: false as const, value: 'First' };
+              }
+              if (nextCall === 2) {
+                return new Promise<IteratorResult<string>>(resolve => {
+                  setTimeout(() => {
+                    vi.setSystemTime(
+                      new Date('2025-12-31T23:00:00.000Z')
+                    );
+                    resolve({
+                      done: false as const,
+                      value: 'Second'
+                    });
+                  }, 20_000);
+                });
+              }
+              return new Promise<IteratorResult<string>>(() => undefined);
+            },
+            return: returnUpstream
+          },
+          getCompletion: async () => ({ finishReason: 'stop' })
+        })
+      });
+      let responseText: string | undefined;
+      void response.text().then(value => {
+        responseText = value;
+      });
+
+      await vi.advanceTimersByTimeAsync(PROVIDER_TIMEOUT_MS);
+
+      expect(responseText).toContain(
+        JSON.stringify({
+          type: 'error',
+          code: 'STREAM_ERROR',
+          message: 'The AI service stopped responding. Please try again.'
+        })
+      );
+      expect(returnUpstream).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('aborts a provider stream that exceeds the chunk-count budget', async () => {
     vi.useFakeTimers();
     try {
