@@ -34,6 +34,10 @@ test('isRenderableExternalUrl rejects placeholders and unsupported protocols', (
   assert.equal(isRenderableExternalUrl('REPLACE_WITH_URL'), false);
   assert.equal(isRenderableExternalUrl('mailto:hello@example.com'), false);
   assert.equal(isRenderableExternalUrl('javascript:alert(1)'), false);
+  assert.equal(
+    isRenderableExternalUrl('https://trusted.example@evil.example'),
+    false
+  );
 });
 
 test('formatMonthYear formats to short and long month strings', () => {
