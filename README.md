@@ -41,15 +41,15 @@ This is the source code for my personal portfolio site — built with Next.js 15
 
 ### Prerequisites
 
-- Node.js 22+
-- npm
+- Node.js 24
+- pnpm 10.33.1
 
 ### Installation
 
 ```bash
 git clone https://github.com/jlescarlan11/portfolio-v1.git
 cd portfolio-v1
-npm install
+pnpm install --frozen-lockfile
 ```
 
 ### Environment Variables
@@ -81,13 +81,13 @@ required configuration for the current runtime is unavailable,
 ### Development
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the site.
 
 To exercise Netlify-provided integrations locally, use `npx netlify dev`
-instead. The rest of the portfolio runs with `npm run dev`; only a real chat
+instead. The rest of the portfolio runs with `pnpm dev`; only a real chat
 request needs gateway configuration.
 
 ---
@@ -96,16 +96,16 @@ request needs gateway configuration.
 
 | Command             | Description                                  |
 | ------------------- | -------------------------------------------- |
-| `npm run dev`       | Start development server with Turbopack      |
-| `npm run build`     | Build for production                         |
-| `npm start`         | Run the production build                     |
-| `npm run lint`      | Lint with ESLint                             |
-| `npm run typecheck` | Type-check with TypeScript compiler          |
-| `npm test`          | Run all tests (unit + UI)                    |
-| `npm run test:unit` | Run unit tests via Node's native test runner |
-| `npm run test:ui`   | Run component tests via Vitest               |
-| `npm run verify:chat` | Run the hosted-chat quality corpus against `CHAT_BASE_URL` |
-| `npm run verify:chat:rate-limit` | Verify the live distributed 20-per-minute boundary |
+| `pnpm dev`       | Start development server with Turbopack      |
+| `pnpm build`     | Build for production                         |
+| `pnpm start`         | Run the production build                     |
+| `pnpm lint`      | Lint with ESLint                             |
+| `pnpm typecheck` | Type-check with TypeScript compiler          |
+| `pnpm test`          | Run all tests (unit + UI)                    |
+| `pnpm test:unit` | Run unit tests via Node's native test runner |
+| `pnpm test:ui`   | Run component tests via Vitest               |
+| `pnpm verify:chat` | Run the hosted-chat quality corpus against `CHAT_BASE_URL` |
+| `pnpm verify:chat:rate-limit` | Verify the live distributed 20-per-minute boundary |
 
 ---
 
@@ -145,9 +145,9 @@ full contract and operational policy.
 ### Preview and production verification
 
 1. Open a pull request and wait for the Netlify deploy preview.
-2. Run `CHAT_BASE_URL=https://<deploy-preview-host> npm run verify:chat`.
+2. Run `CHAT_BASE_URL=https://<deploy-preview-host> pnpm verify:chat`.
    After at least 60 seconds with no requests from the same client, run
-   `CHAT_BASE_URL=https://<deploy-preview-host> npm run verify:chat:rate-limit`.
+   `CHAT_BASE_URL=https://<deploy-preview-host> pnpm verify:chat:rate-limit`.
    This sends only invalid bodies, so it exercises the edge boundary without
    invoking the model.
 3. In a narrow mobile viewport, open the widget, send a prompt, observe
