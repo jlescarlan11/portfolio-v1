@@ -14,7 +14,8 @@
     "test:unit": "node --test --experimental-strip-types src/features/projects/project.test.ts",
     "test:ui": "vitest run",
     "verify:chat": "node scripts/verify-hosted-chat.mjs",
-    "verify:chat:rate-limit": "node scripts/verify-chat-rate-limit.mjs"
+    "verify:chat:rate-limit": "node scripts/verify-chat-rate-limit.mjs",
+    "verify:cutover": "node scripts/verify-vercel-cutover.mjs"
   },
   "dependencies": {
     "@vercel/firewall": "1.2.2",
