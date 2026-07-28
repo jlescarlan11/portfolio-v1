@@ -819,6 +819,11 @@ export function useOnlineChat(): UseOnlineChatResult {
         if (responseReaderRef.current === responseReader) {
           responseReaderRef.current = null;
         }
+        try {
+          responseReader?.releaseLock();
+        } catch {
+          // Cancellation remains authoritative when a read is still pending.
+        }
         window.clearTimeout(timeoutId);
         finishOperation(operationId);
       }

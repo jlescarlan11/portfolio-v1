@@ -168,6 +168,41 @@ describe('useOnlineChat', () => {
     expect(result.current.error).toBeNull();
   });
 
+  it('releases the response reader lock after a successful stream', async () => {
+    const response = successResponse();
+    const value = new TextEncoder().encode(
+      [
+        frame({ type: 'text-delta', delta: 'Complete.' }),
+        frame({ type: 'finish', finishReason: 'stop' })
+      ].join('')
+    );
+    let readCall = 0;
+    const reader = {
+      read: vi.fn(async () => {
+        readCall += 1;
+        return readCall === 1
+          ? { done: false as const, value }
+          : { done: true as const, value: undefined };
+      }),
+      cancel: vi.fn(async () => undefined),
+      releaseLock: vi.fn()
+    };
+    vi.spyOn(response.body!, 'getReader').mockReturnValue(reader as never);
+    vi.stubGlobal('fetch', vi.fn(async () => response));
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toBeNull();
+    expect(result.current.messages.at(-1)).toEqual({
+      role: 'assistant',
+      content: 'Complete.'
+    });
+    expect(reader.releaseLock).toHaveBeenCalledOnce();
+  });
+
   it('ignores whitespace and duplicate submissions while a request is active', async () => {
     let streamController: ReadableStreamDefaultController<Uint8Array> | undefined;
     vi.stubGlobal(
