@@ -22,7 +22,7 @@ export function isRenderableExternalUrl(url?: string): url is string {
   try {
     const parsedUrl = new URL(trimmedUrl);
     return (
-      (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') &&
+      parsedUrl.protocol === 'https:' &&
       !parsedUrl.username &&
       !parsedUrl.password &&
       !isIpLiteralHostname(parsedUrl.hostname)

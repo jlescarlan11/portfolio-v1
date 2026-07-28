@@ -25,13 +25,13 @@ test('getProjectBySlug returns undefined for an unknown slug', () => {
   assert.equal(getProjectBySlug('does-not-exist'), undefined);
 });
 
-test('isRenderableExternalUrl accepts valid http and https urls', () => {
+test('isRenderableExternalUrl accepts valid https urls', () => {
   assert.equal(isRenderableExternalUrl('https://example.com'), true);
-  assert.equal(isRenderableExternalUrl('http://example.com/demo'), true);
 });
 
 test('isRenderableExternalUrl rejects placeholders and unsupported protocols', () => {
   assert.equal(isRenderableExternalUrl('REPLACE_WITH_URL'), false);
+  assert.equal(isRenderableExternalUrl('http://example.com/demo'), false);
   assert.equal(isRenderableExternalUrl('mailto:hello@example.com'), false);
   assert.equal(isRenderableExternalUrl('javascript:alert(1)'), false);
   assert.equal(
