@@ -182,7 +182,8 @@ export async function fetchGitHubContributionData(
   fetcher: Fetcher = fetch
 ): Promise<GitHubContributionData> {
   const normalizedUsername = normalizeGitHubUsername(username);
-  if (!normalizedUsername) {
+  const normalizedToken = token.trim();
+  if (!normalizedUsername || !normalizedToken) {
     throw new GitHubContributionDataError();
   }
 
@@ -195,7 +196,7 @@ export async function fetchGitHubContributionData(
     const response = await fetcher('https://api.github.com/graphql', {
       method: 'POST',
       headers: {
-        Authorization: `bearer ${token}`,
+        Authorization: `bearer ${normalizedToken}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({

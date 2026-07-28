@@ -53,7 +53,7 @@ describe('GitHub contribution data', () => {
     await expect(
       fetchGitHubContributionData(
         'jlescarlan11',
-        'test-placeholder-token',
+        '  test-placeholder-token  ',
         fetcher
       )
     ).resolves.toEqual(validCalendar);
@@ -64,7 +64,10 @@ describe('GitHub contribution data', () => {
       expect.objectContaining({
         method: 'POST',
         cache: 'no-store',
-        signal: expect.any(AbortSignal)
+        signal: expect.any(AbortSignal),
+        headers: expect.objectContaining({
+          Authorization: 'bearer test-placeholder-token'
+        })
       })
     );
   });
@@ -109,6 +112,19 @@ describe('GitHub contribution data', () => {
 
     expect(fetcher).not.toHaveBeenCalled();
   });
+
+  it.each(['', '   '])(
+    'rejects blank token %j before issuing a direct provider request',
+    async token => {
+      const fetcher = vi.fn();
+
+      await expect(
+        fetchGitHubContributionData('jlescarlan11', token, fetcher)
+      ).rejects.toThrow('GitHub contribution data is unavailable.');
+
+      expect(fetcher).not.toHaveBeenCalled();
+    }
+  );
 
   it('rejects HTTP-200 GraphQL errors before validated data can be cached', () => {
     expect(() =>
