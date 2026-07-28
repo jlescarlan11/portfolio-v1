@@ -1,4 +1,5 @@
 import { heroContent, type HeroContent } from '@/features/home/content';
+import { isRenderableExternalUrl } from '@/shared/lib/project';
 import { siteConfig } from '@/shared/site/config';
 
 interface PersonSchema {
@@ -23,8 +24,12 @@ export function createProfilePageSchema(
 ): ProfilePageSchema {
   const homepageUrl = new URL('/', siteConfig.seo.siteUrl).toString();
   const sameAs = content.socialLinks
-    .filter(({ platform }) => CONFIRMED_PROFILE_PLATFORMS.has(platform))
-    .map(({ url }) => url);
+    .filter(
+      ({ platform, url }) =>
+        CONFIRMED_PROFILE_PLATFORMS.has(platform) &&
+        isRenderableExternalUrl(url)
+    )
+    .map(({ url }) => url.trim());
 
   return {
     '@context': 'https://schema.org',

@@ -2,6 +2,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import ProfileStructuredData from '@/features/home/components/ProfileStructuredData';
+import { heroContent } from '@/features/home/content';
 import {
   createProfilePageSchema,
   serializeJsonLd
@@ -43,6 +44,28 @@ describe('createProfilePageSchema', () => {
     expect(schema.mainEntity).not.toHaveProperty('email');
     expect(schema.mainEntity).not.toHaveProperty('address');
     expect(JSON.stringify(schema)).not.toMatch(/:(null|""|undefined)/);
+  });
+
+  it('omits unsupported confirmed-profile URLs from sameAs', () => {
+    const schema = createProfilePageSchema({
+      ...heroContent,
+      socialLinks: [
+        {
+          platform: 'GitHub',
+          url: 'javascript:alert(1)',
+          label: 'Unsafe profile'
+        },
+        {
+          platform: 'LinkedIn',
+          url: ' https://www.linkedin.com/in/safe-profile/ ',
+          label: 'Safe profile'
+        }
+      ]
+    });
+
+    expect(schema.mainEntity.sameAs).toEqual([
+      'https://www.linkedin.com/in/safe-profile/'
+    ]);
   });
 });
 
