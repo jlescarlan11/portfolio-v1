@@ -857,6 +857,41 @@ describe('handleChatRequest', () => {
     }
   });
 
+  it('rejects startup that exhausts the deadline synchronously', async () => {
+    vi.useFakeTimers();
+    try {
+      let providerSignal: AbortSignal | undefined;
+      const nextUpstream = vi.fn(async () => ({
+        done: true as const,
+        value: undefined
+      }));
+      const returnUpstream = vi.fn(async () => ({
+        done: true as const,
+        value: undefined
+      }));
+      const response = await handleChatRequest(request(validBody()), {
+        startChat: ({ signal }) => {
+          providerSignal = signal;
+          vi.advanceTimersByTime(PROVIDER_TIMEOUT_MS + 1);
+          return {
+            iterator: {
+              next: nextUpstream,
+              return: returnUpstream
+            },
+            getCompletion: async () => ({ finishReason: 'stop' })
+          };
+        }
+      });
+
+      expect(response.status).toBe(504);
+      expect(nextUpstream).not.toHaveBeenCalled();
+      expect(providerSignal?.aborted).toBe(true);
+      expect(returnUpstream).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('releases a provider stream that resolves after startup timeout', async () => {
     vi.useFakeTimers();
     try {

@@ -903,8 +903,17 @@ export async function handleChatRequest(
         }
         const stableHostedStream = parseHostedChatStream(hostedStream);
         pendingHostedStream = stableHostedStream;
+        const firstChunkTimeout = getRemainingTimeout(
+          providerDeadline,
+          PROVIDER_TIMEOUT_MS,
+          'Provider startup timed out.'
+        );
         const firstChunk = parseProviderChunkResult(
-          await stableHostedStream.iterator.next()
+          await withTimeout(
+            stableHostedStream.iterator.next(),
+            firstChunkTimeout,
+            'Provider startup timed out.'
+          )
         );
         return {
           hostedStream: stableHostedStream,
