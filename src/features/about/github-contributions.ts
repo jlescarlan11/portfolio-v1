@@ -82,7 +82,7 @@ function parseContributionDay(value: unknown): ContributionDay | null {
   if (
     !parsedDate ||
     typeof contributionCount !== 'number' ||
-    !Number.isInteger(contributionCount) ||
+    !Number.isSafeInteger(contributionCount) ||
     contributionCount < 0 ||
     typeof weekday !== 'number' ||
     !Number.isInteger(weekday) ||
@@ -124,7 +124,7 @@ export function parseGitHubContributionData(
   const { totalContributions, weeks } = calendar;
   if (
     typeof totalContributions !== 'number' ||
-    !Number.isInteger(totalContributions) ||
+    !Number.isSafeInteger(totalContributions) ||
     totalContributions < 0 ||
     !Array.isArray(weeks) ||
     weeks.length > MAX_CONTRIBUTION_WEEKS

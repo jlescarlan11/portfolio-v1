@@ -266,6 +266,44 @@ describe('GitHub contribution data', () => {
     ).toThrow('GitHub contribution data is unavailable.');
   });
 
+  it.each([
+    {
+      field: 'total',
+      calendar: {
+        ...validCalendar,
+        totalContributions: Number.MAX_SAFE_INTEGER + 1
+      }
+    },
+    {
+      field: 'day count',
+      calendar: {
+        ...validCalendar,
+        weeks: [
+          {
+            contributionDays: [
+              {
+                ...validCalendar.weeks[0].contributionDays[0],
+                contributionCount: Number.MAX_SAFE_INTEGER + 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ])('rejects an unsafe contribution $field', ({ calendar }) => {
+    expect(() =>
+      parseGitHubContributionData({
+        data: {
+          user: {
+            contributionsCollection: {
+              contributionCalendar: calendar
+            }
+          }
+        }
+      })
+    ).toThrow('GitHub contribution data is unavailable.');
+  });
+
   it('logs a sanitized warning when cached contribution data is unavailable', async () => {
     const sensitive = 'SENSITIVE_GITHUB_PROVIDER_DETAIL';
     vi.stubEnv('GITHUB_TOKEN', 'test-placeholder-token');
