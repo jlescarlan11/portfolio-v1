@@ -132,7 +132,7 @@ export function parseGitHubContributionData(
     throw new GitHubContributionDataError();
   }
 
-  const parsedDates = new Set<string>();
+  let previousDate: string | null = null;
   const parsedWeeks = weeks.map(candidate => {
     if (
       !isRecord(candidate) ||
@@ -144,10 +144,13 @@ export function parseGitHubContributionData(
 
     const contributionDays = candidate.contributionDays.map(day => {
       const parsed = parseContributionDay(day);
-      if (!parsed || parsedDates.has(parsed.date)) {
+      if (
+        !parsed ||
+        (previousDate !== null && parsed.date <= previousDate)
+      ) {
         throw new GitHubContributionDataError();
       }
-      parsedDates.add(parsed.date);
+      previousDate = parsed.date;
       return parsed;
     });
     return { contributionDays };
