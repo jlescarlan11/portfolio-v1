@@ -26,6 +26,19 @@ export const WELCOME_MESSAGE: ChatMessage = {
     "Hi! I'm John's AI assistant. Ask me anything about his work, skills, or experience."
 };
 
+function cancelSafely(
+  cancelable: { cancel: () => unknown } | null | undefined
+): void {
+  try {
+    const cancellation = cancelable?.cancel();
+    if (cancellation !== undefined) {
+      void Promise.resolve(cancellation).catch(() => undefined);
+    }
+  } catch {
+    // Cancellation is best-effort and must not interrupt state cleanup.
+  }
+}
+
 export type ChatClientErrorKind =
   | 'validation'
   | 'rate_limit'
@@ -246,16 +259,16 @@ async function readApiErrorCode(
   signal?: AbortSignal
 ): Promise<string | undefined> {
   if (!isJsonResponse(response)) {
-    void response.body?.cancel().catch(() => undefined);
+    cancelSafely(response.body);
     return undefined;
   }
   if (!hasAcceptableDeclaredLength(response, MAX_API_ERROR_RESPONSE_BYTES)) {
-    void response.body?.cancel().catch(() => undefined);
+    cancelSafely(response.body);
     return undefined;
   }
   const declaredResponseBytes = getComparableDeclaredLength(response);
   if (declaredResponseBytes === 0) {
-    void response.body?.cancel().catch(() => undefined);
+    cancelSafely(response.body);
     return undefined;
   }
   if (!response.body) return undefined;
@@ -274,7 +287,7 @@ async function readApiErrorCode(
     return undefined;
   }
   const cancelOnAbort = (): void => {
-    void reader.cancel().catch(() => undefined);
+    cancelSafely(reader);
   };
   if (signal?.aborted) {
     cancelOnAbort();
@@ -300,7 +313,7 @@ async function readApiErrorCode(
     while (true) {
       const result = await Promise.race([reader.read(), timeout]);
       if (result === null) {
-        void reader.cancel().catch(() => undefined);
+        cancelSafely(reader);
         return undefined;
       }
 
@@ -313,7 +326,7 @@ async function readApiErrorCode(
         if (
           consecutiveEmptyChunks > MAX_CONSECUTIVE_EMPTY_STREAM_CHUNKS
         ) {
-          void reader.cancel().catch(() => undefined);
+          cancelSafely(reader);
           return undefined;
         }
       } else {
@@ -325,7 +338,7 @@ async function readApiErrorCode(
         (declaredResponseBytes !== undefined &&
           receivedBytes > declaredResponseBytes)
       ) {
-        void reader.cancel().catch(() => undefined);
+        cancelSafely(reader);
         return undefined;
       }
 
@@ -342,7 +355,7 @@ async function readApiErrorCode(
     const body = JSON.parse(text) as ApiErrorBody;
     return typeof body.error?.code === 'string' ? body.error.code : undefined;
   } catch (caught: unknown) {
-    void reader.cancel().catch(() => undefined);
+    cancelSafely(reader);
     if (signal?.aborted) {
       throw signal.reason ?? caught;
     }
@@ -364,7 +377,7 @@ async function classifyHttpError(
 ): Promise<ChatClientError> {
   const statusCode = errorCodeFromStatus(response.status);
   if (statusCode) {
-    void response.body?.cancel().catch(() => undefined);
+    cancelSafely(response.body);
   }
   const code = statusCode ?? (await readApiErrorCode(response, signal));
 
@@ -436,7 +449,7 @@ async function fetchWithAbortSignal(
 
   const responsePromise = fetch(input, init).then(response => {
     if (signal.aborted) {
-      void response.body?.cancel().catch(() => undefined);
+      cancelSafely(response.body);
       throw abortReason();
     }
     return response;
@@ -544,7 +557,7 @@ export function useOnlineChat(): UseOnlineChatResult {
         abortController.abort(
           new DOMException('The chat request timed out.', 'TimeoutError')
         );
-        void responseReader?.cancel().catch(() => undefined);
+        cancelSafely(responseReader);
       }, CLIENT_TIMEOUT_MS);
 
       let fullAssistantResponse = '';
@@ -601,7 +614,7 @@ export function useOnlineChat(): UseOnlineChatResult {
           abortController.signal.aborted ||
           operationId !== operationIdRef.current
         ) {
-          void response.body?.cancel().catch(() => undefined);
+          cancelSafely(response.body);
           throw (
             abortController.signal.reason ??
             new DOMException('The chat request is stale.', 'AbortError')
@@ -633,7 +646,7 @@ export function useOnlineChat(): UseOnlineChatResult {
         }
 
         if (!isChatStreamResponse(response)) {
-          void response.body?.cancel().catch(() => undefined);
+          cancelSafely(response.body);
           throw new ChatProtocolError();
         }
 
@@ -643,12 +656,12 @@ export function useOnlineChat(): UseOnlineChatResult {
             MAX_CHAT_STREAM_RESPONSE_BYTES
           )
         ) {
-          void response.body?.cancel().catch(() => undefined);
+          cancelSafely(response.body);
           throw new ChatProtocolError();
         }
         const declaredResponseBytes = getComparableDeclaredLength(response);
         if (declaredResponseBytes === 0) {
-          void response.body?.cancel().catch(() => undefined);
+          cancelSafely(response.body);
           throw new ChatProtocolError();
         }
 
@@ -781,7 +794,7 @@ export function useOnlineChat(): UseOnlineChatResult {
           { role: 'assistant', content: fullAssistantResponse }
         ];
       } catch (caught: unknown) {
-        void responseReader?.cancel().catch(() => undefined);
+        cancelSafely(responseReader);
         cancelScheduledFlush();
         flushBufferedText();
 
@@ -861,7 +874,7 @@ export function useOnlineChat(): UseOnlineChatResult {
   const reset = useCallback((): void => {
     operationIdRef.current += 1;
     abortReasonRef.current = 'cancel';
-    void responseReaderRef.current?.cancel().catch(() => undefined);
+    cancelSafely(responseReaderRef.current);
     responseReaderRef.current = null;
     abortControllerRef.current?.abort(
       new DOMException('The chat was closed.', 'AbortError')
@@ -885,7 +898,7 @@ export function useOnlineChat(): UseOnlineChatResult {
     return () => {
       operationIdRef.current += 1;
       abortReasonRef.current = 'cancel';
-      void responseReaderRef.current?.cancel().catch(() => undefined);
+      cancelSafely(responseReaderRef.current);
       responseReaderRef.current = null;
       abortControllerRef.current?.abort(
         new DOMException('The chat was unmounted.', 'AbortError')

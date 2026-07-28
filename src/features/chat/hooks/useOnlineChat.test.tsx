@@ -1003,6 +1003,46 @@ describe('useOnlineChat', () => {
     expect(cancelBody).toHaveBeenCalledOnce();
   });
 
+  it('assimilates a PromiseLike response reader cancellation', async () => {
+    let cancellationStarted = false;
+    const response = successResponse();
+    const reader = {
+      read: vi.fn(async () => ({
+        done: false as const,
+        value: new TextEncoder().encode('not-json\n')
+      })),
+      cancel: vi.fn(
+        () =>
+          ({
+            then: (resolve: (value: void) => void) => {
+              cancellationStarted = true;
+              resolve();
+            }
+          }) as Promise<void>
+      ),
+      releaseLock: vi.fn()
+    };
+    vi.spyOn(response.body!, 'getReader').mockReturnValue(reader as never);
+    vi.stubGlobal('fetch', vi.fn(async () => response));
+    const { result } = renderHook(() => useOnlineChat());
+    let sendError: unknown;
+
+    await act(async () => {
+      try {
+        await result.current.send('Hello');
+      } catch (caught: unknown) {
+        sendError = caught;
+      }
+    });
+    await Promise.resolve();
+
+    expect(sendError).toBeUndefined();
+    expect(cancellationStarted).toBe(true);
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'protocol', canRetry: true })
+    );
+  });
+
   it('rejects an unexpected success media type without reading its body', async () => {
     let requestSignal: AbortSignal | null | undefined;
     const cancelBody = vi.fn();
