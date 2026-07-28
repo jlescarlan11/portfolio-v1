@@ -96,6 +96,20 @@ describe('GitHub contribution data', () => {
     expect(fetcher).toHaveBeenCalledOnce();
   });
 
+  it('rejects an invalid username before issuing a direct provider request', async () => {
+    const fetcher = vi.fn();
+
+    await expect(
+      fetchGitHubContributionData(
+        'invalid--login',
+        'test-placeholder-token',
+        fetcher
+      )
+    ).rejects.toThrow('GitHub contribution data is unavailable.');
+
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
   it('rejects HTTP-200 GraphQL errors before validated data can be cached', () => {
     expect(() =>
       parseGitHubContributionData({
@@ -163,6 +177,32 @@ describe('GitHub contribution data', () => {
       'GitHub contribution data unavailable — contribution graph will not render.'
     );
     expect(JSON.stringify(warn.mock.calls)).not.toContain(sensitive);
+  });
+
+  it.each(['', '   ', '-invalid', 'invalid--login', 'a'.repeat(40)])(
+    'rejects invalid username %j before creating a cache entry',
+    async username => {
+      vi.stubEnv('GITHUB_TOKEN', 'test-placeholder-token');
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+      await expect(getGitHubContributionData(username)).resolves.toBeNull();
+
+      expect(cacheMocks.read).not.toHaveBeenCalled();
+      expect(warn).toHaveBeenCalledWith(
+        'GitHub username invalid — contribution graph will not render.'
+      );
+    }
+  );
+
+  it('uses a canonical username for the cache key', async () => {
+    vi.stubEnv('GITHUB_TOKEN', 'test-placeholder-token');
+    cacheMocks.read.mockResolvedValueOnce(validCalendar);
+
+    await expect(
+      getGitHubContributionData('  jlescarlan11  ')
+    ).resolves.toEqual(validCalendar);
+
+    expect(cacheMocks.read).toHaveBeenCalledWith('jlescarlan11');
   });
 
   it.each([
