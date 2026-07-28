@@ -114,10 +114,10 @@ describe('ProfileImage', () => {
   });
 
   it('preserves the existing portrait contract when no callback is provided', () => {
-    render(<ProfileImage src="/hero-image.svg" alt="Portrait of John" />);
+    render(<ProfileImage src="/hero-image.jpg" alt="Portrait of John" />);
 
     const image = screen.getByRole('img', { name: 'Portrait of John' });
-    expect(image).toHaveAttribute('src', '/hero-image.svg');
+    expect(image).toHaveAttribute('src', '/hero-image.jpg');
     expect(image).toHaveAttribute('width', '300');
     expect(image).toHaveAttribute('height', '300');
     expect(image).toHaveAttribute('data-priority', 'true');
@@ -129,7 +129,7 @@ describe('ProfileImage', () => {
     const onSettled = vi.fn();
     render(
       <ProfileImage
-        src="/hero-image.svg"
+        src="/hero-image.jpg"
         alt="Portrait of John"
         onSettled={onSettled}
       />
@@ -162,7 +162,7 @@ describe('ProfileImage', () => {
 
     render(
       <ProfileImage
-        src="/hero-image.svg"
+        src="/hero-image.jpg"
         alt="Portrait of John"
         onSettled={onSettled}
       />
@@ -182,7 +182,7 @@ describe('ProfileImage', () => {
 
     render(
       <ProfileImage
-        src="/hero-image.svg"
+        src="/hero-image.jpg"
         alt="Portrait of John"
         onSettled={onSettled}
       />
@@ -200,7 +200,7 @@ describe('ProfileImage', () => {
     const onErrorSettled = vi.fn();
     const errorView = render(
       <ProfileImage
-        src="/hero-image.svg"
+        src="/hero-image.jpg"
         alt="Portrait of John"
         onSettled={onErrorSettled}
       />
@@ -221,7 +221,7 @@ describe('ProfileImage', () => {
     setCachedImageDefaults(true, 0, () => Promise.resolve());
     render(
       <ProfileImage
-        src="/hero-image.svg"
+        src="/hero-image.jpg"
         alt="Portrait of John"
         onSettled={onInvalidSettled}
       />
@@ -243,7 +243,7 @@ describe('ProfileImage', () => {
 
     render(
       <ProfileImage
-        src="/hero-image.svg"
+        src="/hero-image.jpg"
         alt="Portrait of John"
         onSettled={onSettled}
       />
@@ -272,7 +272,7 @@ describe('ProfileImage', () => {
 
     const view = render(
       <ProfileImage
-        src="/hero-image.svg"
+        src="/hero-image.jpg"
         alt="Portrait of John"
         onSettled={onSettled}
       />
