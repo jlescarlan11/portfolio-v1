@@ -97,6 +97,54 @@ describe('handleChatRequest', () => {
     ]);
   });
 
+  it('measures telemetry duration with a monotonic clock', async () => {
+    vi.useFakeTimers();
+    try {
+      let wallNow = 1_000;
+      const telemetry: ChatTelemetryEvent[] = [];
+      let nextCall = 0;
+      const responsePromise = handleChatRequest(request(validBody()), {
+        startChat: () => ({
+          iterator: {
+            next: async () => {
+              nextCall += 1;
+              if (nextCall > 1) {
+                return { done: true as const, value: undefined };
+              }
+              return new Promise<IteratorResult<string>>(resolve => {
+                setTimeout(() => {
+                  wallNow = 0;
+                  resolve({ done: false, value: 'Complete' });
+                }, 1_000);
+              });
+            }
+          },
+          getCompletion: async () => ({
+            finishReason: 'stop',
+            inputTokens: 10,
+            outputTokens: 2
+          })
+        }),
+        now: () => wallNow,
+        writeTelemetry: event => telemetry.push(event)
+      });
+
+      await vi.advanceTimersByTimeAsync(1_000);
+      const response = await responsePromise;
+      await response.text();
+
+      expect(telemetry).toEqual([
+        expect.objectContaining({
+          status: 'success',
+          durationMs: expect.any(Number)
+        })
+      ]);
+      expect(telemetry[0].durationMs).toBeGreaterThanOrEqual(1_000);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('rejects non-POST requests before reading or calling the provider', async () => {
     const inbound = new Request('http://localhost/api/chat', {
       method: 'DELETE',

@@ -811,7 +811,7 @@ export async function handleChatRequest(
 ): Promise<Response> {
   const resolved = { ...DEFAULT_DEPENDENCIES, ...dependencies };
   const requestId = resolved.createRequestId();
-  const startedAt = resolved.now();
+  const startedAt = performance.now();
   let outcomeEmitted = false;
 
   const emitOutcome = (
@@ -828,7 +828,10 @@ export async function handleChatRequest(
     emitTelemetrySafely(resolved.writeTelemetry, {
       requestId,
       status,
-      durationMs: Math.max(0, resolved.now() - startedAt),
+      durationMs: Math.max(
+        0,
+        Math.round(performance.now() - startedAt)
+      ),
       ...details
     });
   };
