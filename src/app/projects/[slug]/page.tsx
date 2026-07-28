@@ -6,12 +6,15 @@ import {
   getProjectBySlug,
   getProjectSlugs
 } from '@/features/projects';
+import {
+  ProjectEvidenceSections,
+  ProjectMetaStrip,
+  ProjectSectionLabel
+} from '@/features/projects/components/ProjectCaseStudySections';
 import { Typography } from '@/shared/components/Typography';
 import { FadeIn } from '@/shared/components/FadeIn';
-import { NewTabNotice } from '@/shared/components/NewTabNotice';
 import { siteConfig } from '@/shared/site/config';
 import { SURFACE, TYPOGRAPHY_STYLES } from '@/shared/styles/shared';
-import { formatMonthYear, isRenderableExternalUrl } from '@/shared/lib/project';
 
 interface ProjectPageProps {
   params: Promise<{ slug: string }>;
@@ -117,104 +120,6 @@ function ProjectHero({ src, title, isLogo }: ProjectHeroProps) {
   );
 }
 
-// ─── Meta strip ────────────────────────────────────────────────────────────────
-// Compact horizontal row: date · client · links — stacks on mobile
-// Tech pills live in a second row below, always full-width
-interface MetaStripProps {
-  client?: string;
-  completedAt: string;
-  technologies: string[];
-  liveUrl?: string;
-  githubUrl?: string;
-}
-
-function MetaStrip({ client, completedAt, technologies, liveUrl, githubUrl }: MetaStripProps) {
-  const safeLiveUrl = isRenderableExternalUrl(liveUrl) ? liveUrl : undefined;
-  const safeGithubUrl = isRenderableExternalUrl(githubUrl) ? githubUrl : undefined;
-  const completedLabel = formatMonthYear(completedAt, 'long');
-
-  return (
-    <div className={`border-y ${SURFACE.hairline} py-6 space-y-5`}>
-
-      {/* Row 1 — date, client, CTAs */}
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-        <div className="flex items-baseline gap-2.5">
-          <Typography
-            variant="caption"
-            as="span"
-            className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground"
-          >
-            Completed
-          </Typography>
-          <Typography variant="label" as="time" dateTime={completedAt} className="tabular-nums">
-            {completedLabel}
-          </Typography>
-        </div>
-
-        {client && (
-          <>
-            <span className="hidden h-3.5 w-px bg-surface-divider sm:block" aria-hidden="true" />
-            <div className="flex items-baseline gap-2.5">
-              <Typography
-                variant="caption"
-                as="span"
-                className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground"
-              >
-                Client
-              </Typography>
-              <Typography variant="label" as="span">{client}</Typography>
-            </div>
-          </>
-        )}
-
-        {(safeLiveUrl || safeGithubUrl) && (
-          <div className="ml-auto flex items-center gap-4">
-            {safeLiveUrl && (
-              <a
-                href={safeLiveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 border border-foreground px-4 py-1.5 text-xs font-medium text-foreground transition-all duration-200 hover:bg-foreground hover:text-background"
-              >
-                View live
-                <span aria-hidden="true" className="opacity-50">↗</span>
-                <NewTabNotice />
-              </a>
-            )}
-            {safeGithubUrl && (
-              <a
-                href={safeGithubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={TYPOGRAPHY_STYLES.linkSecondary}
-              >
-                GitHub
-                <span aria-hidden="true"> ↗</span>
-                <NewTabNotice />
-              </a>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Row 2 — tech stack pills */}
-      <ul className="flex flex-wrap gap-2" aria-label="Technology stack">
-        {technologies.map((tech) => (
-          <li key={tech}>
-            <Typography
-              variant="caption"
-              as="span"
-              className={`inline-flex items-center border ${SURFACE.hairline} px-2.5 py-1 text-[11px] text-muted-foreground`}
-            >
-              {tech}
-            </Typography>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 // ─── Smart gallery ─────────────────────────────────────────────────────────────
 // 1 image  → full-width 16/9
 // 2 images → side by side 4/3
@@ -300,21 +205,6 @@ function SmartGallery({ images, projectTitle }: SmartGalleryProps) {
         ))}
       </div>
     </div>
-  );
-}
-
-// ─── Section eyebrow label ─────────────────────────────────────────────────────
-// Consistent small-caps label style across Overview / Highlights / Gallery
-function SectionLabel({ children, id }: { children: string; id: string }) {
-  return (
-    <Typography
-      variant="caption"
-      as="h2"
-      id={id}
-      className="mb-5 text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle-foreground"
-    >
-      {children}
-    </Typography>
   );
 }
 
@@ -405,7 +295,8 @@ export default async function ProjectPage({ params }: ProjectPageProps): Promise
 
           {/* ── META STRIP ─────────────────────────────────────────── */}
           <FadeIn delay={150} className="mb-14 md:mb-18">
-            <MetaStrip
+            <ProjectMetaStrip
+              roleScope={project.caseStudy.roleScope}
               client={project.client}
               completedAt={project.completedAt}
               technologies={project.technologies}
@@ -421,7 +312,9 @@ export default async function ProjectPage({ params }: ProjectPageProps): Promise
             className="mb-14 md:mb-18"
             aria-labelledby="overview-heading"
           >
-            <SectionLabel id="overview-heading">Overview</SectionLabel>
+            <ProjectSectionLabel id="overview-heading">
+              Overview
+            </ProjectSectionLabel>
             <div className="space-y-5">
               {project.caseStudy.overview.map((paragraph) => (
                 <Typography
@@ -436,14 +329,21 @@ export default async function ProjectPage({ params }: ProjectPageProps): Promise
             </div>
           </FadeIn>
 
+          <ProjectEvidenceSections
+            impact={project.caseStudy.impact}
+            decisions={project.caseStudy.decisions}
+          />
+
           {/* ── HIGHLIGHTS ─────────────────────────────────────────── */}
           <FadeIn
-            delay={300}
+            delay={460}
             as="section"
             className={`mb-14 border-t ${SURFACE.hairline} pt-10 md:mb-18`}
             aria-labelledby="highlights-heading"
           >
-            <SectionLabel id="highlights-heading">Highlights</SectionLabel>
+            <ProjectSectionLabel id="highlights-heading">
+              Highlights
+            </ProjectSectionLabel>
             <ul className="space-y-5">
               {project.caseStudy.highlights.map((highlight, i) => (
                 <li key={highlight} className="flex gap-4">
@@ -468,12 +368,14 @@ export default async function ProjectPage({ params }: ProjectPageProps): Promise
           {/* ── GALLERY — only if there are remaining images after the hero ── */}
           {showGallery && (
             <FadeIn
-              delay={380}
+              delay={540}
               as="section"
               className={`mb-14 border-t ${SURFACE.hairline} pt-10 md:mb-18`}
               aria-labelledby="gallery-heading"
             >
-              <SectionLabel id="gallery-heading">Gallery</SectionLabel>
+              <ProjectSectionLabel id="gallery-heading">
+                Gallery
+              </ProjectSectionLabel>
               <SmartGallery
                 images={remainingGallery}
                 projectTitle={project.title}
@@ -483,7 +385,7 @@ export default async function ProjectPage({ params }: ProjectPageProps): Promise
 
           {/* ── FOOTER ─────────────────────────────────────────────── */}
           <FadeIn
-            delay={460}
+            delay={620}
             className={`border-t ${SURFACE.hairline} pt-10`}
           >
             <div className="flex items-center justify-between">
