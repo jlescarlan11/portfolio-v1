@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Typography } from '@/shared/components/Typography';
 import { NewTabNotice } from '@/shared/components/NewTabNotice';
+import { isRenderableExternalUrl } from '@/shared/lib/project';
 import { SURFACE } from '@/shared/styles/shared';
 
 interface Certification {
@@ -44,7 +45,7 @@ export function CertificationsList({
                 as="p"
                 className="leading-snug transition-colors duration-200 group-hover:text-foreground"
               >
-                {cert.url ? (
+                {isRenderableExternalUrl(cert.url) ? (
                   <a
                     href={cert.url}
                     target="_blank"
