@@ -1,3 +1,10 @@
+export function isIpLiteralHostname(hostname: string): boolean {
+  return (
+    /^\d{1,3}(?:\.\d{1,3}){3}$/.test(hostname) ||
+    (hostname.startsWith('[') && hostname.endsWith(']'))
+  );
+}
+
 export function isRenderableExternalUrl(url?: string): url is string {
   if (!url) {
     return false;
@@ -17,7 +24,8 @@ export function isRenderableExternalUrl(url?: string): url is string {
     return (
       (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') &&
       !parsedUrl.username &&
-      !parsedUrl.password
+      !parsedUrl.password &&
+      !isIpLiteralHostname(parsedUrl.hostname)
     );
   } catch {
     return false;

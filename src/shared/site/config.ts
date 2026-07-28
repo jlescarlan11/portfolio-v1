@@ -1,3 +1,5 @@
+import { isIpLiteralHostname } from '@/shared/lib/project';
+
 export interface NavItem {
   name: string;
   href: string;
@@ -39,13 +41,6 @@ function isManagedDeploymentHostname(hostname: string): boolean {
   return MANAGED_DEPLOYMENT_HOSTS.some(
     managedHost =>
       hostname === managedHost || hostname.endsWith(`.${managedHost}`)
-  );
-}
-
-function isIpLiteralHostname(hostname: string): boolean {
-  return (
-    /^\d{1,3}(?:\.\d{1,3}){3}$/.test(hostname) ||
-    (hostname.startsWith('[') && hostname.endsWith(']'))
   );
 }
 
