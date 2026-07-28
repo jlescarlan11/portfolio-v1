@@ -105,6 +105,7 @@ are complete.
 | `pnpm test`          | Run all tests (unit + UI)                    |
 | `pnpm test:unit` | Run unit tests via Node's native test runner |
 | `pnpm test:ui`   | Run component tests via Vitest               |
+| `pnpm verify:ai-gateway:credits` | Read Gateway balance without making a model request |
 | `pnpm verify:chat` | Run the hosted-chat quality corpus against `CHAT_BASE_URL` |
 | `pnpm verify:chat:rate-limit` | Verify the live distributed 20-per-minute boundary |
 | `pnpm verify:cutover` | Run read-only domain, content, metadata, and header checks |
@@ -140,6 +141,12 @@ If the rule is missing or the Firewall check fails, the route fails closed with
 a sanitized `503` and does not call the model. Keep the WAF rule on the Hobby
 plan's included allowance, AI Gateway automatic top-up disabled, and no paid
 fallback configured.
+
+Before running the seven-request hosted quality corpus, refresh `.env.local`
+with `vercel env pull .env.local --yes`, then run
+`pnpm verify:ai-gateway:credits`. The command calls the read-only Gateway credit
+endpoint and does not invoke a model. If the reported balance is zero, stop and
+leave hosted model verification pending.
 
 Pre-stream errors use JSON with `400`, `413`, `429`, `503`, or `504`. A stream
 that fails after text begins ends with a sanitized error frame. Application

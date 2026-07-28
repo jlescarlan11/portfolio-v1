@@ -217,6 +217,17 @@ Vercel AI Gateway is the source of truth for inference usage. Vercel Firewall is
 the source of truth for rate-limit traffic. Application events supplement them
 with sanitized outcomes only.
 
+Use the read-only Gateway credits endpoint before any hosted model verification:
+
+```bash
+vercel env pull .env.local --yes
+pnpm verify:ai-gateway:credits
+```
+
+The verifier reports only the credit balance and lifetime usage. It does not
+make a model request or print the credential. A zero balance is a release
+blocker for the quality corpus under the no-paid-credit policy.
+
 ## Quality regression corpus
 
 The selected model must pass these cases on a Vercel Preview before release:
@@ -251,8 +262,9 @@ the assembled profile.
 3. Review Firewall traffic and confirm the rule does not match unrelated paths
    or methods.
 4. After the owner has enabled the free Gateway credit, run
-   `pnpm verify:chat` against Preview and inspect sanitized application events
-   plus Gateway usage.
+   `pnpm verify:ai-gateway:credits`. Continue only when it reports an available
+   balance, then run `pnpm verify:chat` against Preview and inspect sanitized
+   application events plus Gateway usage.
 5. Only after those gates pass, change the rule to production enforcement and
    complete the domain cutover.
 

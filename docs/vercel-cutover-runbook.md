@@ -123,6 +123,8 @@ All boxes must be checked in the same release window:
   pnpm verify:chat:rate-limit` passes.
 - [ ] Vercel AI Gateway account prerequisites are satisfied without enabling
   automatic top-up or a paid fallback.
+- [ ] `pnpm verify:ai-gateway:credits` reports an available balance without
+  making a model request.
 - [ ] `CHAT_BASE_URL=https://<preview-host> pnpm verify:chat` passes all seven
   quality cases and Gateway usage remains within the intended free allowance.
 - [ ] Static pages still return normally when Gateway inference is unavailable.
