@@ -15,11 +15,11 @@ does not authorize a deployment, DNS edit, Firewall publication, plan change,
 credit purchase, or Netlify removal.
 
 Do not change public DNS until all pre-cutover gates pass. In particular, a
-valid chat request must stream through Vercel AI Gateway and the Vercel
+valid chat request must stream through Groq and the Vercel
 Firewall rule must reject request 21 in Preview. At the time this runbook was
-recorded, Gateway inference was blocked because the Vercel team did not have
-the card prerequisite for its advertised free credit, and the Firewall rule
-was staged but unpublished.
+recorded, Groq was selected to avoid the Vercel AI Gateway card prerequisite.
+The Groq server credential still needs to be configured in Vercel, and the
+Firewall rule remains staged but unpublished.
 
 ## Systems and identifiers
 
@@ -121,13 +121,12 @@ All boxes must be checked in the same release window:
 - [ ] The Firewall rule is changed to enforce the 20-request/60-second fixed
   window and `CHAT_BASE_URL=https://<preview-host>
   pnpm verify:chat:rate-limit` passes.
-- [ ] Vercel AI Gateway account prerequisites are satisfied without enabling
-  automatic top-up or a paid fallback.
-- [ ] `pnpm verify:ai-gateway:credits` reports an available balance without
-  making a model request.
+- [ ] `GROQ_API_KEY` is configured as a sensitive server-only variable for the
+  candidate environment and is absent from browser assets and logs.
+- [ ] The Groq organization remains on the Free plan with no paid fallback.
 - [ ] `CHAT_BASE_URL=https://<preview-host> pnpm verify:chat` passes all seven
-  quality cases and Gateway usage remains within the intended free allowance.
-- [ ] Static pages still return normally when Gateway inference is unavailable.
+  quality cases and Groq usage remains within the account's Free-plan limits.
+- [ ] Static pages still return normally when Groq inference is unavailable.
 - [ ] The candidate shows PACU ending in August 2026, the approved project
   descriptions, current resume, canonical metadata, and security headers.
 - [ ] A second maintainer or explicit owner review confirms the DNS changes and

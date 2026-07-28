@@ -1,6 +1,4 @@
-export const HOSTED_CHAT_MODEL = 'openai/gpt-5-nano';
 export const HOSTED_CHAT_REASONING = 'minimal' as const;
-export const HOSTED_CHAT_VERBOSITY = 'low' as const;
 export { MAX_REQUEST_BYTES } from './contracts';
 export const MAX_MESSAGE_COUNT = 12;
 export const MAX_USER_CHARACTERS = 2_000;
@@ -26,14 +24,4 @@ export function isNetlifyRuntime(
 ): boolean {
   return Boolean(environment.SITE_ID?.trim()) ||
     environment.NETLIFY?.trim().toLowerCase() === 'true';
-}
-
-export function assertHostedChatConfiguration(
-  environment: NodeJS.ProcessEnv = process.env
-): void {
-  const hasOidcToken = Boolean(environment.VERCEL_OIDC_TOKEN?.trim());
-  const hasGatewayApiKey = Boolean(environment.AI_GATEWAY_API_KEY?.trim());
-  if (!hasOidcToken && !hasGatewayApiKey) {
-    throw new ChatConfigurationError();
-  }
 }

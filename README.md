@@ -32,7 +32,7 @@ This is the source code for my personal portfolio site — built with Next.js 15
 | UI        | React 19                                                     |
 | Language  | TypeScript                                                   |
 | Styling   | Tailwind CSS 4                                               |
-| AI chat   | Vercel AI Gateway · AI SDK · OpenAI `gpt-5-nano`            |
+| AI chat   | Groq · AI SDK · OpenAI `gpt-oss-20b`                        |
 | Icons     | React Icons                                                  |
 | Testing   | Vitest · Node Test Runner · React Testing Library · Jest DOM |
 | Tooling   | ESLint · Turbopack                                           |
@@ -61,22 +61,25 @@ Create a `.env.local` file in the root directory:
 ```env
 NEXT_PUBLIC_SITE_URL=https://johnlesterescarlan.pro
 NEXT_PUBLIC_CONTACT_EMAIL=your-email@example.com
+GROQ_API_KEY=your-server-only-groq-key
+# Optional; Groq is the default.
+HOSTED_CHAT_PROVIDER=groq
 ```
 
-Vercel deployments inject a short-lived `VERCEL_OIDC_TOKEN` automatically, so
-the hosted chat does not require an OpenAI API key. For local chat development,
-link this clone to the existing Vercel project and pull a short-lived OIDC token:
+Create the key in the [Groq Console](https://console.groq.com/keys). The project
+uses Groq's Free plan directly, so no card or Vercel AI Gateway credit is
+required. Add the key to Vercel as a sensitive server-side variable for
+Development, Preview, and Production:
 
 ```bash
-vercel link --yes --scope lester-s-projects4 --project portfolio-v1
-vercel env pull .env.local --yes
+vercel env add GROQ_API_KEY production,preview,development --sensitive
 ```
 
-Re-run the environment pull when the local token expires. Keep
-`VERCEL_OIDC_TOKEN` and the optional server-only `AI_GATEWAY_API_KEY` out of Git,
-browser code, fixtures, logs, and screenshots. Never prefix either credential
-with `NEXT_PUBLIC_`. If server-side gateway authentication is unavailable,
-`POST /api/chat` intentionally returns a sanitized `503`.
+Enter the key only in the CLI's hidden prompt or Vercel dashboard; do not paste
+it into source control or chat. Keep `GROQ_API_KEY` out of Git, browser code,
+fixtures, logs, and screenshots, and never prefix it with `NEXT_PUBLIC_`. If
+the selected provider or its credential is unavailable, `POST /api/chat`
+intentionally returns a sanitized `503`.
 
 ### Development
 
@@ -86,10 +89,9 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the site.
 
-The portfolio runs locally with `pnpm dev`; only a real chat request needs
-Gateway configuration. The Netlify development path remains available solely
-for rollback compatibility until the production cutover and observation window
-are complete.
+The portfolio runs locally with `pnpm dev`; only a real chat request needs a
+Groq key. The Netlify development path remains available solely for rollback
+compatibility until the production cutover and observation window are complete.
 
 ---
 
@@ -105,7 +107,6 @@ are complete.
 | `pnpm test`          | Run all tests (unit + UI)                    |
 | `pnpm test:unit` | Run unit tests via Node's native test runner |
 | `pnpm test:ui`   | Run component tests via Vitest               |
-| `pnpm verify:ai-gateway:credits` | Read Gateway balance without making a model request |
 | `pnpm verify:chat` | Run the hosted-chat quality corpus against `CHAT_BASE_URL` |
 | `pnpm verify:chat:rate-limit` | Verify the live distributed 20-per-minute boundary |
 | `pnpm verify:cutover` | Run read-only domain, content, metadata, and header checks |
@@ -117,12 +118,17 @@ are complete.
 The browser posts validated `user`/`assistant` history to `POST /api/chat`.
 The server prepends the trusted portfolio prompt, trims the oldest complete
 turns to the input budget, and streams newline-delimited JSON text frames from
-Vercel AI Gateway. Closing the widget aborts the browser request and forwards
-the cancellation signal upstream.
+the selected server-side provider. Closing the widget aborts the browser
+request and forwards the cancellation signal upstream.
+
+The route depends on a provider-neutral `HostedChatProvider` interface. Groq is
+the registered default adapter; a future provider can be added as another
+adapter and selected through the server-only `HOSTED_CHAT_PROVIDER` variable
+without changing the browser or API contract.
 
 Application limits are deliberately conservative:
 
-- `gpt-5-nano` with `minimal` reasoning effort
+- Groq `openai/gpt-oss-20b` with `minimal` reasoning effort
 - 16 KiB body, 12 messages, and 2,000 Unicode characters in the current prompt
 - 8,000 estimated input tokens and 256 maximum output tokens
 - 25-second provider timeout
@@ -130,8 +136,8 @@ Application limits are deliberately conservative:
   60-second Vercel Firewall fixed window
 
 The server calls the `portfolio-chat` rule through `@vercel/firewall` before it
-parses the request or starts AI Gateway. Vercel derives the anonymous key from
-the connection IP; the application does not read, store, or log raw IP
+parses the request or starts provider inference. Vercel derives the anonymous
+key from the connection IP; the application does not read, store, or log raw IP
 addresses. The fixed-window counter is shared across function instances within
 a Vercel region. Counters are regional rather than globally exact, so traffic
 that reaches multiple regions can receive a separate 20-request allowance in
@@ -139,14 +145,14 @@ each region. This is abuse protection rather than a strict billing cap.
 
 If the rule is missing or the Firewall check fails, the route fails closed with
 a sanitized `503` and does not call the model. Keep the WAF rule on the Hobby
-plan's included allowance, AI Gateway automatic top-up disabled, and no paid
-fallback configured.
+plan's included allowance, keep the Groq organization on its Free plan, and do
+not configure a paid fallback.
 
-Before running the seven-request hosted quality corpus, refresh `.env.local`
-with `vercel env pull .env.local --yes`, then run
-`pnpm verify:ai-gateway:credits`. The command calls the read-only Gateway credit
-endpoint and does not invoke a model. If the reported balance is zero, stop and
-leave hosted model verification pending.
+Groq's published Free-plan limits for this model are currently 30 requests per
+minute, 1,000 requests per day, 8,000 tokens per minute, and 200,000 tokens per
+day. The exact account limits in Groq Console are authoritative. Exceeding any
+provider limit produces the existing sanitized `429` response and leaves the
+static portfolio available.
 
 Pre-stream errors use JSON with `400`, `413`, `429`, `503`, or `504`. A stream
 that fails after text begins ends with a sanitized error frame. Application
@@ -174,13 +180,12 @@ full contract and operational policy.
 6. Inspect browser network traffic and built client assets: only `/api/chat`
    may receive prompt content, and no gateway credential or legacy model asset
    may be present.
-7. After production release, repeat the corpus and review Vercel AI Gateway
-   usage, Firewall traffic, application outcomes, and the account-credit
-   notifications described in the decision record.
+7. After production release, repeat the corpus and review Groq usage and limits,
+   Firewall traffic, and sanitized application outcomes.
 
 `CHAT_BASE_URL` is only the public preview/production origin; it is not a
 credential. The verification script makes seven real model requests, so do not
-run it repeatedly without checking gateway usage.
+run it repeatedly without checking Groq usage and remaining Free-plan limits.
 
 GitHub `main` is the Vercel Production source; eligible pull requests and other
 branches produce Vercel Previews. Preview responses must remain

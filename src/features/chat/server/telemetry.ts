@@ -1,4 +1,4 @@
-import { HOSTED_CHAT_MODEL } from './config';
+import { getHostedChatTelemetryModel } from './providers';
 
 export type ChatTelemetryStatus =
   | 'success'
@@ -36,7 +36,7 @@ export function emitTelemetrySafely(
   try {
     writer({
       event: 'portfolio_chat_request',
-      model: HOSTED_CHAT_MODEL,
+      model: getHostedChatTelemetryModel(),
       ...event
     });
   } catch {

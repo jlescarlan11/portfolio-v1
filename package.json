@@ -11,14 +11,14 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "pnpm test:unit && pnpm test:ui",
-    "test:unit": "node --test --experimental-strip-types src/features/projects/project.test.ts scripts/verify-ai-gateway-credits.test.mjs",
+    "test:unit": "node --test --experimental-strip-types src/features/projects/project.test.ts",
     "test:ui": "vitest run",
-    "verify:ai-gateway:credits": "node --env-file-if-exists=.env.local scripts/verify-ai-gateway-credits.mjs",
     "verify:chat": "node scripts/verify-hosted-chat.mjs",
     "verify:chat:rate-limit": "node scripts/verify-chat-rate-limit.mjs",
     "verify:cutover": "node scripts/verify-vercel-cutover.mjs"
   },
   "dependencies": {
+    "@ai-sdk/groq": "^4.0.15",
     "@vercel/firewall": "1.2.2",
     "ai": "^7.0.37",
     "geist": "^1.7.0",
