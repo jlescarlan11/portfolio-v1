@@ -12,17 +12,15 @@ describe('resolveSiteUrl', () => {
     expect(resolveSiteUrl('not a URL')).toBe(PRODUCTION_SITE_URL);
   });
 
-  it('normalizes a valid web URL to a slash-free origin', () => {
+  it('normalizes a valid HTTPS URL to a slash-free origin', () => {
     expect(
       resolveSiteUrl('  https://portfolio.example.com/path/?preview=1#work  ')
     ).toBe('https://portfolio.example.com');
-    expect(resolveSiteUrl('http://portfolio.example.com:8080/')).toBe(
-      'http://portfolio.example.com:8080'
-    );
   });
 
   it.each([
     'ftp://johnlesterescarlan.pro',
+    'http://portfolio.example.com:8080',
     'https://user:password@johnlesterescarlan.pro',
     'http://localhost:3000',
     'http://127.0.0.1:3000',

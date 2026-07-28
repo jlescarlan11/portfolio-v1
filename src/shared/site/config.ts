@@ -47,13 +47,13 @@ export function resolveSiteUrl(value?: string): string {
 
   try {
     const url = new URL(candidate);
-    const isWebUrl = url.protocol === 'http:' || url.protocol === 'https:';
+    const isSecureWebUrl = url.protocol === 'https:';
     const hasCredentials = Boolean(url.username || url.password);
     const isUnsafeHost =
       UNSAFE_CANONICAL_HOSTS.has(url.hostname) ||
       isNetlifyPreviewHostname(url.hostname);
 
-    if (!isWebUrl || hasCredentials || isUnsafeHost) {
+    if (!isSecureWebUrl || hasCredentials || isUnsafeHost) {
       return PRODUCTION_SITE_URL;
     }
 
