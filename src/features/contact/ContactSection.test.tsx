@@ -59,6 +59,28 @@ describe('ContactSection', () => {
     expect(screen.getByRole('status')).not.toHaveClass('sr-only');
   });
 
+  it('contains repeated clicks while a clipboard write is pending', () => {
+    const writeText = vi.fn(
+      () => new Promise<void>(() => undefined)
+    );
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText }
+    });
+
+    render(<ContactSection content={contactContent} />);
+    const copyButton = screen.getByRole('button', {
+      name: `Copy email address ${contactContent.email}`
+    });
+
+    fireEvent.click(copyButton);
+    fireEvent.click(copyButton);
+
+    expect(writeText).toHaveBeenCalledOnce();
+    expect(copyButton).toBeDisabled();
+    expect(screen.getByRole('status')).toHaveTextContent('Copying email.');
+  });
+
   it('announces when clipboard access is unavailable', async () => {
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
