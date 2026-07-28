@@ -71,6 +71,10 @@ describe('next.config crawler and redirect wiring', () => {
           value: 'strict-origin-when-cross-origin'
         },
         {
+          key: 'Strict-Transport-Security',
+          value: 'max-age=31536000'
+        },
+        {
           key: 'X-Content-Type-Options',
           value: 'nosniff'
         },
@@ -79,6 +83,15 @@ describe('next.config crawler and redirect wiring', () => {
           value: 'DENY'
         }
       ]
+    });
+  });
+
+  it('instructs returning browsers to keep using HTTPS', async () => {
+    const rules = await createNextConfig('production').headers?.();
+
+    expect(rules?.[0].headers).toContainEqual({
+      key: 'Strict-Transport-Security',
+      value: 'max-age=31536000'
     });
   });
 
