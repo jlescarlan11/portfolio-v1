@@ -10,9 +10,11 @@
 
 **Live →** [johnlesterescarlan.pro](https://johnlesterescarlan.pro)
 
-Netlify hosts the application, but `https://johnlesterescarlan.pro` is the
-canonical public address. The generated `.netlify.app` URL is a deployment
-fallback, not the preferred portfolio URL.
+`https://johnlesterescarlan.pro` is the canonical public address. Production
+traffic still resolves to Netlify while the gated Vercel migration is prepared;
+the generated provider domains are fallbacks, not preferred portfolio URLs.
+See the [Vercel cutover runbook](docs/vercel-cutover-runbook.md) for the
+verified DNS inventory, release gates, and rollback procedure.
 
 ---
 
@@ -30,7 +32,7 @@ This is the source code for my personal portfolio site — built with Next.js 15
 | UI        | React 19                                                     |
 | Language  | TypeScript                                                   |
 | Styling   | Tailwind CSS 4                                               |
-| AI chat   | Netlify AI Gateway · AI SDK · OpenAI `gpt-5-nano`           |
+| AI chat   | Groq · AI SDK · OpenAI `gpt-oss-20b`                        |
 | Icons     | React Icons                                                  |
 | Testing   | Vitest · Node Test Runner · React Testing Library · Jest DOM |
 | Tooling   | ESLint · Turbopack                                           |
@@ -41,15 +43,15 @@ This is the source code for my personal portfolio site — built with Next.js 15
 
 ### Prerequisites
 
-- Node.js 22+
-- npm
+- Node.js 24
+- pnpm 10.33.1
 
 ### Installation
 
 ```bash
 git clone https://github.com/jlescarlan11/portfolio-v1.git
 cd portfolio-v1
-npm install
+pnpm install --frozen-lockfile
 ```
 
 ### Environment Variables
@@ -59,36 +61,42 @@ Create a `.env.local` file in the root directory:
 ```env
 NEXT_PUBLIC_SITE_URL=https://johnlesterescarlan.pro
 NEXT_PUBLIC_CONTACT_EMAIL=your-email@example.com
-
-# Server-only hosted chat values. Never use NEXT_PUBLIC_ for these.
-OPENAI_API_KEY=replace-with-a-local-development-key
-# Optional: omit for the official OpenAI API.
-# OPENAI_BASE_URL=https://replace-with-an-openai-compatible-v1-endpoint
+GROQ_API_KEY=your-server-only-groq-key
+# Optional; Groq is the default.
+HOSTED_CHAT_PROVIDER=groq
 ```
 
-Netlify deploys inject the collision-free `NETLIFY_AI_GATEWAY_KEY` and
-`NETLIFY_AI_GATEWAY_BASE_URL` values at runtime; the server prefers that pair so
-existing provider-specific project settings cannot bypass the gateway. A
-Netlify runtime fails closed if that pair is missing or incomplete; it never
-falls back to provider-specific credentials there. `OPENAI_API_KEY` is the
-local or non-Netlify fallback and uses the official OpenAI endpoint by default.
-Set `OPENAI_BASE_URL` only for a different OpenAI-compatible endpoint.
-Do not set the `NETLIFY_AI_GATEWAY_*` values by hand or copy any runtime value
-into the repository, browser code, fixtures, logs, or screenshots. If the
-required configuration for the current runtime is unavailable,
-`POST /api/chat` intentionally returns a sanitized `503`.
+Create the key in the [Groq Console](https://console.groq.com/keys). The project
+uses Groq's Free plan directly, so no card or Vercel AI Gateway credit is
+required. Add the key to Vercel as a sensitive server-side variable for
+Preview and Production:
+
+```bash
+vercel env add GROQ_API_KEY production,preview --sensitive
+```
+
+Enter the key only in the CLI's hidden prompt or Vercel dashboard; do not paste
+it into source control or chat. Keep `GROQ_API_KEY` out of Git, browser code,
+fixtures, logs, and screenshots, and never prefix it with `NEXT_PUBLIC_`. If
+the selected provider or its credential is unavailable, `POST /api/chat`
+intentionally returns a sanitized `503`.
+
+For local development, place the same key in the gitignored `.env.local` file.
+Vercel does not support sensitive variables in its Development environment, so
+do not add the key there unless authorized project members need to retrieve it
+through Vercel.
 
 ### Development
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the site.
 
-To exercise Netlify-provided integrations locally, use `npx netlify dev`
-instead. The rest of the portfolio runs with `npm run dev`; only a real chat
-request needs gateway configuration.
+The portfolio runs locally with `pnpm dev`; only a real chat request needs a
+Groq key. The Netlify development path remains available solely for rollback
+compatibility until the production cutover and observation window are complete.
 
 ---
 
@@ -96,16 +104,17 @@ request needs gateway configuration.
 
 | Command             | Description                                  |
 | ------------------- | -------------------------------------------- |
-| `npm run dev`       | Start development server with Turbopack      |
-| `npm run build`     | Build for production                         |
-| `npm start`         | Run the production build                     |
-| `npm run lint`      | Lint with ESLint                             |
-| `npm run typecheck` | Type-check with TypeScript compiler          |
-| `npm test`          | Run all tests (unit + UI)                    |
-| `npm run test:unit` | Run unit tests via Node's native test runner |
-| `npm run test:ui`   | Run component tests via Vitest               |
-| `npm run verify:chat` | Run the hosted-chat quality corpus against `CHAT_BASE_URL` |
-| `npm run verify:chat:rate-limit` | Verify the live distributed 20-per-minute boundary |
+| `pnpm dev`       | Start development server with Turbopack      |
+| `pnpm build`     | Build for production                         |
+| `pnpm start`         | Run the production build                     |
+| `pnpm lint`      | Lint with ESLint                             |
+| `pnpm typecheck` | Type-check with TypeScript compiler          |
+| `pnpm test`          | Run all tests (unit + UI)                    |
+| `pnpm test:unit` | Run unit tests via Node's native test runner |
+| `pnpm test:ui`   | Run component tests via Vitest               |
+| `pnpm verify:chat` | Run the hosted-chat quality corpus against `CHAT_BASE_URL` |
+| `pnpm verify:chat:rate-limit` | Verify the live distributed 20-per-minute boundary |
+| `pnpm verify:cutover` | Run read-only domain, content, metadata, and header checks |
 
 ---
 
@@ -114,25 +123,41 @@ request needs gateway configuration.
 The browser posts validated `user`/`assistant` history to `POST /api/chat`.
 The server prepends the trusted portfolio prompt, trims the oldest complete
 turns to the input budget, and streams newline-delimited JSON text frames from
-Netlify AI Gateway. Closing the widget aborts the browser request and forwards
-the cancellation signal upstream.
+the selected server-side provider. Closing the widget aborts the browser
+request and forwards the cancellation signal upstream.
+
+The route depends on a provider-neutral `HostedChatProvider` interface. Groq is
+the registered default adapter; a future provider can be added as another
+adapter and selected through the server-only `HOSTED_CHAT_PROVIDER` variable
+without changing the browser or API contract.
 
 Application limits are deliberately conservative:
 
-- `gpt-5-nano` with `minimal` reasoning effort
+- Groq `openai/gpt-oss-20b` with `minimal` reasoning effort
 - 16 KiB body, 12 messages, and 2,000 Unicode characters in the current prompt
 - 8,000 estimated input tokens and 256 maximum output tokens
 - 25-second provider timeout
 - 20 anonymous POST requests per client IP across every site domain in a
-  60-second distributed Netlify rate-limit window
+  60-second Vercel Firewall fixed window
 
-Netlify's edge counter can admit requests that are already in flight at the
-boundary, so this is abuse protection rather than a strict billing cap. The
-live verifier checks convergence and retry-window recovery; gateway account
-TPM limits and Netlify's documented 50%, 75%, and 100% account-credit
-notifications are the cost backstops. Netlify's Agent Runner AI Credit Usage
-Limit does not stop AI Gateway traffic, so keep paid-plan auto recharge disabled
-when a hard account-credit ceiling is required.
+The server calls the `portfolio-chat` rule through `@vercel/firewall` before it
+parses the request or starts provider inference. Vercel derives the anonymous
+key from the connection IP; the application does not read, store, or log raw IP
+addresses. The fixed-window counter is shared across function instances within
+a Vercel region. Counters are regional rather than globally exact, so traffic
+that reaches multiple regions can receive a separate 20-request allowance in
+each region. This is abuse protection rather than a strict billing cap.
+
+If the rule is missing or the Firewall check fails, the route fails closed with
+a sanitized `503` and does not call the model. Keep the WAF rule on the Hobby
+plan's included allowance, keep the Groq organization on its Free plan, and do
+not configure a paid fallback.
+
+Groq's published Free-plan limits for this model are currently 30 requests per
+minute, 1,000 requests per day, 8,000 tokens per minute, and 200,000 tokens per
+day. The exact account limits in Groq Console are authoritative. Exceeding any
+provider limit produces the existing sanitized `429` response and leaves the
+static portfolio available.
 
 Pre-stream errors use JSON with `400`, `413`, `429`, `503`, or `504`. A stream
 that fails after text begins ends with a sanitized error frame. Application
@@ -144,27 +169,35 @@ full contract and operational policy.
 
 ### Preview and production verification
 
-1. Open a pull request and wait for the Netlify deploy preview.
-2. Run `CHAT_BASE_URL=https://<deploy-preview-host> npm run verify:chat`.
+1. Open a pull request and wait for the Vercel Preview deployment.
+2. Run
+   `CUTOVER_BASE_URL=https://<preview-host> pnpm verify:cutover`.
+3. Run `CHAT_BASE_URL=https://<preview-host> pnpm verify:chat`.
    After at least 60 seconds with no requests from the same client, run
-   `CHAT_BASE_URL=https://<deploy-preview-host> npm run verify:chat:rate-limit`.
+   `CHAT_BASE_URL=https://<preview-host> pnpm verify:chat:rate-limit`.
    This sends only invalid bodies, so it exercises the edge boundary without
    invoking the model.
-3. In a narrow mobile viewport, open the widget, send a prompt, observe
+4. In a narrow mobile viewport, open the widget, send a prompt, observe
    progressive text, close it mid-stream, reopen it, and retry a simulated
    network failure.
-4. Repeat in Safari or Firefox with graphics acceleration unavailable. The
+5. Repeat in Safari or Firefox with graphics acceleration unavailable. The
    welcome message and input must still appear immediately.
-5. Inspect browser network traffic and built client assets: only `/api/chat`
+6. Inspect browser network traffic and built client assets: only `/api/chat`
    may receive prompt content, and no gateway credential or legacy model asset
    may be present.
-6. After production release, repeat the corpus and review Netlify gateway usage,
-   application outcomes, and the account-credit notifications described in the
-   decision record.
+7. After production release, repeat the corpus and review Groq usage and limits,
+   Firewall traffic, and sanitized application outcomes.
 
 `CHAT_BASE_URL` is only the public preview/production origin; it is not a
 credential. The verification script makes seven real model requests, so do not
-run it repeatedly without checking gateway usage.
+run it repeatedly without checking Groq usage and remaining Free-plan limits.
+
+GitHub `main` is the Vercel Production source; eligible pull requests and other
+branches produce Vercel Previews. Preview responses must remain
+`noindex, nofollow`. The project operates with no paid AI credits, no automatic
+top-up, and no paid provider fallback. Free allowances are capped, not
+unlimited; exhausted or unavailable inference must degrade to the sanitized
+chat error while static portfolio pages remain available.
 
 ---
 

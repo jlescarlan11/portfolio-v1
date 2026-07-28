@@ -1,26 +1,20 @@
-import { createOpenAI } from '@ai-sdk/openai';
 import { streamText, type ModelMessage } from 'ai';
 import {
-  HOSTED_CHAT_MODEL,
   HOSTED_CHAT_REASONING,
-  HOSTED_CHAT_VERBOSITY,
-  getHostedChatConfiguration,
   MAX_OUTPUT_TOKENS,
   PROVIDER_TIMEOUT_MS
 } from './config';
 import type { HostedChatStream, StartHostedChat } from './contracts';
+import { resolveHostedChatProvider } from './providers';
 
 export const startHostedChat: StartHostedChat = ({
   messages,
   signal,
   systemPrompt
 }): HostedChatStream => {
-  const configuration = getHostedChatConfiguration();
-  const openai = createOpenAI({
-    apiKey: configuration.apiKey,
-    baseURL: configuration.baseUrl,
-    name: 'netlify-ai-gateway'
-  });
+  const environment = process.env;
+  const hostedProvider = resolveHostedChatProvider(environment);
+  const model = hostedProvider.createModel(environment);
 
   const modelMessages: ModelMessage[] = messages.map(message => ({
     role: message.role,
@@ -28,15 +22,10 @@ export const startHostedChat: StartHostedChat = ({
   }));
 
   const result = streamText({
-    model: openai.chat(HOSTED_CHAT_MODEL),
+    model,
     system: systemPrompt,
     messages: modelMessages,
     reasoning: HOSTED_CHAT_REASONING,
-    providerOptions: {
-      openai: {
-        textVerbosity: HOSTED_CHAT_VERBOSITY
-      }
-    },
     maxOutputTokens: MAX_OUTPUT_TOKENS,
     maxRetries: 0,
     abortSignal: signal,

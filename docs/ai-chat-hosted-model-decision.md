@@ -2,108 +2,136 @@
 
 **Date:** 2026-07-27
 
-**Pricing and limits rechecked:** 2026-07-28
+**Updated:** 2026-07-28
 
-**Status:** Provisionally selected; release blocked on the live quality gate
+**Status:** Groq selected; Preview release verification awaits a server
+credential and the unpublished Firewall rule
 
-**Issues:** #6, #7, #8, #9, #10
+**Issues:** #6, #7, #8, #9, #10, #24, #25
 
 ## Decision
 
-Use the existing Netlify AI Gateway with OpenAI's `gpt-5-nano` model for the
-portfolio chatbot.
+Use Groq's Free plan directly through the official `@ai-sdk/groq` adapter with
+the `openai/gpt-oss-20b` model. Do not use Vercel AI Gateway for the current
+chatbot because activating its advertised credit requires a card on the Vercel
+team, while Groq requires a payment method only when upgrading from Free to
+Developer.
 
-Netlify already hosts the production site and injects collision-free
-`NETLIFY_AI_GATEWAY_KEY` and `NETLIFY_AI_GATEWAY_BASE_URL` values into its
-Next.js compute runtime. This keeps credentials server-only and avoids adding
-another hosting account, provider balance, or static production key.
+The route depends on a provider-neutral `HostedChatProvider` interface. Groq is
+the default registered adapter. Provider selection, credential validation, and
+model construction stay inside the server provider registry; the browser,
+`POST /api/chat`, streaming frames, validation, cancellation, rate limiting,
+and telemetry contract do not depend on Groq.
 
-`gpt-5-nano` is the lowest-cost supported model that also has the highest
-published throughput tier among the low-cost candidates on Netlify:
+Adding another provider later requires:
 
-| Candidate | Input / 1M tokens | Output / 1M tokens | Free-plan TPM | Decision |
-| --- | ---: | ---: | ---: | --- |
-| `gpt-5-nano` | $0.05 | $0.40 | 300,000 | Selected |
-| `gpt-4.1-nano` | $0.10 | $0.40 | 250,000 | Higher input cost and lower throughput |
-| `gemini-2.5-flash-lite` | $0.10 | $0.40 | 50,000 | Higher input cost and materially lower throughput |
+1. an adapter implementing `HostedChatProvider`;
+2. registration under a unique server-only provider ID;
+3. provider-specific credential and model configuration; and
+4. regression and hosted quality verification.
 
-Rates and model availability are provider-controlled and must be rechecked
-before a future model change. “Unlimited use” is not possible; this design
-instead bounds every request, rate-limits abusive clients, and exposes usage
-through Netlify's gateway monitoring.
+No provider name, model ID, credential, token budget, or reasoning setting is
+accepted from a browser request. An unknown `HOSTED_CHAT_PROVIDER` value fails
+closed with the existing sanitized service-unavailable response.
 
-Netlify bills successful AI Gateway requests from actual token usage and
-converts each $1 of provider usage to 180 credits. At the application ceilings
-of 8,000 estimated input tokens and 256 output tokens, one `gpt-5-nano` request
-is budgeted at approximately $0.0005024 in model usage, or 0.090432 Netlify
-credits, before any future pricing change. This is a conservative calculation,
-not measured production usage; provider tokenization can differ and actual
-requests are normally lower.
+“Completely free” means operating within Groq's current Free-plan allowance; it
+does not mean unlimited or guaranteed inference. No payment method, Developer
+upgrade, automatic purchase, or paid fallback is part of this decision.
 
 ## Server-only configuration
 
-Production and deploy previews use Netlify-injected values:
+Required:
 
-- `NETLIFY_AI_GATEWAY_KEY` — gateway credential; preferred at request time and
-  never set manually.
-- `NETLIFY_AI_GATEWAY_BASE_URL` — gateway endpoint; preferred at request time
-  and never set manually.
+```env
+GROQ_API_KEY=<secret>
+```
 
-Local development can receive those values through `netlify dev`, or use
-`OPENAI_API_KEY` for the official OpenAI endpoint. `OPENAI_BASE_URL` is an
-optional override for a different OpenAI-compatible endpoint. The server
-prefers the collision-free Netlify pair and uses Netlify's reserved `SITE_ID`
-runtime variable to fail closed if the pair is missing or incomplete, so an
-existing provider-specific project setting cannot bypass the gateway.
-Provider-specific fallback credentials are accepted only outside Netlify.
-None of these values may use a `NEXT_PUBLIC_` prefix or appear in client code,
-logs, errors, fixtures, or committed environment files.
+Optional:
 
-The model and request budgets are application-owned constants:
+```env
+HOSTED_CHAT_PROVIDER=groq
+```
 
-- Model: `gpt-5-nano`
-- Reasoning effort: `minimal` to favor latency and cost for short portfolio
-  answers
+Groq is the default when `HOSTED_CHAT_PROVIDER` is unset. Store
+`GROQ_API_KEY` as a sensitive Vercel environment variable in Preview and
+Production:
+
+```bash
+vercel env add GROQ_API_KEY production,preview --sensitive
+```
+
+Enter the value through the hidden CLI prompt or the Vercel dashboard. The key
+must never use a `NEXT_PUBLIC_` prefix or appear in browser code, committed
+environment files, fixtures, screenshots, error messages, or telemetry.
+Vercel does not permit sensitive variables in the Development environment; use
+the gitignored `.env.local` file for local development instead.
+`VERCEL_OIDC_TOKEN`, `AI_GATEWAY_API_KEY`, `OPENAI_API_KEY`,
+`OPENAI_BASE_URL`, and the former Netlify AI variables are not credential
+fallbacks.
+
+## Model and application limits
+
+- Provider: Groq
+- Model: `openai/gpt-oss-20b`
+- Reasoning effort: `minimal`, mapped by the Groq AI SDK adapter to `low`
 - Maximum request body: 16 KiB
 - Maximum message count: 12
 - Maximum current user message: 2,000 Unicode characters
 - Maximum estimated input context: 8,000 tokens, including the system prompt
-- Token-estimation safety rule: estimate conservatively and trim complete
-  oldest turns before calling the provider
 - Maximum output: 256 tokens
-- Provider timeout: 25 seconds
-- Anonymous rate limit: 20 POST requests per client IP across every site domain
-  per 60 seconds
-- Rate-limit retry interval: 60 seconds
+- SDK retries: 0
+- Provider timeout: 24 seconds
+- Anonymous application rate limit: 20 POST requests per Vercel-derived client
+  IP per 60-second fixed window
+- Application rate-limit retry interval: 60 seconds
 
-Netlify begins blocking after its configured `windowLimit` is exceeded. The
-deployed rule therefore uses the static platform value `20`, which the live
-boundary verifier confirms as 20 allowed requests followed by a blocked request
-21 for sequential traffic. The counter aggregates by client IP only, so the
-custom domain and Netlify default domain do not grant separate allowances.
-Because enforcement runs on Netlify's distributed edge, requests already in
-flight at the boundary can briefly overshoot the nominal threshold before the
-counter converges. The live verifier races two boundary requests, requires
-enforcement after propagation, waits for the advertised retry window, and
-confirms that traffic is accepted again. Treat the 20-request limit as abuse
-protection rather than an exact account-budget control. Netlify's current
-`gpt-5-nano` account limits are 300,000 TPM on Free, 600,000 TPM on Personal,
-and 900,000 TPM on Pro, with both input and output tokens counting toward the
-limit. The application budgets up to 165,120 estimated tokens per minute for
-20 sequential worst-case requests from one client, so a small number of
-independent clients can still exhaust the account-level allowance.
+The token estimator trims complete oldest turns before provider invocation. The
+trusted system prompt and current user message are never removed.
 
-Netlify's AI Credit Usage Limit is an Agent Runner control and does not stop AI
-Gateway traffic on self-serve plans. Netlify currently sends account-credit
-notifications at 50%, 75%, and 100%; on a Free plan the monthly credit limit is
-hard, while paid plans can exceed their included balance only when auto recharge
-is enabled. Keep auto recharge disabled when a hard account-credit ceiling is
-required. Credit exhaustion can pause every project on the account, so it is a
-last-resort ceiling rather than a chat-specific graceful fallback.
+As of 2026-07-28, Groq publishes these base Free-plan limits for
+`openai/gpt-oss-20b`: 30 requests per minute, 1,000 requests per day, 8,000
+tokens per minute, and 200,000 tokens per day. Rate limits apply at the Groq
+organization level, and the exact Limits page for the account is authoritative.
+Any one limit may be reached before the application request counter.
 
-The 8,000-token application limit is intentionally much smaller than the model
-and Netlify gateway context limits. It provides predictable cost and leaves
-room for tokenizer-estimation differences.
+An upstream 429 is mapped to the established sanitized application 429 response.
+When Groq provides `Retry-After`, the server forwards a bounded value. Free-plan
+exhaustion must not affect static portfolio pages.
+
+## Distributed abuse protection
+
+The Vercel App Router endpoint calls `checkRateLimit('portfolio-chat')` from
+`@vercel/firewall` before request parsing, validation, or provider inference.
+Application code does not accept or construct a caller-provided key; the SDK
+uses Vercel's normalized connection-IP signal for its default anonymous key.
+Vercel owns the counter outside the function process.
+
+The corresponding WAF rule is a fixed window of 20 requests per 60 seconds. The
+rule is currently staged as a valid, log-only draft:
+
+- Rule: `Portfolio chat SDK rate limit`
+- Rate-limit ID: `portfolio-chat`
+- Algorithm: fixed window
+- Limit: 20 requests / 60 seconds
+- Key: IP
+- Exceeded action: log during staging; change to rate-limit only after Preview
+  validation
+
+The SDK counter is distributed across function instances within a Vercel
+region. Vercel documents the counters as regional, so a client routed through
+multiple regions can receive a separate allowance in each region. This is
+low-latency regional abuse protection, not an exact global billing cap.
+
+Requests 1 through 20 in one regional window can proceed to validation. Request
+21 receives the established application 429 response once the rule is enforcing.
+After the fixed window expires, the next request can proceed again. A limited
+request never reaches request validation or the provider adapter. If the rule is
+missing, Vercel returns an unexpected result, or the rate-limit service cannot
+be reached, the route returns a sanitized 503 and does not call Groq.
+
+The application never persists or emits the raw client IP. It records only the
+existing `application_rate_limited` event for a 429 or a sanitized failed event
+when enforcement is unavailable.
 
 ## API contract
 
@@ -127,14 +155,11 @@ Rules:
 - Only `user` and `assistant` roles are accepted.
 - The conversation must start with `user`, alternate roles, and end with `user`.
 - The final message must be a non-empty `user` message.
-- Client-supplied system messages, model IDs, token settings, and provider
-  options are rejected.
+- Client-supplied system messages, provider IDs, model IDs, token settings, and
+  provider options are rejected.
 - Leading and trailing whitespace is removed.
 - Empty, oversized, malformed, or structurally invalid payloads never reach the
   provider.
-- When context is over budget, the server removes the oldest complete
-  user/assistant turn. The trusted system prompt and current user message are
-  never removed.
 
 ### Streaming success
 
@@ -156,8 +181,8 @@ If an error happens after streaming begins, the final frame is sanitized:
 {"type":"error","code":"STREAM_ERROR","message":"The AI service stopped responding. Please try again."}
 ```
 
-The client must retain any already-rendered partial text, leave the generating
-state, and allow another submission.
+The client retains already-rendered partial text, leaves the generating state,
+and allows another submission.
 
 ### JSON errors before streaming
 
@@ -174,12 +199,11 @@ state, and allow another submission.
 | ---: | --- | --- |
 | 400 | `VALIDATION_ERROR` | Invalid JSON, roles, message ordering, or empty content |
 | 413 | `PAYLOAD_TOO_LARGE` | Body or current message exceeds the configured limit |
-| 429 | `RATE_LIMITED` | Netlify or the upstream gateway limit was reached |
-| 503 | `SERVICE_UNAVAILABLE` | Gateway configuration or provider is unavailable |
+| 429 | `RATE_LIMITED` | Application or Groq Free-plan limit was reached |
+| 503 | `SERVICE_UNAVAILABLE` | Provider or abuse-protection configuration is unavailable |
 | 504 | `TIMEOUT` | The provider did not begin or finish within the timeout |
 
-Rate-limit responses include `Retry-After: 60` when the application knows the
-retry interval.
+Application rate-limit responses include `Retry-After: 60`.
 
 ### Cancellation
 
@@ -189,17 +213,14 @@ consuming output tokens when the provider supports cancellation.
 
 ## Privacy-safe operational events
 
-The application emits one structured completion event per started provider
-request and one structured event for the rate-limit rewrite endpoint.
-
 Allowed fields:
 
 - event name
 - request ID
 - status
-- model
+- provider-qualified model identifier
 - duration in milliseconds
-- provider-reported input and output tokens when available
+- provider-reported input and output token counts when available
 - finish reason
 - error category
 
@@ -207,26 +228,23 @@ Forbidden fields:
 
 - user or assistant message content
 - full system prompt
-- gateway credentials or authorization headers
+- Groq or other provider credentials and authorization headers
 - raw provider request/response bodies
-- client IP addresses
+- client IP addresses or rate-limit keys
 
-Netlify AI Gateway remains the source of truth for account-level inference usage
-and billing. Application logs supplement it with request outcomes and latency.
+Groq Console is the source of truth for provider usage and organization limits.
+Vercel Firewall is the source of truth for application rate-limit traffic.
+Application events supplement them with sanitized outcomes only.
 
-Operational counters are grouped by `status`: `success`, `failed`, `cancelled`,
-`output_limit`, `provider_quota`, and `application_rate_limited`. Review them
-alongside gateway token usage after each release and daily for the first seven
-days. Confirm that the documented 50%, 75%, and 100% account-credit
-notifications reach the owner, review AI Gateway inference separately in
-account usage insights, and keep paid-plan auto recharge disabled unless the
-owner intentionally accepts spend beyond the selected credit tier. Investigate
-unexpected growth in output tokens or any sustained provider/application
-rate-limit events before increasing limits.
+Groq states that inference input and output are not retained by default, except
+temporarily for reliability troubleshooting or abuse investigation, and offers
+Zero Data Retention controls. This application does not send browser search,
+batch, fine-tuning, or other stateful feature requests.
 
 ## Quality regression corpus
 
-The selected model must pass these cases on a deploy preview before release:
+The selected provider and model must pass these cases on a Vercel Preview before
+release:
 
 | ID | Prompt | Required behavior |
 | --- | --- | --- |
@@ -244,27 +262,44 @@ the assembled profile.
 
 ## Release and rollback
 
-- Run automated route, client, and contract tests without billable provider
-  calls.
-- Run Q1–Q7 against a Netlify deploy preview.
-- Confirm no legacy on-device model request and no provider credential appear
-  in browser network traffic or client bundles.
-- Monitor Netlify AI Gateway usage after release.
-- Roll back by reverting the hosted-chat change set. Do not keep the legacy
-  on-device model as a runtime fallback because it restores the mobile
-  performance problem this change is intended to solve.
+1. Add `GROQ_API_KEY` to Preview and Production as a sensitive server-only
+   variable, and use `.env.local` for local development. Do not upgrade the
+   Groq organization from Free.
+2. Publish the staged Firewall rule in log-only mode and verify that Preview
+   chat requests match the `portfolio-chat` rule.
+3. Change the rule's exceeded action to rate-limit in Preview scope, publish it,
+   and run:
+
+   ```bash
+   CHAT_BASE_URL=https://<preview-host> pnpm verify:chat:rate-limit
+   ```
+
+   The verifier sends only malformed bodies, so it does not intentionally
+   invoke the model.
+4. Run `CHAT_BASE_URL=https://<preview-host> pnpm verify:chat` once, inspect
+   sanitized application events, and confirm the Groq account remains within
+   its current Free-plan limits.
+5. Only after those gates pass, change the Firewall rule to production
+   enforcement and complete the domain cutover.
+
+Roll back inference by restoring the previous Vercel deployment or selecting a
+tested registered adapter through `HOSTED_CHAT_PROVIDER`. Never set an
+unregistered value, expose a provider key to the browser, or enable a paid
+fallback implicitly.
 
 ## Sources
 
-- Netlify AI Gateway overview and supported models:
-  https://docs.netlify.com/build/ai-gateway/overview/
-- Netlify AI model pricing:
-  https://docs.netlify.com/manage/accounts-and-billing/billing/billing-for-credit-based-plans/pricing-for-ai-features/
-- Netlify credit limits and notifications:
-  https://www.netlify.com/pricing/
-- Netlify rate limiting:
-  https://docs.netlify.com/manage/security/secure-access-to-sites/rate-limiting/
-- OpenAI `gpt-5-nano` pricing and provider rate limits:
-  https://developers.openai.com/api/docs/models/gpt-5-nano
-- Netlify Next.js support and response streaming:
-  https://docs.netlify.com/build/frameworks/framework-setup-guides/nextjs/overview/
+- Groq Free-plan rate limits:
+  https://console.groq.com/docs/rate-limits
+- Groq billing and tier upgrades:
+  https://console.groq.com/docs/billing-faqs
+- Groq `openai/gpt-oss-20b` model:
+  https://console.groq.com/docs/model/openai/gpt-oss-20b
+- Groq data controls:
+  https://console.groq.com/docs/your-data
+- AI SDK Groq provider:
+  https://ai-sdk.dev/providers/ai-sdk-providers/groq
+- Vercel Firewall Rate Limiting SDK:
+  https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting-sdk
+- Vercel Firewall staging guidance:
+  https://vercel.com/docs/vercel-firewall/vercel-waf/custom-rules

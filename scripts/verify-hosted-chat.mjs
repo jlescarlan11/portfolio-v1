@@ -1,7 +1,7 @@
 const baseUrl = process.env.CHAT_BASE_URL?.replace(/\/$/, '');
 
 if (!baseUrl) {
-  console.error('Set CHAT_BASE_URL to a Netlify deploy preview or production origin.');
+  console.error('Set CHAT_BASE_URL to a Vercel Preview or production origin.');
   process.exitCode = 1;
 } else {
   const sentenceCount = value =>
