@@ -1,6 +1,14 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi
+} from 'vitest';
 import ContributionGraph from './ContributionGraph';
 
 vi.mock('../github-contributions', () => ({
@@ -28,6 +36,10 @@ afterAll(() => {
   vi.unstubAllGlobals();
 });
 
+afterEach(() => {
+  cleanup();
+});
+
 describe('ContributionGraph', () => {
   it('keeps the visible graph title readable in both themes', async () => {
     render(await ContributionGraph({ username: 'jlescarlan11' }));
@@ -35,5 +47,13 @@ describe('ContributionGraph', () => {
     const title = screen.getByText('GITHUB CONTRIBUTIONS');
     expect(title).toHaveClass('text-subtle-foreground');
     expect(title).not.toHaveClass('text-foreground/50');
+  });
+
+  it('positions partial-week days in their calendar row', async () => {
+    render(await ContributionGraph({ username: 'jlescarlan11' }));
+
+    expect(screen.getByTitle(/^2 contributions on/)).toHaveStyle({
+      gridRowStart: '3'
+    });
   });
 });

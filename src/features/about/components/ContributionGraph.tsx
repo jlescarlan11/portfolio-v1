@@ -109,13 +109,21 @@ export default async function ContributionGraph({
             aria-label={`GitHub contributions for ${username} — ${data.totalContributions.toLocaleString()} in the last year`}
           >
             {weeks.map((week, wi) => (
-              <div key={wi} className="flex flex-col" style={{ gap: '2px' }}>
+              <div
+                key={wi}
+                style={{
+                  display: 'grid',
+                  gridTemplateRows: 'repeat(7, 13px)',
+                  gap: '2px'
+                }}
+              >
                 {week.contributionDays.map((day) => {
                   const level = getLevel(day.contributionCount);
                   return (
                     <div
                       key={day.date}
                       title={`${day.contributionCount} contribution${day.contributionCount !== 1 ? 's' : ''} on ${new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}
+                      style={{ gridRowStart: day.weekday + 1 }}
                       className={`h-[13px] w-[13px] flex-shrink-0 transition-opacity duration-150 hover:opacity-60 ${levelOpacity[level]}`}
                     />
                   );
