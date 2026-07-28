@@ -118,6 +118,29 @@ describe('handleChatRequest', () => {
     expect(startChat).not.toHaveBeenCalled();
   });
 
+  it('assimilates a PromiseLike unread request cancellation', async () => {
+    let cancellationStarted = false;
+    const inbound = new Request('http://localhost/api/chat', {
+      method: 'DELETE',
+      body: validBody(),
+      headers: { 'Content-Type': 'application/json' }
+    });
+    vi.spyOn(inbound.body!, 'cancel').mockReturnValue(
+      {
+        then: (resolve: (value: void) => void) => {
+          cancellationStarted = true;
+          resolve();
+        }
+      } as Promise<void>
+    );
+
+    const response = await handleChatRequest(inbound);
+    await Promise.resolve();
+
+    expect(response.status).toBe(405);
+    expect(cancellationStarted).toBe(true);
+  });
+
   it.each([
     ['malformed JSON', '{', 400, 'validation'],
     [

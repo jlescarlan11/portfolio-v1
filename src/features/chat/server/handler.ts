@@ -389,13 +389,21 @@ function linkAbortSignal(source: AbortSignal, target: AbortController): () => vo
   return () => source.removeEventListener('abort', abort);
 }
 
-function cancelUnreadRequestBody(request: Request): void {
+function cancelSafely(
+  cancelable: { cancel: () => unknown } | null | undefined
+): void {
   try {
-    const cancellation = request.body?.cancel();
-    void cancellation?.catch(() => undefined);
+    const cancellation = cancelable?.cancel();
+    if (cancellation !== undefined) {
+      void Promise.resolve(cancellation).catch(() => undefined);
+    }
   } catch {
-    // Header-based rejection is authoritative if cleanup cannot be started.
+    // Rejection handling remains authoritative if cleanup cannot be started.
   }
+}
+
+function cancelUnreadRequestBody(request: Request): void {
+  cancelSafely(request.body);
 }
 
 async function readRequestText(request: Request): Promise<string | Response> {
@@ -523,11 +531,11 @@ async function readRequestText(request: Request): Promise<string | Response> {
     while (true) {
       const next = await Promise.race([reader.read(), timeout, aborted]);
       if (next === REQUEST_BODY_ABORTED) {
-        void reader.cancel().catch(() => undefined);
+        cancelSafely(reader);
         return cancelledResponse();
       }
       if (next === REQUEST_BODY_TIMEOUT) {
-        void reader.cancel().catch(() => undefined);
+        cancelSafely(reader);
         return jsonError(
           408,
           'TIMEOUT',
@@ -544,7 +552,7 @@ async function readRequestText(request: Request): Promise<string | Response> {
         if (
           consecutiveEmptyChunks > MAX_CONSECUTIVE_EMPTY_REQUEST_CHUNKS
         ) {
-          void reader.cancel().catch(() => undefined);
+          cancelSafely(reader);
           return jsonError(
             400,
             'VALIDATION_ERROR',
@@ -556,7 +564,7 @@ async function readRequestText(request: Request): Promise<string | Response> {
       }
       receivedBytes += chunkBytes;
       if (declaredBytes !== undefined && receivedBytes > declaredBytes) {
-        void reader.cancel().catch(() => undefined);
+        cancelSafely(reader);
         return jsonError(
           400,
           'VALIDATION_ERROR',
@@ -564,7 +572,7 @@ async function readRequestText(request: Request): Promise<string | Response> {
         );
       }
       if (receivedBytes > MAX_REQUEST_BYTES) {
-        void reader.cancel().catch(() => undefined);
+        cancelSafely(reader);
         return jsonError(
           413,
           'PAYLOAD_TOO_LARGE',
@@ -580,7 +588,7 @@ async function readRequestText(request: Request): Promise<string | Response> {
     return text;
   } catch {
     if (request.signal.aborted) return cancelledResponse();
-    void reader.cancel().catch(() => undefined);
+    cancelSafely(reader);
     return jsonError(400, 'VALIDATION_ERROR', 'Check your conversation and try again.');
   } finally {
     if (timeoutId !== undefined) clearTimeout(timeoutId);
