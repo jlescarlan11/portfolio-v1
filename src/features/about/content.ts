@@ -55,7 +55,7 @@ export const aboutContent: AboutContent = {
   eyebrow: 'About',
   title: 'Experience, education, and the stack behind it.',
   intro:
-    'From production monitoring to full-stack product delivery, the throughline is keeping reliability, observability, and automation front and center so the systems stay useful in real-world use.',
+    'I work across production monitoring, full-stack product delivery, and workflow automation, with a consistent focus on reliable systems, explicit safeguards, and practical user outcomes.',
   skillsHeading: 'Skills',
   skillsIntro: 'The tools I reach for most often, grouped by where they show up in the stack.',
   credentialsHeading: 'Credentials',

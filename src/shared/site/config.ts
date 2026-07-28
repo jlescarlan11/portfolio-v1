@@ -75,7 +75,7 @@ export const siteConfig = {
     siteTitle: 'John Lester Escarlan | Full-Stack Software Engineer',
     titleTemplateName: 'John Lester Escarlan',
     description:
-      'Portfolio of John Lester Escarlan, a full-stack software engineer building reliable web products, marketplaces, and AI automation workflows.',
+      'Portfolio of John Lester Escarlan, a full-stack software engineer building reliable marketplaces, offline-first products, and guarded AI automation systems.',
     siteName: 'John Lester Escarlan',
     siteUrl: resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
     locale: 'en_US',

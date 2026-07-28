@@ -100,9 +100,9 @@ export const projects: ProjectRecord[] = [
       summary:
         'A civic health app combining deterministic safety checks, Gemini-assisted triage, and offline clinical records to help residents identify an appropriate next level of care.',
       roleScope: {
-        role: 'Team Lead / Full-Stack Engineer',
+        role: 'Project and Technical Lead',
         team: 'Five-person hackathon team',
-        status: 'Hackathon semi-finalist',
+        status: 'Hackathon semi-finalist; repository archived',
         ownership: [
           'Led a five-person team in building symptom assessment, facility discovery, medication records, and YAKAP enrollment guidance.',
           'Combined SQLite-backed offline data with the Node.js, Prisma, and PostgreSQL backend.'
@@ -160,28 +160,30 @@ export const projects: ProjectRecord[] = [
     title: 'PriceCraft',
     category: 'Web Application / Business Tooling',
     description:
-      'A pricing and cost-planning application for small food businesses, combining live margin calculations with reusable recipe variants, offline-first use, Supabase-backed accounts and synchronization, and portable JSON backups.',
+      'A live, installable pricing PWA for small food businesses, combining recipe and variant costing, offline and cloud synchronization, a personal ingredient catalog, and receipt capture with OCR-assisted item extraction.',
     logo: '/project/pricecraft.svg',
-    technologies: ['TypeScript', 'React', 'Vite', 'Tailwind CSS', 'Supabase', 'PostgreSQL', 'Vitest'],
-    completedAt: '2026-01',
+    technologies: ['TypeScript', 'React', 'Vite', 'Tailwind CSS', 'Supabase', 'PostgreSQL', 'Tesseract.js', 'Vitest', 'Vite PWA'],
+    completedAt: '2026-05',
     links: {
       githubUrl: 'https://github.com/jlescarlan11/pricecraft',
       liveUrl: 'https://pricecraft.netlify.app/'
     },
     caseStudy: {
       summary:
-        'An offline-capable pricing tool that turns ingredient, labor, and overhead costs into clear selling-price decisions for small food businesses.',
+        'An installable, offline-capable pricing tool that turns costs into selling-price decisions and converts reviewed receipt lines into reusable ingredient and price-history records.',
       roleScope: {
         role: 'Full-Stack Engineer',
+        team: 'Solo project',
         status: 'Live',
         ownership: [
           'Built the pricing workflow across ingredient, labor, overhead, markup, and profit-margin calculations.',
-          'Added reusable recipe variants, offline operation, Supabase accounts and synchronization, guest-data migration, and portable backups.'
+          'Expanded the product with recipe variants, a personal ingredient catalog, receipt capture and OCR-assisted extraction, price-drift review, offline operation, and Supabase synchronization.'
         ]
       },
       overview: [
         'Built PriceCraft to replace spreadsheet-heavy pricing workflows with immediate cost breakdowns, markup and profit-margin strategies, and visual margin indicators.',
-        'Expanded the calculator with reusable base recipes and product variants, offline operation, Supabase authentication and synchronization, Row-Level Security, guest-data migration, and JSON import and export.'
+        'Expanded the calculator into an installable PWA with reusable recipe variants, offline operation, Supabase authentication and synchronization, Row-Level Security, guest-data migration, and JSON import and export.',
+        'Added camera and image-based receipt capture, OCR-assisted line extraction, an editable confirmation step, catalog matching, price history, and user-confirmed recipe price-drift updates.'
       ],
       impact: [
         {
@@ -197,10 +199,16 @@ export const projects: ProjectRecord[] = [
             'Supports guest use and offline changes, then synchronizes authenticated account data through Supabase.'
         },
         {
-          value: 'Portable data',
-          label: 'Backup and migration',
+          value: '300+ tests',
+          label: 'Regression coverage',
           context:
-            'Supports guest-data migration plus JSON import and export for portable backups.'
+            'Covers pricing logic, persistence, migration, catalog, and interface behavior with more than 300 unit and integration tests.'
+        },
+        {
+          value: 'Receipt to catalog',
+          label: 'Cost capture',
+          context:
+            'Turns user-reviewed receipt lines into new catalog ingredients or updated price-history records.'
         }
       ],
       decisions: [
@@ -212,6 +220,17 @@ export const projects: ProjectRecord[] = [
             'Model reusable base recipes and allocate shared costs across product variants.',
           rationale:
             'Keep variant pricing comparable while retaining one source for shared recipe costs.'
+        },
+        {
+          title: 'Human-confirmed receipt extraction',
+          constraint:
+            'Receipt text is noisy and cannot safely update ingredient costs without review.',
+          decision:
+            'Preprocess captured images, extract candidate lines through the available OCR path, and require editable confirmation before catalog or price-history writes.',
+          rationale:
+            'Reduce re-entry work without treating uncertain OCR output as trusted pricing data.',
+          tradeoff:
+            'The user remains responsible for checking names, quantities, units, and prices before saving.'
         },
         {
           title: 'Guest-first offline persistence',
@@ -226,7 +245,8 @@ export const projects: ProjectRecord[] = [
       highlights: [
         'Calculates ingredient, labor, and overhead costs using both markup and profit-margin pricing strategies.',
         'Allocates shared recipe costs across product variants and compares resulting margins.',
-        'Supports guest use, offline changes, authenticated cloud synchronization, account migration, and portable backups.'
+        'Captures receipts, extracts candidate items, and requires user confirmation before updating the ingredient catalog and price history.',
+        'Supports installable PWA use, offline changes, authenticated cloud synchronization, account migration, and portable backups.'
       ]
     }
   },
@@ -235,73 +255,95 @@ export const projects: ProjectRecord[] = [
     title: 'Job Pipeline',
     category: 'AI Automation / Developer Tooling',
     description:
-      'A three-workflow n8n system that collects OnlineJobs.ph listings, deduplicates them across active and archived Google Sheets, drafts tailored messages with Groq, and archives processed rows using rate-aware batching and prompt guardrails for manual review.',
+      'A seven-workflow, resume-driven n8n system that discovers and ranks OnlineJobs.ph listings, builds evidence-supported application packs with Groq, alerts through Slack, records manual outcomes, and publishes guarded analytics and recommendations without submitting applications.',
     logo: '',
-    technologies: ['n8n', 'Groq API', 'Google Sheets API', 'JavaScript', 'Prompt Engineering'],
-    completedAt: '2025-11',
+    technologies: ['n8n', 'Node.js', 'JavaScript', 'Groq API', 'Google Sheets API', 'Google Apps Script', 'Slack Webhooks'],
+    completedAt: '2026-07',
     links: {
       githubUrl: 'https://github.com/jlescarlan11/Job-Pipeline'
     },
     caseStudy: {
       summary:
-        'An automated job-application workflow for collecting listings, drafting tailored messages, and archiving processed results while preserving manual review before sending.',
+        'A policy-driven job discovery and application-review system that coordinates seven disabled-by-default workflows while preserving manual review, submission, and outcome decisions.',
       roleScope: {
         role: 'Workflow Automation Engineer',
+        team: 'Solo project',
+        status: 'Validated; disabled by default',
         ownership: [
-          'Connected OnlineJobs.ph, n8n, Groq, and Google Sheets across independently scheduled scraping, drafting, and archival workflows.',
-          'Added cross-sheet deduplication, generation guardrails, per-run limits, and rate-aware batching while preserving manual review.'
+          'Designed seven independently scheduled workflows for discovery, generation, alerts, review, analytics, recommendations, and archival.',
+          'Modeled the pipeline around versioned policies, an 89-field canonical record, additive Sheet migration, deterministic validation, and a manual-submission boundary.'
         ]
       },
       overview: [
-        'Connected OnlineJobs.ph, n8n, Groq, and Google Sheets through three independently scheduled workflows for scraping, message generation, and archival.',
-        'Added cross-sheet deduplication, URL and project whitelists, banned-language checks, self-review instructions, per-run generation limits, and rate-aware batching to keep generated drafts grounded and processing predictable.'
+        'Built a resume-driven n8n system that runs 22 evidence-linked discovery queries, reconciles active and archived history, evaluates qualification and opportunity, and generates instruction-aware application packs grounded in one versioned candidate profile.',
+        'Expanded the original scraper, generator, and archiver into seven workflows that also provide idempotent Slack alerts, explicit review actions, deduplicated conversion analytics, and guarded weekly recommendations.',
+        'Generated workflow exports and Google Apps Script from versioned configuration, then validated artifact drift and the full synthetic lifecycle without making live OnlineJobs.ph, Google Sheets, Groq, or n8n calls by default.'
       ],
       impact: [
         {
-          value: '3 workflows',
+          value: '7 workflows',
           label: 'Automation coverage',
           context:
-            'Separates listing collection, tailored-message drafting, and processed-row archival into three independently scheduled n8n workflows.'
+            'Separates discovery, generation, Slack alerts, manual review, archival, analytics, and recommendations into independently scheduled n8n workflows.'
         },
         {
-          value: '2-sheet check',
-          label: 'Duplicate prevention',
+          value: '22 queries',
+          label: 'Evidence-linked discovery',
           context:
-            'Checks both active and archived Google Sheets before inserting a listing for processing.'
+            'Runs a versioned search catalog while reconciling active and archived records around one canonical job identity.'
         },
         {
-          value: 'Human-reviewed',
+          value: '147 tests',
+          label: 'Deterministic validation',
+          context:
+            'Covers profile and policy contracts, discovery, ranking, generation, review, alerts, archival, analytics, recommendations, generated artifacts, and a synthetic lifecycle.'
+        },
+        {
+          value: 'Manual-only',
           label: 'Sending boundary',
           context:
-            'Produces constrained message drafts while retaining manual review before anything is sent.'
+            'Produces validated application material while requiring the candidate to review and submit every application.'
         }
       ],
       decisions: [
         {
-          title: 'Cross-sheet deduplication',
+          title: 'Versioned policy and generated artifacts',
           constraint:
-            'A listing could already exist in either the active queue or the processed archive.',
+            'Editing exported workflows directly would let runtime behavior drift from profile, ranking, alert, analytics, and application rules.',
           decision:
-            'Check both Google Sheets before inserting a newly collected listing.',
+            'Treat versioned configuration as the source of truth and generate the seven workflow exports and Sheet setup from it.',
           rationale:
-            'Prevent the independently scheduled workflows from processing the same listing again.'
+            'Make critical behavior reviewable, reproducible, and testable before activation.',
+          validation:
+            'The validation command checks generated-artifact drift and runs 147 deterministic tests without live service calls.'
         },
         {
-          title: 'Guarded draft generation',
+          title: 'Canonical identity and guarded state transitions',
           constraint:
-            'Generated messages needed to stay grounded and processing had to remain predictable under provider limits.',
+            'Independent schedules, retries, legacy rows, and reviewer actions could otherwise duplicate work or overwrite a newer decision.',
           decision:
-            'Apply URL and project whitelists, banned-language checks, self-review instructions, per-run limits, and rate-aware batching.',
+            'Use canonical job identities, append-only claims, processing tokens, state guards, idempotent upserts, and archive confirmation before deletion.',
           rationale:
-            'Constrain draft content and bound each generation run.',
+            'Preserve one coherent record across active and archived Sheets even when work overlaps or retries.',
+          validation:
+            'Regression fixtures cover duplicate discovery, stale claims, concurrent review, partial archive writes, row shifts, and legacy records.'
+        },
+        {
+          title: 'Learning without autonomous submission',
+          constraint:
+            'The pipeline needed better prioritization and feedback without allowing generated output or aggregate analytics to take action for the candidate.',
+          decision:
+            'Keep review, Apply Points, submission, and outcomes explicit while limiting analytics and weekly recommendations to versioned, evidence-backed advisory output.',
+          rationale:
+            'Improve future decisions while keeping authority at the human boundary.',
           tradeoff:
-            'The workflow stops at a draft and keeps final review and sending manual.'
+            'The system prepares and prioritizes work but never applies for a job.'
         }
       ],
       highlights: [
-        'Automated listing collection, tailored-message drafting, and result archival across three n8n workflows.',
-        'Prevented repeated processing by checking both active and archived Google Sheets before inserting a listing.',
-        'Constrained Groq-generated drafts with explicit whitelists, validation rules, self-check instructions, and per-run limits while retaining manual review before sending.'
+        'Coordinates discovery, generation, Slack alerts, review, archival, analytics, and recommendations across seven n8n workflows.',
+        'Runs 22 evidence-linked searches, dual-score evaluation, instruction-aware application packs, and canonical cross-sheet reconciliation.',
+        'Generates grounded application material and guarded learning output while keeping review, submission, and outcomes manual.'
       ]
     }
   }

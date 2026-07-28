@@ -273,6 +273,14 @@ test('HEALTH copy uses precise safety, offline, and team claims', () => {
     health.caseStudy.roleScope.team,
     'Five-person hackathon team'
   );
+  assert.equal(
+    health.caseStudy.roleScope.role,
+    'Project and Technical Lead'
+  );
+  assert.equal(
+    health.caseStudy.roleScope.status,
+    'Hackathon semi-finalist; repository archived'
+  );
   assert.ok(
     health.caseStudy.impact.some(
       impact =>
@@ -302,22 +310,31 @@ test('PriceCraft copy reflects its current pricing and persistence capabilities'
       'Supabase',
       'Row-Level Security',
       'guest-data migration',
-      'JSON import and export'
+      'JSON import and export',
+      'installable PWA',
+      'receipt',
+      'OCR',
+      'ingredient catalog',
+      'price history',
+      'user confirmation',
+      '300+ tests'
     ],
     'PriceCraft copy'
   );
   assertIncludesEvery(
     priceCraft.technologies.join(' '),
-    ['Supabase', 'PostgreSQL', 'Vitest'],
+    ['Supabase', 'PostgreSQL', 'Tesseract.js', 'Vitest', 'Vite PWA'],
     'PriceCraft technologies'
   );
+  assert.equal(priceCraft.completedAt, '2026-05');
+  assert.equal(priceCraft.caseStudy.roleScope.team, 'Solo project');
   assert.doesNotMatch(
     getProjectCopy(priceCraft),
     /\b(?:active users?|customers?|revenue|sales|conversion rate|response time|load time)\b/i
   );
 });
 
-test('Job Pipeline copy preserves automation guardrails and manual review', () => {
+test('Job Pipeline copy reflects the version 2.0 architecture and manual boundary', () => {
   const jobPipeline = projects.find(project => project.slug === 'job-pipeline');
   assert.ok(jobPipeline, 'Job Pipeline should exist');
 
@@ -325,14 +342,20 @@ test('Job Pipeline copy preserves automation guardrails and manual review', () =
   assertIncludesEvery(
     copy,
     [
-      'three',
+      'seven',
       'n8n workflows',
-      'active and archived Google Sheets',
-      'deduplication',
-      'whitelists',
-      'rate-aware',
+      '22 evidence-linked',
+      'Slack alerts',
+      'manual review',
+      'analytics',
+      'recommendations',
       'archival',
-      'manual review before sending'
+      'versioned configuration',
+      '89-field',
+      'canonical job',
+      '147 deterministic tests',
+      'disabled by default',
+      'never applies for a job'
     ],
     'Job Pipeline copy'
   );
@@ -341,10 +364,16 @@ test('Job Pipeline copy preserves automation guardrails and manual review', () =
   assert.ok(
     jobPipeline.caseStudy.impact.some(
       impact =>
-        impact.value === 'Human-reviewed' &&
-        impact.context.includes('manual review before anything is sent')
+        impact.value === 'Manual-only' &&
+        impact.context.includes('review and submit every application')
     ),
     'Job Pipeline should preserve the manual sending boundary'
+  );
+  assert.equal(jobPipeline.completedAt, '2026-07');
+  assert.equal(jobPipeline.caseStudy.roleScope.team, 'Solo project');
+  assert.equal(
+    jobPipeline.caseStudy.roleScope.status,
+    'Validated; disabled by default'
   );
 });
 
@@ -378,8 +407,8 @@ test('each short description stays aligned with visible case-study positioning',
   const sharedClaims: Record<string, string[]> = {
     'rent-n-roll': ['pre-launch', 'marketplace', 'PayMongo'],
     health: ['health', 'Gemini', 'offline'],
-    pricecraft: ['pricing', 'offline', 'Supabase'],
-    'job-pipeline': ['three', 'n8n', 'manual review']
+    pricecraft: ['pricing', 'PWA', 'receipt'],
+    'job-pipeline': ['seven', 'n8n', 'manual']
   };
 
   for (const project of projects) {

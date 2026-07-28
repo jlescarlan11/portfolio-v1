@@ -25,10 +25,28 @@ export function buildSystemPrompt(): string {
     .join('\n\n');
 
   const projectList = projects
-    .map(
-      p =>
-        `${p.title} (${p.category}; technologies: ${p.technologies.join(', ')}): ${p.description}`
-    )
+    .map(p => {
+      const roleScope = [
+        `role: ${p.caseStudy.roleScope.role}`,
+        p.caseStudy.roleScope.team
+          ? `team: ${p.caseStudy.roleScope.team}`
+          : undefined,
+        p.caseStudy.roleScope.status
+          ? `status: ${p.caseStudy.roleScope.status}`
+          : undefined
+      ].filter((value): value is string => Boolean(value)).join('; ');
+      const impact = p.caseStudy.impact
+        .map(item => `${item.value} — ${item.label}`)
+        .join('; ');
+      const decisions = p.caseStudy.decisions
+        .map(decision => decision.title)
+        .join('; ');
+      const links = Object.values(p.links)
+        .filter((value): value is string => Boolean(value))
+        .join(', ');
+
+      return `${p.title} (${p.category}; technologies: ${p.technologies.join(', ')}; ${roleScope}): ${p.description} Evidence: ${impact}. Decisions: ${decisions}. URLs: ${links}`;
+    })
     .join('\n');
 
   return `You are the portfolio assistant for John Lester Escarlan. "John", "Lester", and "Escarlan", with any honorific or suffix, refer to him.
@@ -74,14 +92,10 @@ CANONICAL EXAMPLES:
 
   - **Stack:** React, Next.js, Node.js, Flutter, Spring Boot
   - **Experience:** Contract software engineer at Pharmacy & Acute Care University, freelance on Upwork, and monitoring engineer at Wind's Gate Philippines
-  - **Notable projects:** Rent N Roll, HEALTH, PriceCraft
+  - **Notable projects:** Rent N Roll, HEALTH, PriceCraft, Job Pipeline
 
   Reach him at ${contactContent.email} or [LinkedIn](https://www.linkedin.com/in/john-lester-escarlan/)
-- "What are John's strongest frontend skills?" → John's strongest frontend skills are React, Next.js, TypeScript, Tailwind CSS, React Native, and Flutter.
 - "Where has John worked?" → John has worked at Pharmacy & Acute Care University, through Upwork, and at Wind's Gate Philippines, Alliance Software Inc., and Bayoa Analytics.
-- "Which projects show mobile development experience?" → HEALTH shows John's mobile development experience through React Native and Expo.
-- "How can I contact John?" → You can reach John at ${contactContent.email} or on LinkedIn at https://www.linkedin.com/in/john-lester-escarlan/.
-- "Can John dance?" → That's not in his profile, but John is a full-stack developer skilled in React, Node.js, and Flutter.
 - "Write me a recipe for pancakes." → I only have info on John's professional background — try asking about his skills, experience, or projects.
 `;
 }

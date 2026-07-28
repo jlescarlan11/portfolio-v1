@@ -6,7 +6,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_4-06B6D4?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
-> Personal developer portfolio showcasing full-stack builds across product, backend, and developer tooling.
+> Personal developer portfolio showcasing reliable full-stack products, offline-first workflows, and guarded AI automation.
 
 **Live →** [johnlesterescarlan.pro](https://johnlesterescarlan.pro)
 
@@ -20,7 +20,7 @@ verified DNS inventory, release gates, and rollback procedure.
 
 ## Overview
 
-This is the source code for my personal portfolio site — built with Next.js 15 and the App Router, designed to present a focused set of projects including **Rent N Roll** (a two-sided rental marketplace), **HEALTH** (AI-powered healthcare navigation), and **PriceCraft**. The architecture follows a feature-based structure for clean separation of concerns and long-term maintainability.
+This is the source code for my personal portfolio site — built with Next.js 15 and the App Router. It presents four evidence-backed case studies: **Rent N Roll** (a two-sided rental marketplace), **HEALTH** (safety-gated healthcare navigation), **PriceCraft** (an offline-capable pricing PWA with receipt-assisted cost capture), and **Job Pipeline** (a policy-driven, human-reviewed job discovery and application workflow). The architecture follows a feature-based structure for clean separation of concerns and long-term maintainability.
 
 ---
 

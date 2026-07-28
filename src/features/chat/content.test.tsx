@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { buildSystemPrompt, CHAT_SYSTEM_PROMPT } from './content';
+import { estimateTokenCount } from './server/token-budget';
 
 describe('buildSystemPrompt', () => {
   it('exposes one cached prompt matching the canonical builder', () => {
@@ -22,6 +23,22 @@ describe('buildSystemPrompt', () => {
     expect(buildSystemPrompt()).toContain(
       'HEALTH (Mobile Application / Civic Tech; technologies: TypeScript, React Native, Expo'
     );
+  });
+
+  it('grounds project answers with the latest role, impact, and engineering evidence', () => {
+    const prompt = buildSystemPrompt();
+
+    expect(prompt).toContain('role: Project and Technical Lead');
+    expect(prompt).toContain('300+ tests — Regression coverage');
+    expect(prompt).toContain('7 workflows — Automation coverage');
+    expect(prompt).toContain('Validated; disabled by default');
+    expect(prompt).toContain(
+      '**Notable projects:** Rent N Roll, HEALTH, PriceCraft, Job Pipeline'
+    );
+  });
+
+  it('keeps the trusted profile compact enough for multi-turn chat history', () => {
+    expect(estimateTokenCount(buildSystemPrompt())).toBeLessThanOrEqual(4_375);
   });
 
   it('includes at least one skill', () => {
