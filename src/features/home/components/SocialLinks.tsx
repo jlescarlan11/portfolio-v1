@@ -4,6 +4,7 @@ import React from 'react';
 import { FaLinkedin } from 'react-icons/fa6';
 import { SiGithub, SiGmail, SiHackerrank } from 'react-icons/si';
 import type { HomeSocialLink } from '@/features/home/content';
+import { isRenderableExternalUrl } from '@/shared/lib/project';
 
 interface SocialLinksProps {
   links: HomeSocialLink[];
@@ -21,13 +22,26 @@ function getIcon(platform: string): React.JSX.Element | null {
   return icons[platform as keyof typeof icons] ?? null;
 }
 
-function SocialLinkItem({ link }: { link: HomeSocialLink }): React.JSX.Element {
-  const isExternal = link.url.startsWith('http');
+function isRenderableEmailUrl(url: string): boolean {
+  return /^mailto:[^@\s]+@[^@\s]+$/i.test(url.trim());
+}
+
+function SocialLinkItem({
+  link
+}: {
+  link: HomeSocialLink;
+}): React.JSX.Element | null {
+  const href = link.url.trim();
+  const isExternal = isRenderableExternalUrl(href);
+
+  if (!isExternal && !isRenderableEmailUrl(href)) {
+    return null;
+  }
 
   return (
     <li>
       <a
-        href={link.url}
+        href={href}
         target={isExternal ? '_blank' : undefined}
         rel={isExternal ? 'noopener noreferrer' : undefined}
         className="group relative inline-flex h-11 w-11 items-center justify-center border border-transparent text-muted-foreground transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04] hover:border-surface hover:text-foreground"

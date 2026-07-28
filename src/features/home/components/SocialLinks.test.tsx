@@ -31,4 +31,22 @@ describe('SocialLinks', () => {
       }
     }
   });
+
+  it('does not render unsupported social URLs as links', () => {
+    render(
+      <SocialLinks
+        links={[
+          {
+            platform: 'GitHub',
+            url: 'javascript:alert(1)',
+            label: 'Unsafe social profile'
+          }
+        ]}
+      />
+    );
+
+    expect(
+      screen.queryByRole('link', { name: 'Unsafe social profile' })
+    ).not.toBeInTheDocument();
+  });
 });
