@@ -61,13 +61,15 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function isCanonicalCalendarDate(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+function parseCanonicalCalendarDate(value: string): Date | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
 
   const parsed = new Date(`${value}T00:00:00.000Z`);
   return (
     !Number.isNaN(parsed.getTime()) &&
     parsed.toISOString().slice(0, 10) === value
+      ? parsed
+      : null
   );
 }
 
@@ -75,22 +77,24 @@ function parseContributionDay(value: unknown): ContributionDay | null {
   if (!isRecord(value)) return null;
 
   const { date, contributionCount, weekday } = value;
+  const parsedDate =
+    typeof date === 'string' ? parseCanonicalCalendarDate(date) : null;
   if (
-    typeof date !== 'string' ||
-    !isCanonicalCalendarDate(date) ||
+    !parsedDate ||
     typeof contributionCount !== 'number' ||
     !Number.isInteger(contributionCount) ||
     contributionCount < 0 ||
     typeof weekday !== 'number' ||
     !Number.isInteger(weekday) ||
     weekday < 0 ||
-    weekday > 6
+    weekday > 6 ||
+    parsedDate.getUTCDay() !== weekday
   ) {
     return null;
   }
 
   return {
-    date,
+    date: parsedDate.toISOString().slice(0, 10),
     contributionCount,
     weekday
   };
