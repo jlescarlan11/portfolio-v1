@@ -28,6 +28,15 @@ function getProjectCopy(project: ProjectRecord): string {
     project.caseStudy.roleScope.duration,
     project.caseStudy.roleScope.status,
     ...project.caseStudy.roleScope.ownership,
+    project.caseStudy.problem.audience,
+    project.caseStudy.problem.challenge,
+    project.caseStudy.problem.stakes,
+    ...project.caseStudy.problem.constraints,
+    project.caseStudy.solution.summary,
+    ...project.caseStudy.solution.workflow,
+    ...project.caseStudy.learnings.lessons,
+    ...project.caseStudy.learnings.improvements,
+    ...project.caseStudy.learnings.unvalidated,
     ...project.caseStudy.overview,
     ...project.caseStudy.impact.flatMap(impact => [
       impact.value,
@@ -98,6 +107,38 @@ test('all projects provide complete case-study content', () => {
       project.caseStudy.summary.trim(),
       `${project.title} should have a summary`
     );
+    for (const [field, value] of Object.entries(project.caseStudy.problem)) {
+      if (field === 'constraints') continue;
+      assert.ok(
+        typeof value === 'string' && value.trim(),
+        `${project.title} should have a non-empty problem.${field}`
+      );
+    }
+    assert.ok(
+      project.caseStudy.problem.constraints.length > 0 &&
+        project.caseStudy.problem.constraints.every(constraint =>
+          constraint.trim()
+        ),
+      `${project.title} should have non-empty problem.constraints`
+    );
+    assert.ok(
+      project.caseStudy.solution.summary.trim(),
+      `${project.title} should have a non-empty solution.summary`
+    );
+    assert.ok(
+      project.caseStudy.solution.workflow.length > 0 &&
+        project.caseStudy.solution.workflow.every(step => step.trim()),
+      `${project.title} should have non-empty solution.workflow`
+    );
+    for (const [field, entries] of Object.entries(
+      project.caseStudy.learnings
+    )) {
+      assert.ok(
+        entries.length > 0 &&
+          entries.every((entry: string) => entry.trim()),
+        `${project.title} should have non-empty learnings.${field}`
+      );
+    }
     assert.ok(
       project.caseStudy.overview.length > 0 &&
         project.caseStudy.overview.every(paragraph => paragraph.trim()),
@@ -123,6 +164,7 @@ test('all projects provide complete case-study content', () => {
       project.caseStudy.impact.length > 0 &&
         project.caseStudy.impact.every(
           impact =>
+            ['product', 'implementation'].includes(impact.kind) &&
             impact.value.trim() &&
             impact.label.trim() &&
             impact.context.trim()
@@ -147,6 +189,35 @@ test('all projects provide complete case-study content', () => {
         project.caseStudy.highlights.every(highlight => highlight.trim()),
       `${project.title} should have non-empty highlights`
     );
+    const heroVisuals = project.caseStudy.visuals.filter(
+      visual => visual.kind === 'hero'
+    );
+    assert.ok(
+      heroVisuals.length <= 1,
+      `${project.title} should not have duplicate hero visuals`
+    );
+    for (const [index, visual] of project.caseStudy.visuals.entries()) {
+      assert.ok(
+        visual.src.trim(),
+        `${project.title} should have a non-empty visuals[${index}].src`
+      );
+      assert.ok(
+        visual.alt.trim(),
+        `${project.title} should have a non-empty visuals[${index}].alt`
+      );
+      assert.ok(
+        visual.caption.trim(),
+        `${project.title} should have a non-empty visuals[${index}].caption`
+      );
+      if (visual.kind === 'supporting') {
+        assert.ok(
+          ['problem', 'solution', 'decisions', 'outcomes', 'learnings'].includes(
+            visual.section
+          ),
+          `${project.title} should have a valid visuals[${index}].section`
+        );
+      }
+    }
     assert.ok(
       project.technologies.length > 0 &&
         project.technologies.every(technology => technology.trim()),
@@ -322,6 +393,23 @@ test('PriceCraft copy reflects its current pricing and persistence capabilities'
     'PriceCraft copy'
   );
   assertIncludesEvery(
+    [
+      priceCraft.caseStudy.problem.audience,
+      priceCraft.caseStudy.problem.challenge,
+      priceCraft.caseStudy.problem.stakes,
+      ...priceCraft.caseStudy.problem.constraints
+    ].join(' '),
+    [
+      'small food businesses',
+      'spreadsheets',
+      'ingredient costs',
+      'real margins',
+      'shared recipe costs',
+      'connectivity'
+    ],
+    'PriceCraft problem'
+  );
+  assertIncludesEvery(
     priceCraft.technologies.join(' '),
     ['Supabase', 'PostgreSQL', 'Tesseract.js', 'Vitest', 'Vite PWA'],
     'PriceCraft technologies'
@@ -414,6 +502,15 @@ test('each short description stays aligned with visible case-study positioning',
   for (const project of projects) {
     const visibleCopy = [
       project.caseStudy.summary,
+      project.caseStudy.problem.audience,
+      project.caseStudy.problem.challenge,
+      project.caseStudy.problem.stakes,
+      ...project.caseStudy.problem.constraints,
+      project.caseStudy.solution.summary,
+      ...project.caseStudy.solution.workflow,
+      ...project.caseStudy.learnings.lessons,
+      ...project.caseStudy.learnings.improvements,
+      ...project.caseStudy.learnings.unvalidated,
       ...project.caseStudy.overview,
       ...project.caseStudy.highlights
     ].join(' ');
@@ -429,4 +526,45 @@ test('each short description stays aligned with visible case-study positioning',
       `${project.title} visible case study`
     );
   }
+});
+
+test('project outcomes distinguish delivered value from implementation evidence', () => {
+  const expectedImplementationEvidence: Record<string, string[]> = {
+    'rent-n-roll': ['24 queries'],
+    health: [],
+    pricecraft: ['300+ tests'],
+    'job-pipeline': ['147 tests']
+  };
+
+  for (const project of projects) {
+    const actualImplementationEvidence = project.caseStudy.impact
+      .filter(impact => impact.kind === 'implementation')
+      .map(impact => impact.value);
+
+    assert.deepEqual(
+      actualImplementationEvidence,
+      expectedImplementationEvidence[project.slug],
+      `${project.title} should classify implementation evidence explicitly`
+    );
+  }
+});
+
+test('Rent N Roll migrates its existing screenshots to contextual visual metadata', () => {
+  const rentNRoll = projects.find(project => project.slug === 'rent-n-roll');
+  assert.ok(rentNRoll, 'Rent N Roll should exist');
+
+  assert.deepEqual(
+    rentNRoll.caseStudy.visuals.map(visual => visual.src),
+    rentNRoll.caseStudy.gallery
+  );
+  assert.equal(
+    rentNRoll.caseStudy.visuals.filter(visual => visual.kind === 'hero').length,
+    1
+  );
+  assert.ok(
+    rentNRoll.caseStudy.visuals.some(
+      visual => visual.kind === 'supporting' && visual.section === 'solution'
+    ),
+    'Rent N Roll should associate its listing screenshot with the solution'
+  );
 });

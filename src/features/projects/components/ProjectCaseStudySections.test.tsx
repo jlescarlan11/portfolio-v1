@@ -104,6 +104,7 @@ describe('ProjectEvidenceSections', () => {
       <ProjectEvidenceSections
         impact={[
           {
+            kind: 'product',
             value: 'One result',
             label: 'Verified outcome',
             context: 'The supported context.'
@@ -124,11 +125,13 @@ describe('ProjectEvidenceSections', () => {
       <ProjectEvidenceSections
         impact={[
           {
+            kind: 'product',
             value: 'First value',
             label: 'First label',
             context: 'First context'
           },
           {
+            kind: 'implementation',
             value: 'Second value',
             label: 'Second label',
             context: 'Second context'

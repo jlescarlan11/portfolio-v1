@@ -9,11 +9,12 @@ describe('portfolio media assets', () => {
       heroContent.profileImage.src,
       ...projects.flatMap(project => [
         ...(project.logo ? [project.logo] : []),
+        ...project.caseStudy.visuals.map(visual => visual.src),
         ...(project.caseStudy.gallery ?? [])
       ])
     ];
 
-    for (const mediaPath of mediaPaths) {
+    for (const mediaPath of new Set(mediaPaths)) {
       expect(
         existsSync(`public${mediaPath}`),
         `${mediaPath} should resolve beneath public`

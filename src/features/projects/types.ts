@@ -6,11 +6,56 @@ export interface ProjectRoleScope {
   status?: string;
 }
 
+export interface ProjectProblem {
+  audience: string;
+  challenge: string;
+  stakes: string;
+  constraints: string[];
+}
+
+export interface ProjectSolution {
+  summary: string;
+  workflow: string[];
+}
+
+export interface ProjectLearnings {
+  lessons: string[];
+  improvements: string[];
+  unvalidated: string[];
+}
+
+export type ProjectOutcomeKind = 'product' | 'implementation';
+
 export interface ProjectImpact {
+  kind: ProjectOutcomeKind;
   value: string;
   label: string;
   context: string;
 }
+
+export type ProjectVisualSection =
+  | 'problem'
+  | 'solution'
+  | 'decisions'
+  | 'outcomes'
+  | 'learnings';
+
+interface ProjectVisualBase {
+  src: string;
+  alt: string;
+  caption: string;
+}
+
+export interface ProjectHeroVisual extends ProjectVisualBase {
+  kind: 'hero';
+}
+
+export interface ProjectSupportingVisual extends ProjectVisualBase {
+  kind: 'supporting';
+  section: ProjectVisualSection;
+}
+
+export type ProjectVisual = ProjectHeroVisual | ProjectSupportingVisual;
 
 export interface ProjectDecision {
   title: string;
@@ -24,10 +69,14 @@ export interface ProjectDecision {
 export interface ProjectCaseStudy {
   summary: string;
   roleScope: ProjectRoleScope;
+  problem: ProjectProblem;
+  solution: ProjectSolution;
+  learnings: ProjectLearnings;
   overview: string[];
   impact: ProjectImpact[];
   decisions: ProjectDecision[];
   highlights: string[];
+  visuals: ProjectVisual[];
   gallery?: string[];
 }
 
