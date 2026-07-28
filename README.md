@@ -10,9 +10,11 @@
 
 **Live →** [johnlesterescarlan.pro](https://johnlesterescarlan.pro)
 
-Netlify hosts the application, but `https://johnlesterescarlan.pro` is the
-canonical public address. The generated `.netlify.app` URL is a deployment
-fallback, not the preferred portfolio URL.
+`https://johnlesterescarlan.pro` is the canonical public address. Production
+traffic still resolves to Netlify while the gated Vercel migration is prepared;
+the generated provider domains are fallbacks, not preferred portfolio URLs.
+See the [Vercel cutover runbook](docs/vercel-cutover-runbook.md) for the
+verified DNS inventory, release gates, and rollback procedure.
 
 ---
 
@@ -84,9 +86,10 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the site.
 
-To exercise Netlify-provided integrations locally, use `npx netlify dev`
-instead. The rest of the portfolio runs with `pnpm dev`; only a real chat
-request needs gateway configuration.
+The portfolio runs locally with `pnpm dev`; only a real chat request needs
+Gateway configuration. The Netlify development path remains available solely
+for rollback compatibility until the production cutover and observation window
+are complete.
 
 ---
 
@@ -104,6 +107,7 @@ request needs gateway configuration.
 | `pnpm test:ui`   | Run component tests via Vitest               |
 | `pnpm verify:chat` | Run the hosted-chat quality corpus against `CHAT_BASE_URL` |
 | `pnpm verify:chat:rate-limit` | Verify the live distributed 20-per-minute boundary |
+| `pnpm verify:cutover` | Run read-only domain, content, metadata, and header checks |
 
 ---
 
@@ -147,27 +151,36 @@ full contract and operational policy.
 
 ### Preview and production verification
 
-1. Open a pull request and wait for the Netlify deploy preview.
-2. Run `CHAT_BASE_URL=https://<deploy-preview-host> pnpm verify:chat`.
+1. Open a pull request and wait for the Vercel Preview deployment.
+2. Run
+   `CUTOVER_BASE_URL=https://<preview-host> pnpm verify:cutover`.
+3. Run `CHAT_BASE_URL=https://<preview-host> pnpm verify:chat`.
    After at least 60 seconds with no requests from the same client, run
-   `CHAT_BASE_URL=https://<deploy-preview-host> pnpm verify:chat:rate-limit`.
+   `CHAT_BASE_URL=https://<preview-host> pnpm verify:chat:rate-limit`.
    This sends only invalid bodies, so it exercises the edge boundary without
    invoking the model.
-3. In a narrow mobile viewport, open the widget, send a prompt, observe
+4. In a narrow mobile viewport, open the widget, send a prompt, observe
    progressive text, close it mid-stream, reopen it, and retry a simulated
    network failure.
-4. Repeat in Safari or Firefox with graphics acceleration unavailable. The
+5. Repeat in Safari or Firefox with graphics acceleration unavailable. The
    welcome message and input must still appear immediately.
-5. Inspect browser network traffic and built client assets: only `/api/chat`
+6. Inspect browser network traffic and built client assets: only `/api/chat`
    may receive prompt content, and no gateway credential or legacy model asset
    may be present.
-6. After production release, repeat the corpus and review Netlify gateway usage,
-   application outcomes, and the account-credit notifications described in the
-   decision record.
+7. After production release, repeat the corpus and review Vercel AI Gateway
+   usage, Firewall traffic, application outcomes, and the account-credit
+   notifications described in the decision record.
 
 `CHAT_BASE_URL` is only the public preview/production origin; it is not a
 credential. The verification script makes seven real model requests, so do not
 run it repeatedly without checking gateway usage.
+
+GitHub `main` is the Vercel Production source; eligible pull requests and other
+branches produce Vercel Previews. Preview responses must remain
+`noindex, nofollow`. The project operates with no paid AI credits, no automatic
+top-up, and no paid provider fallback. Free allowances are capped, not
+unlimited; exhausted or unavailable inference must degrade to the sanitized
+chat error while static portfolio pages remain available.
 
 ---
 
