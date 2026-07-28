@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { POST } from './route';
+import { maxDuration, POST } from './route';
 import { handleChatRequest } from '@/features/chat/server/handler';
+import {
+  PROVIDER_TIMEOUT_MS,
+  REQUEST_BODY_TIMEOUT_MS
+} from '@/features/chat/server/config';
 
 vi.mock('@/features/chat/server/handler', () => ({
   handleChatRequest: vi.fn(async () => new Response(null, { status: 204 }))
@@ -12,6 +16,16 @@ afterEach(() => {
 });
 
 describe('chat App Router fallback', () => {
+  it('reserves function time for cleanup and terminal framing', () => {
+    const requiredHeadroomMs = 1_000;
+
+    expect(
+      REQUEST_BODY_TIMEOUT_MS + PROVIDER_TIMEOUT_MS
+    ).toBeLessThanOrEqual(
+      maxDuration * 1_000 - requiredHeadroomMs
+    );
+  });
+
   it('fails closed when a Netlify request bypasses the edge function', async () => {
     vi.stubEnv('SITE_ID', 'production-site');
     const request = new Request('https://example.com/api/chat/', {
