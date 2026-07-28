@@ -28,6 +28,8 @@ describe('resolveSiteUrl', () => {
     'https://10.0.0.8',
     'https://[fd00::8]',
     'https://johnlester.vercel.app',
+    'https://portfolio-git-feature-team.vercel.app',
+    'https://portfolio.netlify.app',
     'https://deploy-preview-15--portfolio.netlify.app',
     'https://feature-seo--portfolio.netlify.app'
   ])('rejects unsafe canonical origin %s', (value) => {

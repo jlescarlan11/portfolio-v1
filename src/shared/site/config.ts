@@ -30,12 +30,16 @@ export const PRODUCTION_SITE_URL = 'https://johnlesterescarlan.pro';
 const UNSAFE_CANONICAL_HOSTS = new Set([
   'localhost',
   '127.0.0.1',
-  '[::1]',
-  'johnlester.vercel.app'
+  '[::1]'
 ]);
 
-function isNetlifyPreviewHostname(hostname: string): boolean {
-  return hostname.endsWith('.netlify.app') && hostname.includes('--');
+const MANAGED_DEPLOYMENT_HOSTS = ['vercel.app', 'netlify.app'];
+
+function isManagedDeploymentHostname(hostname: string): boolean {
+  return MANAGED_DEPLOYMENT_HOSTS.some(
+    managedHost =>
+      hostname === managedHost || hostname.endsWith(`.${managedHost}`)
+  );
 }
 
 function isIpLiteralHostname(hostname: string): boolean {
@@ -59,7 +63,7 @@ export function resolveSiteUrl(value?: string): string {
     const isUnsafeHost =
       UNSAFE_CANONICAL_HOSTS.has(url.hostname) ||
       isIpLiteralHostname(url.hostname) ||
-      isNetlifyPreviewHostname(url.hostname);
+      isManagedDeploymentHostname(url.hostname);
 
     if (!isSecureWebUrl || hasCredentials || isUnsafeHost) {
       return PRODUCTION_SITE_URL;
