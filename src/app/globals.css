@@ -71,6 +71,32 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.project-case-study-layout {
+  display: grid;
+  gap: 3.5rem;
+}
+
+.project-case-study-story,
+.project-case-study-rail {
+  min-width: 0;
+}
+
+@media (min-width: 72rem) {
+  .project-case-study-layout {
+    grid-template-columns: minmax(220px, 280px) minmax(680px, 720px);
+    align-items: start;
+    justify-content: space-between;
+    gap: 3rem;
+  }
+}
+
+@media (min-width: 72rem) and (min-height: 62rem) {
+  .project-case-study-rail {
+    position: sticky;
+    top: 2rem;
+  }
+}
+
 :where(a, button, [role="button"], input, textarea, summary):focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 3px;

@@ -84,9 +84,11 @@ describe('ProjectPage', () => {
 
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content');
     expect(screen.getByRole('main')).toHaveAttribute('tabindex', '-1');
-    expect(
-      screen.getAllByRole('link', { name: /Back to selected work/ })[0]
-    ).toHaveAttribute('href', '/#work');
+    const backLinks = screen.getAllByRole('link', {
+      name: /Back to selected work/
+    });
+    expect(backLinks).toHaveLength(1);
+    expect(backLinks[0]).toHaveAttribute('href', '/#work');
   });
 
   it('exposes the required case-study section names in order and removes legacy headings', async () => {
@@ -187,6 +189,70 @@ describe('ProjectPage', () => {
       expect(link).toHaveAttribute('target', '_blank');
       expect(link).toHaveAttribute('rel', 'noopener noreferrer');
     }
+  });
+
+  it('renders one in-flow snapshot before the narrative with functional section anchors', async () => {
+    const page = await ProjectPage({
+      params: Promise.resolve({ slug: 'rent-n-roll' })
+    });
+
+    render(page);
+
+    const snapshot = screen.getByRole('complementary', {
+      name: 'Project snapshot'
+    });
+    const problem = screen.getByRole('region', { name: 'Problem' });
+    expect(
+      snapshot.compareDocumentPosition(problem) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+
+    const navigation = screen.getByRole('navigation', {
+      name: 'Case study sections'
+    });
+    const expectedLinks = [
+      ['Problem', '#problem'],
+      ['Solution', '#solution'],
+      ['Engineering Decisions', '#decisions'],
+      ['Outcomes', '#outcomes'],
+      ['Learnings', '#learnings']
+    ];
+    for (const [name, href] of expectedLinks) {
+      expect(within(navigation).getByRole('link', { name })).toHaveAttribute(
+        'href',
+        href
+      );
+      expect(document.querySelectorAll(href)).toHaveLength(1);
+    }
+    expect(
+      within(navigation)
+        .getAllByRole('link')
+        .filter(link => link.hasAttribute('aria-current'))
+    ).toHaveLength(1);
+  });
+
+  it.each([
+    ['rent-n-roll', 'health'],
+    ['health', 'pricecraft'],
+    ['pricecraft', 'job-pipeline'],
+    ['job-pipeline', 'rent-n-roll']
+  ])('links %s to the source-ordered next project %s', async (slug, nextSlug) => {
+    const nextProject = projects.find(project => project.slug === nextSlug);
+    if (!nextProject) throw new Error(`${nextSlug} fixture is missing`);
+    const page = await ProjectPage({
+      params: Promise.resolve({ slug })
+    });
+
+    render(page);
+
+    const card = screen.getByText('Next project').closest('a');
+    expect(card).not.toBeNull();
+    expect(card).toHaveAttribute('href', `/projects/${nextSlug}`);
+    expect(card).not.toHaveAttribute('target');
+    expect(within(card!).getByText(nextProject.title)).toBeVisible();
+    expect(
+      within(card!).getByText(nextProject.caseStudy.summary)
+    ).toBeVisible();
   });
 });
 

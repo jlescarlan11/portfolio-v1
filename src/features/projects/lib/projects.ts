@@ -12,3 +12,10 @@ export function getProjectSlugs(): string[] {
 export function getProjectBySlug(slug: string): ProjectRecord | undefined {
   return projects.find((project) => project.slug === slug);
 }
+
+export function getNextProject(slug: string): ProjectRecord | undefined {
+  const currentIndex = projects.findIndex(project => project.slug === slug);
+  if (currentIndex === -1 || projects.length === 0) return undefined;
+
+  return projects[(currentIndex + 1) % projects.length];
+}

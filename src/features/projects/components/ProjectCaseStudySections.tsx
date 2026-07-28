@@ -140,10 +140,13 @@ export function ProjectMetaStrip({
   );
 
   return (
-    <div className={`space-y-6 border-y ${SURFACE.hairline} py-6`}>
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3">
+    <div className={`space-y-5 border-y ${SURFACE.hairline} py-5`}>
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
         {facts.map((fact) => (
-          <div key={fact.label} className="min-w-0 space-y-1">
+          <div
+            key={fact.label}
+            className={`min-w-0 space-y-1 ${fact.label === 'Status' ? 'col-span-2' : ''}`}
+          >
             <Typography
               variant="caption"
               as="dt"
@@ -165,7 +168,7 @@ export function ProjectMetaStrip({
           </div>
         ))}
 
-        <div className="col-span-2 space-y-2 border-t border-surface pt-5 sm:col-span-3">
+        <div className="col-span-2 space-y-2 border-t border-surface pt-4">
           <Typography
             variant="caption"
             as="dt"
@@ -196,7 +199,7 @@ export function ProjectMetaStrip({
       </dl>
 
       <ul
-        className="flex min-w-0 flex-wrap gap-2 border-t border-surface pt-5"
+        className="flex min-w-0 flex-wrap gap-2 border-t border-surface pt-4"
         aria-label="Technology stack"
       >
         {technologies.map((technology) => (

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  getNextProject,
   getProjectBySlug,
   getProjectSlugs
 } from './lib/projects.ts';
@@ -233,6 +234,27 @@ test('getProjectBySlug returns a project for a known slug', () => {
 
 test('getProjectBySlug returns undefined for an unknown slug', () => {
   assert.equal(getProjectBySlug('does-not-exist'), undefined);
+});
+
+test('getNextProject follows source order and wraps the final project', () => {
+  const expectedNextProjects: Record<string, string> = {
+    'rent-n-roll': 'health',
+    health: 'pricecraft',
+    pricecraft: 'job-pipeline',
+    'job-pipeline': 'rent-n-roll'
+  };
+
+  for (const [slug, nextSlug] of Object.entries(expectedNextProjects)) {
+    assert.equal(
+      getNextProject(slug)?.slug,
+      nextSlug,
+      `${slug} should link to ${nextSlug}`
+    );
+  }
+});
+
+test('getNextProject returns undefined for an unknown slug', () => {
+  assert.equal(getNextProject('does-not-exist'), undefined);
 });
 
 test('isRenderableExternalUrl accepts valid https urls', () => {

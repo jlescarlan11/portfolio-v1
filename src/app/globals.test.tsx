@@ -17,3 +17,17 @@ describe('reduced-motion styles', () => {
     expect(reducedMotionBlock).not.toMatch(/(?:^|,)\s*\.opacity-0\b/m);
   });
 });
+
+describe('project case-study layout styles', () => {
+  it('uses a 680–720px desktop story column and limits sticky behavior to tall viewports', () => {
+    expect(stylesheet).toContain(
+      'grid-template-columns: minmax(220px, 280px) minmax(680px, 720px);'
+    );
+    expect(stylesheet).toContain(
+      '@media (min-width: 72rem) and (min-height: 62rem)'
+    );
+    expect(stylesheet).toMatch(
+      /\.project-case-study-rail\s*\{\s*position: sticky;\s*top: 2rem;/
+    );
+  });
+});
