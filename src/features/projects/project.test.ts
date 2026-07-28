@@ -23,9 +23,27 @@ function getProjectCopy(project: ProjectRecord): string {
   return [
     project.description,
     project.caseStudy.summary,
+    project.caseStudy.roleScope.role,
+    project.caseStudy.roleScope.team,
+    project.caseStudy.roleScope.duration,
+    project.caseStudy.roleScope.status,
+    ...project.caseStudy.roleScope.ownership,
     ...project.caseStudy.overview,
+    ...project.caseStudy.impact.flatMap(impact => [
+      impact.value,
+      impact.label,
+      impact.context
+    ]),
+    ...project.caseStudy.decisions.flatMap(decision => [
+      decision.title,
+      decision.constraint,
+      decision.decision,
+      decision.rationale,
+      decision.tradeoff,
+      decision.validation
+    ]),
     ...project.caseStudy.highlights
-  ].join(' ');
+  ].filter((value): value is string => Boolean(value)).join(' ');
 }
 
 function assertIncludesEvery(
@@ -84,6 +102,45 @@ test('all projects provide complete case-study content', () => {
       project.caseStudy.overview.length > 0 &&
         project.caseStudy.overview.every(paragraph => paragraph.trim()),
       `${project.title} should have non-empty overview paragraphs`
+    );
+    assert.ok(
+      project.caseStudy.roleScope.role.trim(),
+      `${project.title} should have a role`
+    );
+    assert.ok(
+      project.caseStudy.roleScope.ownership.length > 0 &&
+        project.caseStudy.roleScope.ownership.every(item => item.trim()),
+      `${project.title} should have non-empty ownership statements`
+    );
+    for (const [field, value] of Object.entries(project.caseStudy.roleScope)) {
+      if (field === 'ownership' || value === undefined) continue;
+      assert.ok(
+        typeof value === 'string' && value.trim(),
+        `${project.title} should not have empty role/scope fields`
+      );
+    }
+    assert.ok(
+      project.caseStudy.impact.length > 0 &&
+        project.caseStudy.impact.every(
+          impact =>
+            impact.value.trim() &&
+            impact.label.trim() &&
+            impact.context.trim()
+        ),
+      `${project.title} should have complete impact entries`
+    );
+    assert.ok(
+      project.caseStudy.decisions.length > 0 &&
+        project.caseStudy.decisions.every(
+          decision =>
+            decision.title.trim() &&
+            decision.constraint.trim() &&
+            decision.decision.trim() &&
+            decision.rationale.trim() &&
+            (!decision.tradeoff || decision.tradeoff.trim()) &&
+            (!decision.validation || decision.validation.trim())
+        ),
+      `${project.title} should have complete engineering decisions`
     );
     assert.ok(
       project.caseStudy.highlights.length > 0 &&
@@ -175,6 +232,14 @@ test('Rent N Roll copy matches its resume-backed pre-launch scope', () => {
   assert.doesNotMatch(copy, /\bproduction\b/i);
   assert.doesNotMatch(copy, /\bcustodial escrow\b/i);
   assert.doesNotMatch(copy, /\bdispute (?:adjudication|resolution)\b/i);
+  assert.equal(rentNRoll.caseStudy.roleScope.status, 'Pre-launch');
+  assert.equal(rentNRoll.caseStudy.roleScope.team, 'Solo project');
+  assert.ok(
+    rentNRoll.caseStudy.impact.some(
+      impact => impact.value === '24 queries'
+    ),
+    'Rent N Roll should expose the verified typed-query impact'
+  );
   assertIncludesEvery(
     rentNRoll.technologies.join(' '),
     ['Supabase', 'PostgreSQL', 'PayMongo'],
@@ -204,6 +269,18 @@ test('HEALTH copy uses precise safety, offline, and team claims', () => {
   );
   assert.doesNotMatch(copy, /\b100%\b/i);
   assert.doesNotMatch(copy, /\ball core features\b/i);
+  assert.equal(
+    health.caseStudy.roleScope.team,
+    'Five-person hackathon team'
+  );
+  assert.ok(
+    health.caseStudy.impact.some(
+      impact =>
+        impact.value === 'Top 15 / 200+' &&
+        impact.context.includes('five-person team')
+    ),
+    'HEALTH should attribute the hackathon result to the team'
+  );
   assert.ok(
     health.technologies.includes('Gemini API'),
     'HEALTH should list Gemini API'
@@ -234,6 +311,10 @@ test('PriceCraft copy reflects its current pricing and persistence capabilities'
     ['Supabase', 'PostgreSQL', 'Vitest'],
     'PriceCraft technologies'
   );
+  assert.doesNotMatch(
+    getProjectCopy(priceCraft),
+    /\b(?:active users?|customers?|revenue|sales|conversion rate|response time|load time)\b/i
+  );
 });
 
 test('Job Pipeline copy preserves automation guardrails and manual review', () => {
@@ -257,6 +338,40 @@ test('Job Pipeline copy preserves automation guardrails and manual review', () =
   );
   assert.doesNotMatch(copy, /auto(?:matically)?[- ]submit/i);
   assert.doesNotMatch(copy, /autonomous application submission/i);
+  assert.ok(
+    jobPipeline.caseStudy.impact.some(
+      impact =>
+        impact.value === 'Human-reviewed' &&
+        impact.context.includes('manual review before anything is sent')
+    ),
+    'Job Pipeline should preserve the manual sending boundary'
+  );
+});
+
+test('project evidence reuses the established live and GitHub destinations', () => {
+  const expectedLinks: Record<string, ProjectRecord['links']> = {
+    'rent-n-roll': {
+      liveUrl: 'https://rentnroll.store'
+    },
+    health: {
+      githubUrl: 'https://github.com/jlescarlan11/health'
+    },
+    pricecraft: {
+      githubUrl: 'https://github.com/jlescarlan11/pricecraft',
+      liveUrl: 'https://pricecraft.netlify.app/'
+    },
+    'job-pipeline': {
+      githubUrl: 'https://github.com/jlescarlan11/Job-Pipeline'
+    }
+  };
+
+  for (const project of projects) {
+    assert.deepEqual(
+      project.links,
+      expectedLinks[project.slug],
+      `${project.title} should keep its established evidence destinations`
+    );
+  }
 });
 
 test('each short description stays aligned with visible case-study positioning', () => {
