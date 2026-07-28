@@ -714,10 +714,8 @@ function createStreamResponse(
           const providerProtocolFailure =
             error instanceof ProviderStreamProtocolError;
           const classified = classifyProviderError(error);
-          if (classified.category === 'timeout' || providerProtocolFailure) {
-            abortController.abort(error);
-            releaseHostedStream(hostedStream);
-          }
+          abortController.abort(error);
+          releaseHostedStream(hostedStream);
           emitOutcome(classified.telemetryStatus, {
             errorCategory: providerProtocolFailure
               ? 'provider_protocol'

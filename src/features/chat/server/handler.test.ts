@@ -1212,14 +1212,33 @@ describe('handleChatRequest', () => {
   });
 
   it('returns a sanitized midstream error while preserving emitted text', async () => {
+    let providerSignal: AbortSignal | undefined;
+    let nextCall = 0;
+    const telemetry: ChatTelemetryEvent[] = [];
+    const returnUpstream = vi.fn(async () => ({
+      done: true as const,
+      value: undefined
+    }));
     const startChat: StartHostedChat = () => ({
-      iterator: (async function* failingStream(): AsyncGenerator<string> {
-        yield 'Partial answer';
-        throw new Error('raw provider failure');
-      })(),
+      iterator: {
+        next: async () => {
+          nextCall += 1;
+          if (nextCall === 1) {
+            return { done: false as const, value: 'Partial answer' };
+          }
+          throw new Error('raw provider failure');
+        },
+        return: returnUpstream
+      },
       getCompletion: async () => ({ finishReason: 'error' })
     });
-    const response = await handleChatRequest(request(validBody()), { startChat });
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: input => {
+        providerSignal = input.signal;
+        return startChat(input);
+      },
+      writeTelemetry: event => telemetry.push(event)
+    });
 
     expect(await readFrames(response)).toEqual([
       { type: 'text-delta', delta: 'Partial answer' },
@@ -1228,6 +1247,14 @@ describe('handleChatRequest', () => {
         code: 'STREAM_ERROR',
         message: 'The AI service stopped responding. Please try again.'
       }
+    ]);
+    expect(providerSignal?.aborted).toBe(true);
+    expect(returnUpstream).toHaveBeenCalledOnce();
+    expect(telemetry).toEqual([
+      expect.objectContaining({
+        status: 'failed',
+        errorCategory: 'provider'
+      })
     ]);
   });
 
