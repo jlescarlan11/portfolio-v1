@@ -81,7 +81,7 @@ export function getHostedChatConfiguration(
     return {
       apiKey: openAiApiKey,
       baseUrl: openAiBaseUrl
-        ? validateSecureBaseUrl(openAiBaseUrl)
+        ? normalizeOpenAiCompatibleBaseUrl(openAiBaseUrl)
         : DEFAULT_OPENAI_BASE_URL
     };
   }
