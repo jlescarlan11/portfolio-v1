@@ -15,7 +15,7 @@ vi.mock('next/cache', () => ({
 }));
 
 const validCalendar = {
-  totalContributions: 7,
+  totalContributions: 2,
   weeks: [
     {
       contributionDays: [
@@ -297,6 +297,23 @@ describe('GitHub contribution data', () => {
           user: {
             contributionsCollection: {
               contributionCalendar: calendar
+            }
+          }
+        }
+      })
+    ).toThrow('GitHub contribution data is unavailable.');
+  });
+
+  it('rejects a total that disagrees with its contribution days', () => {
+    expect(() =>
+      parseGitHubContributionData({
+        data: {
+          user: {
+            contributionsCollection: {
+              contributionCalendar: {
+                ...validCalendar,
+                totalContributions: 3
+              }
             }
           }
         }

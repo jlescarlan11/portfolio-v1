@@ -133,6 +133,7 @@ export function parseGitHubContributionData(
   }
 
   let previousDate: string | null = null;
+  let parsedTotal = 0;
   const parsedWeeks = weeks.map(candidate => {
     if (
       !isRecord(candidate) ||
@@ -146,15 +147,21 @@ export function parseGitHubContributionData(
       const parsed = parseContributionDay(day);
       if (
         !parsed ||
-        (previousDate !== null && parsed.date <= previousDate)
+        (previousDate !== null && parsed.date <= previousDate) ||
+        parsed.contributionCount > Number.MAX_SAFE_INTEGER - parsedTotal
       ) {
         throw new GitHubContributionDataError();
       }
       previousDate = parsed.date;
+      parsedTotal += parsed.contributionCount;
       return parsed;
     });
     return { contributionDays };
   });
+
+  if (parsedTotal !== totalContributions) {
+    throw new GitHubContributionDataError();
+  }
 
   return {
     totalContributions,
