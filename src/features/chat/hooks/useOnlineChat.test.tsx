@@ -8,7 +8,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   MAX_STREAM_FRAME_CHARACTERS,
   MAX_STREAM_FRAME_COUNT,
-  MAX_STREAM_RESPONSE_CHARACTERS
+  MAX_STREAM_RESPONSE_CHARACTERS,
+  type ChatMessage
 } from '../server/contracts';
 import {
   CLIENT_TIMEOUT_MS,
@@ -19,6 +20,7 @@ import {
   WELCOME_MESSAGE
 } from './useOnlineChat';
 import {
+  MAX_REQUEST_BYTES,
   PROVIDER_TIMEOUT_MS,
   REQUEST_BODY_TIMEOUT_MS
 } from '../server/config';
@@ -164,6 +166,35 @@ describe('useOnlineChat', () => {
       content: 'John builds products.'
     });
     expect(result.current.isStreaming).toBe(false);
+  });
+
+  it('keeps serialized conversation history within the server request cap', async () => {
+    const longAnswer = 'a'.repeat(6_000);
+    const fetchMock = vi.fn<
+      (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+    >(async () => successResponse(longAnswer));
+    vi.stubGlobal('fetch', fetchMock);
+    const { result } = renderHook(() => useOnlineChat());
+
+    for (const question of ['One', 'Two', 'Three', 'Four']) {
+      await act(async () => {
+        await result.current.send(question);
+      });
+    }
+
+    const latestBody = fetchMock.mock.calls.at(-1)?.[1]?.body;
+    expect(typeof latestBody).toBe('string');
+    expect(
+      new TextEncoder().encode(latestBody as string).byteLength
+    ).toBeLessThanOrEqual(MAX_REQUEST_BYTES);
+    const latestMessages = (
+      JSON.parse(latestBody as string) as { messages: ChatMessage[] }
+    ).messages;
+    expect(
+      latestMessages
+        .filter(message => message.role === 'user')
+        .map(message => message.content)
+    ).toEqual(['Two', 'Three', 'Four']);
   });
 
   it('streams successfully when animation frame APIs are unavailable', async () => {

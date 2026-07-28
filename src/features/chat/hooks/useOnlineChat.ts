@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  MAX_REQUEST_BYTES,
   MAX_STREAM_FRAME_CHARACTERS,
   MAX_STREAM_FRAME_COUNT,
   MAX_STREAM_RESPONSE_CHARACTERS,
@@ -25,6 +26,26 @@ export const WELCOME_MESSAGE: ChatMessage = {
   content:
     "Hi! I'm John's AI assistant. Ask me anything about his work, skills, or experience."
 };
+
+function prepareClientConversation(
+  history: ChatMessage[],
+  currentUser: ChatMessage
+): ChatMessage[] {
+  let retainedHistory = history.slice(-MAX_CONTEXT_MESSAGES);
+  let conversation = [...retainedHistory, currentUser];
+  const encoder = new TextEncoder();
+
+  while (
+    retainedHistory.length >= 2 &&
+    encoder.encode(JSON.stringify({ messages: conversation })).byteLength >
+      MAX_REQUEST_BYTES
+  ) {
+    retainedHistory = retainedHistory.slice(2);
+    conversation = [...retainedHistory, currentUser];
+  }
+
+  return conversation;
+}
 
 function cancelSafely(
   cancelable: { cancel: () => unknown } | null | undefined
@@ -849,11 +870,12 @@ export function useOnlineChat(): UseOnlineChatResult {
       const content = text.trim();
       if (!content || isStreamingRef.current || retryBlockedRef.current) return;
 
-      const retainedHistory = successfulConversationRef.current.slice(
-        -MAX_CONTEXT_MESSAGES
-      );
+      const currentUser: ChatMessage = { role: 'user', content };
       await runRequest(
-        [...retainedHistory, { role: 'user', content }],
+        prepareClientConversation(
+          successfulConversationRef.current,
+          currentUser
+        ),
         true
       );
     },
