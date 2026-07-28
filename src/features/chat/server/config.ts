@@ -56,7 +56,9 @@ function validateSecureBaseUrl(baseUrl: string): string {
 
 function normalizeOpenAiCompatibleBaseUrl(baseUrl: string): string {
   const normalized = validateSecureBaseUrl(baseUrl);
-  return /\/v1$/i.test(normalized) ? normalized : `${normalized}/v1`;
+  return /\/v1$/i.test(normalized)
+    ? `${normalized.slice(0, -3)}/v1`
+    : `${normalized}/v1`;
 }
 
 export function getHostedChatConfiguration(

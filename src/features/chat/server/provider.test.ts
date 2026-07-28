@@ -191,6 +191,22 @@ describe('startHostedChat', () => {
     });
   });
 
+  it('canonicalizes the provider API version path casing', () => {
+    vi.stubEnv('OPENAI_BASE_URL', 'https://gateway.invalid/V1/');
+
+    startHostedChat({
+      messages: [{ role: 'user', content: 'Hello' }],
+      signal: new AbortController().signal,
+      systemPrompt: TEST_SYSTEM_PROMPT
+    });
+
+    expect(mocks.createOpenAI).toHaveBeenCalledWith({
+      apiKey: 'test-placeholder-key',
+      baseURL: 'https://gateway.invalid/v1',
+      name: 'netlify-ai-gateway'
+    });
+  });
+
   it('rejects a plaintext provider URL before exposing the API key', () => {
     vi.stubEnv('OPENAI_BASE_URL', 'http://gateway.invalid/v1');
 
