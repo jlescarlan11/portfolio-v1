@@ -218,6 +218,26 @@ describe('GitHub contribution data', () => {
     ).toThrow('GitHub contribution data is unavailable.');
   });
 
+  it('rejects a contribution date duplicated across weeks', () => {
+    expect(() =>
+      parseGitHubContributionData({
+        data: {
+          user: {
+            contributionsCollection: {
+              contributionCalendar: {
+                ...validCalendar,
+                weeks: [
+                  validCalendar.weeks[0],
+                  validCalendar.weeks[0]
+                ]
+              }
+            }
+          }
+        }
+      })
+    ).toThrow('GitHub contribution data is unavailable.');
+  });
+
   it('logs a sanitized warning when cached contribution data is unavailable', async () => {
     const sensitive = 'SENSITIVE_GITHUB_PROVIDER_DETAIL';
     vi.stubEnv('GITHUB_TOKEN', 'test-placeholder-token');
