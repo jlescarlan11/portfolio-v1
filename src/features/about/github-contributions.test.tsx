@@ -163,6 +163,35 @@ describe('GitHub contribution data', () => {
     ).toThrow('GitHub contribution data is unavailable.');
   });
 
+  it.each(['2026-02-29', '2026-02-31', '07/28/2026'])(
+    'rejects non-canonical contribution date %s',
+    date => {
+      expect(() =>
+        parseGitHubContributionData({
+          data: {
+            user: {
+              contributionsCollection: {
+                contributionCalendar: {
+                  ...validCalendar,
+                  weeks: [
+                    {
+                      contributionDays: [
+                        {
+                          ...validCalendar.weeks[0].contributionDays[0],
+                          date
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        })
+      ).toThrow('GitHub contribution data is unavailable.');
+    }
+  );
+
   it('logs a sanitized warning when cached contribution data is unavailable', async () => {
     const sensitive = 'SENSITIVE_GITHUB_PROVIDER_DETAIL';
     vi.stubEnv('GITHUB_TOKEN', 'test-placeholder-token');
