@@ -58,6 +58,9 @@ export function resolveSiteUrl(value?: string): string {
 
   try {
     const url = new URL(candidate);
+    if (url.hostname.endsWith('.')) {
+      url.hostname = url.hostname.slice(0, -1);
+    }
     const isSecureWebUrl = url.protocol === 'https:';
     const hasCredentials = Boolean(url.username || url.password);
     const isUnsafeHost =

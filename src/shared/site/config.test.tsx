@@ -16,6 +16,9 @@ describe('resolveSiteUrl', () => {
     expect(
       resolveSiteUrl('  https://portfolio.example.com/path/?preview=1#work  ')
     ).toBe('https://portfolio.example.com');
+    expect(resolveSiteUrl('https://portfolio.example.com./work')).toBe(
+      'https://portfolio.example.com'
+    );
   });
 
   it.each([
@@ -23,6 +26,7 @@ describe('resolveSiteUrl', () => {
     'http://portfolio.example.com:8080',
     'https://user:password@johnlesterescarlan.pro',
     'http://localhost:3000',
+    'https://localhost.',
     'http://127.0.0.1:3000',
     'http://[::1]:3000',
     'https://10.0.0.8',
