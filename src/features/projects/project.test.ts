@@ -80,7 +80,7 @@ test('project order and featured project remain stable', () => {
   assert.equal(projects[0].title, 'Rent N Roll');
 });
 
-test('project section presents all four engineering domains without unsupported adoption claims', () => {
+test('project section names the four distinct products without unsupported adoption claims', () => {
   const sectionCopy = [
     projectsSectionContent.title,
     projectsSectionContent.intro
@@ -88,10 +88,69 @@ test('project section presents all four engineering domains without unsupported 
 
   assertIncludesEvery(
     sectionCopy,
-    ['marketplaces', 'civic tech', 'business tooling', 'AI automation'],
+    [
+      'rental marketplace',
+      'civic health app',
+      'pricing tool',
+      'job-search pipeline',
+      'user problem',
+      'what I owned',
+      'proof'
+    ],
     'project section copy'
   );
   assert.doesNotMatch(sectionCopy, /ships? to real users/i);
+});
+
+test('case-study openings describe four concrete user problems', () => {
+  const expectedProblemLanguage: Record<string, string[]> = {
+    'rent-n-roll': [
+      'camera owners',
+      'renters',
+      'specific dates',
+      'signed and paid',
+      'handoff'
+    ],
+    health: [
+      'Naga City residents',
+      'emergency help',
+      'immediate danger',
+      'connectivity drops'
+    ],
+    pricecraft: [
+      'small food businesses',
+      'ingredient costs',
+      'base recipe',
+      'real margins'
+    ],
+    'job-pipeline': [
+      'job candidate',
+      'OnlineJobs.ph',
+      'removing duplicates',
+      'unsupported experience',
+      'final judgment'
+    ]
+  };
+
+  for (const project of projects) {
+    const opening = [
+      project.caseStudy.summary,
+      project.caseStudy.problem.audience,
+      project.caseStudy.problem.challenge,
+      project.caseStudy.problem.stakes
+    ].join(' ');
+
+    assertIncludesEvery(
+      opening,
+      expectedProblemLanguage[project.slug],
+      `${project.title} problem framing`
+    );
+    assert.doesNotMatch(
+      opening,
+      /\b(?:one coherent record|workflow coverage|authoritative state)\b/i,
+      `${project.title} should not open with generic systems language`
+    );
+  }
 });
 
 test('all projects provide complete case-study content', () => {
@@ -295,10 +354,19 @@ test('freelance experience entry has metric-rich bullets from resume', () => {
   );
 });
 
-test('skills include Dart and Flutter from resume', () => {
+test('core stack keeps relevant resume-backed product technologies', () => {
   const all = aboutContent.techCategories.flatMap(c => c.items.map(i => i.label));
-  assert.ok(all.includes('Dart'), 'Dart should be in skills');
-  assert.ok(all.includes('Flutter'), 'Flutter should be in skills');
+  for (const technology of [
+    'TypeScript',
+    'React',
+    'Next.js',
+    'Flutter',
+    'Node.js',
+    'PostgreSQL',
+    'Vitest'
+  ]) {
+    assert.ok(all.includes(technology), `${technology} should be in the core stack`);
+  }
 });
 
 test('Rent N Roll copy matches its resume-backed pre-launch scope', () => {

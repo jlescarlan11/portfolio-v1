@@ -44,9 +44,9 @@ describe('resolveSiteUrl', () => {
 describe('siteConfig SEO defaults', () => {
   it('exports the approved production copy and square portrait metadata', () => {
     expect(siteConfig.seo).toMatchObject({
-      siteTitle: 'John Lester Escarlan | Full-Stack Software Engineer',
+      siteTitle: 'John Lester Escarlan | Full-Stack Engineer for Product Teams',
       description:
-        'Portfolio of John Lester Escarlan, a full-stack software engineer building reliable marketplaces, offline-first products, and guarded AI automation systems.',
+        'Full-stack engineer for product teams that need feature delivery, production debugging, or guarded workflow automation. Review evidence-backed case studies and get in touch.',
       siteName: 'John Lester Escarlan',
       siteUrl: PRODUCTION_SITE_URL,
       socialImage: {

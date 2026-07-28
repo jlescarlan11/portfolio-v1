@@ -28,7 +28,12 @@ describe('AboutSection progressive enhancement', () => {
   it('gives each visible subsection its label as an accessible name', () => {
     render(<AboutSection content={aboutContent} />);
 
-    for (const name of ['Skills', 'Credentials', 'Experience', 'Education']) {
+    for (const name of [
+      aboutContent.experienceHeading,
+      aboutContent.skillsHeading,
+      aboutContent.credentialsHeading,
+      aboutContent.educationHeading
+    ]) {
       expect(screen.getByRole('region', { name })).toBeInTheDocument();
     }
   });
@@ -36,7 +41,12 @@ describe('AboutSection progressive enhancement', () => {
   it('nests subsection and timeline headings without skipping a level', () => {
     render(<AboutSection content={aboutContent} />);
 
-    for (const name of ['Skills', 'Credentials', 'Experience', 'Education']) {
+    for (const name of [
+      aboutContent.experienceHeading,
+      aboutContent.skillsHeading,
+      aboutContent.credentialsHeading,
+      aboutContent.educationHeading
+    ]) {
       expect(
         screen.getByRole('heading', { level: 3, name })
       ).toBeInTheDocument();
@@ -84,10 +94,17 @@ describe('AboutSection progressive enhancement', () => {
     expect(within(experienceRegion).getByText('Aug 2026')).toBeVisible();
   });
 
-  it('renders declared skills even when they have no bespoke icon', () => {
+  it('renders the focused client-relevant stack even without bespoke icons', () => {
     const markup = renderToStaticMarkup(<AboutSection content={aboutContent} />);
 
-    for (const skill of ['C', 'C++', 'SQL', 'Riverpod', 'Drift', 'Vitest']) {
+    for (const skill of [
+      'TypeScript',
+      'REST APIs',
+      'PostgreSQL',
+      'Vitest',
+      'n8n',
+      'PayMongo'
+    ]) {
       expect(markup).toContain(`>${skill}<`);
     }
   });

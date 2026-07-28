@@ -2,19 +2,19 @@ import type { ProjectRecord, ProjectsSectionContent } from './types';
 
 export const projectsSectionContent: ProjectsSectionContent = {
   eyebrow: 'Selected Work',
-  title: 'Four builds across marketplaces, civic tech, business tooling, and AI automation.',
+  title: 'A rental marketplace, a civic health app, a pricing tool, and a job-search pipeline.',
   intro:
-    'Full-stack products built around transaction integrity, offline reliability, pricing logic, and automation guardrails. Each case study focuses on the problem, the engineering decisions, and the systems delivered.',
-  ctaLabel: 'View project',
+    'Open a case study to see the user problem, what I owned, the decisions behind the build, and the proof available from the repository.',
+  ctaLabel: 'Read case study',
 };
 
 export const projects: ProjectRecord[] = [
   {
     slug: 'rent-n-roll',
     title: 'Rent N Roll',
-    category: 'Full-Stack Marketplace / Two-Sided Platform',
+    category: 'Marketplace / Booking and Payments',
     description:
-      'A pre-launch two-sided camera rental marketplace covering listing and photo management, booking and availability, identity verification, digital contracts, handoff confirmation, and PayMongo-based payment and deposit workflows.',
+      'A pre-launch camera rental marketplace that guides owners and renters through availability, identity verification, digital contracts, handoff confirmation, and PayMongo payment and deposit handling.',
     logo: '/project/rent-n-roll.jpg',
     technologies: ['Next.js', 'TypeScript', 'React', 'Tailwind CSS', 'Supabase', 'PostgreSQL', 'Zod', 'PayMongo'],
     completedAt: '2025-12',
@@ -23,90 +23,89 @@ export const projects: ProjectRecord[] = [
     },
     caseStudy: {
       summary:
-        'A pre-launch camera rental marketplace covering the full booking lifecycle, from listings and availability to identity verification, contracts, handoffs, and PayMongo-backed payments.',
+        'A pre-launch marketplace that gives camera owners and renters one booking to follow from available dates and verification through payment, handoff, and return.',
       roleScope: {
         role: 'Full-Stack Engineer',
         team: 'Solo project',
         status: 'Pre-launch',
         ownership: [
-          'Built the marketplace end to end across listings, discovery, booking, identity verification, contracts, handoffs, and payment workflows.',
-          'Refactored the data-access layer from untyped queries to typed Supabase RPC patterns with generated types.'
+          'Built the owner and renter journeys across equipment listings, discovery, booking, identity verification, digital contracts, handoff confirmation, and PayMongo payments.',
+          'Replaced 24 untyped database queries with typed Supabase RPC patterns and generated types before launch.'
         ]
       },
       problem: {
         audience:
-          'Camera owners who want to make equipment available and renters who need to find and book it.',
+          'Camera owners listing equipment and renters looking for the right gear on specific dates.',
         challenge:
-          'A two-sided rental requires listings, availability, identity checks, contracts, handoffs, payments, and deposits to remain consistent across one booking lifecycle.',
+          'Both people need to know what gear is available, who has been verified, what has been signed and paid, and whether the equipment is ready for handoff or return.',
         stakes:
-          'If those steps are handled as disconnected records, either party can lose a clear view of what must happen next and which booking state is authoritative.',
+          'If any of those details disagree, the owner and renter can act on different booking information or lose sight of the next required step.',
         constraints: [
-          'The marketplace is still pre-launch, so delivered workflow coverage must not be presented as adoption or live operating evidence.',
-          'Payment and deposit state arrives asynchronously through PayMongo events.',
-          'Twenty-four untyped database queries made application and database contracts ambiguous as the lifecycle expanded.'
+          'The marketplace is still pre-launch, so the build proves feature coverage—not adoption or live rental volume.',
+          'PayMongo confirms payment and deposit changes asynchronously through webhook events.',
+          'The initial data layer contained 24 untyped database queries across a growing booking journey.'
         ]
       },
       solution: {
         summary:
-          'Rent N Roll brings both sides of a camera rental into one marketplace workflow from discovery through return.',
+          'One booking connects the listing, renter, required checks, money movement, and physical exchange so each side can see what happens next.',
         workflow: [
-          'Owners publish equipment, photos, pricing, and availability.',
-          'Renters discover equipment, complete the supported verification and contract steps, and request an available booking.',
-          'The marketplace tracks payment, deposit, handoff, and return state around the same booking record.'
+          'Owners publish equipment with photos, daily pricing, deposit details, and available dates.',
+          'Renters choose available gear, complete the supported identity verification and contract steps, and request the booking.',
+          'That booking carries PayMongo payment and deposit updates through handoff confirmation and return.'
         ]
       },
       learnings: {
         lessons: [
-          'Typed RPC boundaries make a growing booking lifecycle easier to review and maintain.',
-          'Asynchronous provider events need to remain the authority for payment and deposit state.'
+          'The difficult part of rental software is not the listing page; it is keeping two people aligned through every commitment and handoff.',
+          'A payment button shows intent, but the PayMongo event must confirm whether money actually moved.'
         ],
         improvements: [
-          'Exercise the complete booking, handoff, return, and exception paths with launch users before expanding marketplace scope.'
+          'Run the complete booking, payment, handoff, return, and exception paths with launch users before adding more marketplace scope.'
         ],
         unvalidated: [
-          'Marketplace adoption and live operating behavior remain unvalidated because the project is pre-launch.'
+          'Because the marketplace is pre-launch, there is no verified rental volume, user adoption, or live payment history yet.'
         ]
       },
       impact: [
         {
           kind: 'implementation',
           value: '24 queries',
-          label: 'Typed data access',
+          label: 'Safer database changes',
           context:
-            'Replaced 24 untyped database queries with typed Supabase RPC patterns and generated types before launch.'
+            'Moved 24 untyped database queries to typed Supabase RPC patterns so mismatched application and database assumptions can be caught earlier.'
         },
         {
           kind: 'product',
           value: 'Full lifecycle',
-          label: 'Marketplace delivery',
+          label: 'One booking, end to end',
           context:
-            'Delivered the workflow from listings and availability through verification, contracts, handoffs, payments, and deposits.'
+            'Connected listings and availability to verification, contracts, PayMongo payments and deposits, handoff confirmation, and return.'
         }
       ],
       decisions: [
         {
-          title: 'Typed database boundary',
+          title: 'Fix ambiguous database calls before launch',
           constraint:
-            'Twenty-four untyped database queries made data contracts ambiguous before launch.',
+            'Twenty-four untyped database queries made it easy for application code and stored data to disagree.',
           decision:
-            'Move those queries behind typed Supabase RPC patterns backed by generated types.',
+            'Move every identified query behind typed Supabase RPC patterns backed by generated types.',
           rationale:
-            'Keep application and database contracts explicit as the booking lifecycle expanded.',
+            'Make booking-data changes reviewable and catch mismatched fields before they reach an owner or renter.',
           validation:
             'All 24 identified queries were migrated to the typed pattern.'
         },
         {
-          title: 'Provider-backed payment events',
+          title: 'Let PayMongo confirm money movement',
           constraint:
-            'Payment and deposit state had to follow asynchronous provider events.',
+            'The interface can start a payment, but it cannot prove that PayMongo completed it.',
           decision:
             'Integrate payment and deposit handling through PayMongo webhooks.',
           rationale:
-            'Keep marketplace payment handling aligned with events reported by the payment provider.'
+            'Update the booking from provider-confirmed events instead of assuming a successful button click.'
         }
       ],
       highlights: [
-        'Built a two-sided camera rental workflow spanning listing and photo management, availability, identity verification, digital contracts, and handoff confirmation.',
         'Integrated payment and deposit handling through PayMongo webhooks.',
         'Replaced 24 untyped database queries with typed Supabase RPC patterns and generated types.'
       ],
@@ -134,9 +133,9 @@ export const projects: ProjectRecord[] = [
   {
     slug: 'health',
     title: 'HEALTH',
-    category: 'Mobile Application / Civic Tech',
+    category: 'Civic Health / Offline Mobile App',
     description:
-      'A civic health application for Naga City combining deterministic safety checks, Gemini-assisted triage, facility guidance, and offline clinical data; led to a top-15 finish among 200+ hackathon teams.',
+      'A Naga City health app that routes immediate-danger and mental-health inputs before Gemini, keeps supported care records available offline, and helped a five-person team reach the top 15 of 200+ hackathon teams.',
     logo: '/project/health.svg',
     technologies: ['TypeScript', 'React Native', 'Expo', 'Node.js', 'Prisma', 'PostgreSQL', 'SQLite', 'Gemini API'],
     completedAt: '2026-02',
@@ -145,48 +144,48 @@ export const projects: ProjectRecord[] = [
     },
     caseStudy: {
       summary:
-        'A civic health app combining deterministic safety checks, Gemini-assisted triage, and offline clinical records to help residents identify an appropriate next level of care.',
+        'A civic health app that helps residents decide whether to seek emergency help, find a nearby facility, or continue to a lower-acuity next step—even with unreliable connectivity.',
       roleScope: {
         role: 'Project and Technical Lead',
         team: 'Five-person hackathon team',
         status: 'Hackathon semi-finalist; repository archived',
         ownership: [
-          'Led a five-person team in building symptom assessment, facility discovery, medication records, and YAKAP enrollment guidance.',
-          'Combined SQLite-backed offline data with the Node.js, Prisma, and PostgreSQL backend.'
+          'Led a five-person team delivering symptom assessment, nearby-facility discovery, medication records, and YAKAP enrollment guidance.',
+          'Designed the handoff between deterministic safety checks, Gemini-assisted triage, SQLite-backed offline records, and the Node.js, Prisma, and PostgreSQL backend.'
         ]
       },
       problem: {
         audience:
-          'Naga City residents who need help identifying an appropriate next level of care, including when connectivity is unreliable.',
+          'Naga City residents deciding whether symptoms call for emergency help, a nearby facility, or a lower-acuity next step.',
         challenge:
-          'Symptom guidance, nearby-facility information, medication records, and enrollment guidance can span disconnected sources, while emergency and mental-health inputs require predictable handling.',
+          'A symptom tool needs to react predictably to immediate danger while still making supported assessments, medications, and facility information useful when connectivity drops.',
         stakes:
-          'Urgent safety decisions cannot depend on a generative response, and supported care information still needs to remain available during connectivity loss.',
+          'An urgent case should never wait for a generative answer, and losing locally needed information during an outage would undermine the app when guidance matters most.',
         constraints: [
           'The product was built by a five-person team within a hackathon timeline.',
-          'Only supported clinical, medication, assessment, and facility data can be represented as available offline.',
-          'Emergency and mental-health inputs must be resolved before any eligible request reaches Gemini.'
+          'Offline support covers defined assessment, medication, and facility records—not every care scenario.',
+          'Emergency and mental-health inputs must receive deterministic handling before any eligible request reaches Gemini.'
         ]
       },
       solution: {
         summary:
-          'HEALTH combines deterministic safety checks, assisted triage, local care information, and offline clinical records in one civic health workflow.',
+          'The app handles immediate safety first, uses Gemini only for eligible lower-risk inputs, and keeps a defined set of care information on the device.',
         workflow: [
-          'Residents enter symptoms and encounter deterministic emergency or mental-health handling before any AI-assisted path.',
-          'Eligible inputs can receive Gemini-assisted triage and local-facility guidance.',
-          'Assessments, medication records, and facility data remain on the device and synchronize when connectivity returns.'
+          'Residents answer an immediate-danger and mental-health check before any AI request can run.',
+          'Inputs that clear that check can receive Gemini-assisted triage and guidance toward local facilities.',
+          'Supported assessments, medication records, and facility data stay in SQLite and use synchronization when connectivity returns.'
         ]
       },
       learnings: {
         lessons: [
-          'Deterministic safety gates keep urgent decisions outside the generative-model request path.',
-          'Offline claims need to describe the exact records and workflows supported rather than imply universal coverage.'
+          'In a health product, AI is a conditional helper—not the first or final authority for urgent safety.',
+          '“Works offline” is only credible when the exact records available without a connection are named.'
         ],
         improvements: [
-          'A future iteration would require clinical review and field testing before the guidance could be treated as production care infrastructure.'
+          'Bring clinicians and residents into structured review and field testing before treating the guidance as production care infrastructure.'
         ],
         unvalidated: [
-          'The hackathon result does not validate clinical effectiveness, resident adoption, or production reliability.'
+          'The hackathon placement demonstrates team delivery, not clinical effectiveness, resident adoption, or production reliability.'
         ]
       },
       impact: [
@@ -200,31 +199,31 @@ export const projects: ProjectRecord[] = [
         {
           kind: 'product',
           value: 'Offline records',
-          label: 'Continuity without connectivity',
+          label: 'Care data kept on-device',
           context:
             'Assessments, medication records, and facility data remain available locally, with synchronization when connectivity returns.'
         }
       ],
       decisions: [
         {
-          title: 'Deterministic safety gate',
+          title: 'Route danger signals before calling Gemini',
           constraint:
-            'Emergency and mental-health inputs required predictable handling before any AI-assisted triage.',
+            'Emergency and mental-health inputs cannot depend on model availability or model-generated wording.',
           decision:
             'Run deterministic emergency and mental-health checks before eligible requests reach Gemini.',
           rationale:
-            'Keep urgent safety decisions outside the generative-model request path.',
+            'Give urgent inputs a predictable response path before assisted triage is considered.',
           tradeoff:
             'Only inputs that clear the deterministic checks are eligible for Gemini-assisted triage.'
         },
         {
-          title: 'Offline-first clinical data',
+          title: 'Keep a defined record set on the device',
           constraint:
             'Residents may need assessment, medication, and facility information without reliable connectivity.',
           decision:
             'Persist those records in SQLite and synchronize them with the backend when connectivity returns.',
           rationale:
-            'Preserve access to the supported clinical workflows while the device is offline.'
+            'Keep the supported care information readable during an outage without overstating universal offline coverage.'
         }
       ],
       highlights: [
@@ -247,9 +246,9 @@ export const projects: ProjectRecord[] = [
   {
     slug: 'pricecraft',
     title: 'PriceCraft',
-    category: 'Web Application / Business Tooling',
+    category: 'Pricing PWA / Small Business',
     description:
-      'A live, installable pricing PWA for small food businesses, combining recipe and variant costing, offline and cloud synchronization, a personal ingredient catalog, and receipt capture with OCR-assisted item extraction.',
+      'A live, installable pricing PWA that helps small food businesses turn recipe costs into selling prices, reuse costs across variants, and update an ingredient catalog from reviewed receipt lines.',
     logo: '/project/pricecraft.svg',
     technologies: ['TypeScript', 'React', 'Vite', 'Tailwind CSS', 'Supabase', 'PostgreSQL', 'Tesseract.js', 'Vitest', 'Vite PWA'],
     completedAt: '2026-05',
@@ -259,23 +258,23 @@ export const projects: ProjectRecord[] = [
     },
     caseStudy: {
       summary:
-        'An installable, offline-capable pricing tool that turns costs into selling-price decisions and converts reviewed receipt lines into reusable ingredient and price-history records.',
+        'A pricing tool for small food businesses that answers a recurring question: after ingredients, labor, and overhead change, what should this product sell for?',
       roleScope: {
         role: 'Full-Stack Engineer',
         team: 'Solo project',
         status: 'Live',
         ownership: [
-          'Built the pricing workflow across ingredient, labor, overhead, markup, and profit-margin calculations.',
-          'Expanded the product with recipe variants, a personal ingredient catalog, receipt capture and OCR-assisted extraction, price-drift review, offline operation, and Supabase synchronization.'
+          'Built the calculator across ingredient, labor, overhead, markup, profit-margin, break-even, and per-unit profit calculations.',
+          'Added shared recipe costs, product variants, a personal ingredient catalog, receipt OCR with user confirmation, offline use, and Supabase synchronization.'
         ]
       },
       problem: {
         audience:
-          'Small food businesses that need repeatable selling-price decisions as ingredient costs change.',
+          'Small food businesses that need to price products repeatedly as ingredient costs change.',
         challenge:
-          'Pricing work is often split across spreadsheets, with changing ingredient costs entered repeatedly and shared recipe costs duplicated across related products.',
+          'A price is easy to calculate once; keeping it current is harder when spreadsheets repeat ingredient costs and related products duplicate the same base recipe.',
         stakes:
-          'That fragmentation makes real margins harder to understand, shared costs harder to reuse, and pricing work less dependable when connectivity is unreliable.',
+          'Missing a shared cost can make real margins look healthier than they are, while required sign-in or connectivity can block a quick pricing check.',
         constraints: [
           'The calculator must remain useful before sign-in and during connectivity loss.',
           'Related product variants need one source for shared recipe costs.',
@@ -284,21 +283,21 @@ export const projects: ProjectRecord[] = [
       },
       solution: {
         summary:
-          'PriceCraft turns recipe costs into selling-price decisions and carries reviewed receipt changes into a reusable ingredient catalog.',
+          'PriceCraft keeps the recipe, selling-price options, and future cost updates together so a business can recalculate instead of rebuilding its math.',
         workflow: [
-          'A business records ingredients, labor, overhead, and shared recipe costs, then compares markup and profit-margin pricing.',
-          'Related variants reuse a base recipe so shared costs remain consistent across products.',
-          'Captured receipt lines stay editable until the user confirms catalog or price-history updates, while local changes remain available offline and can synchronize after sign-in.',
-          'Authenticated records synchronize through Supabase with Row-Level Security, while guest-data migration and JSON import and export preserve continuity and portability.'
+          'The business records ingredients, labor, overhead, and shared recipe costs, then compares markup and profit-margin prices with break-even and profit figures.',
+          'Product variants reuse one base recipe and add only the costs that differ.',
+          'Receipt OCR proposes ingredient names, quantities, units, and prices; the user edits and confirms them before the ingredient catalog or price history changes.',
+          'Guest data works offline, can move into an account after sign-in, and can synchronize through Supabase with Row-Level Security; JSON import and export provide a portable backup.'
         ]
       },
       learnings: {
         lessons: [
-          'Human confirmation is the safer boundary when OCR output can change cost data.',
-          'Guest-first local persistence makes the core pricing workflow useful without turning an account or active connection into a prerequisite.'
+          'Receipt OCR is most useful as a draft that reduces typing; it should not silently rewrite the costs behind a selling price.',
+          'A calculator earns trust faster when it works before account creation and explains the cost behind its recommendation.'
         ],
         improvements: [
-          'Validate receipt extraction against a broader range of layouts and make price-drift reconciliation easier to review in batches.'
+          'Test receipt extraction across more layouts and let users review several detected price changes in one pass.'
         ],
         unvalidated: [
           'User adoption, pricing time saved, and business-margin improvement have not been measured.'
@@ -308,21 +307,21 @@ export const projects: ProjectRecord[] = [
         {
           kind: 'product',
           value: '2 strategies',
-          label: 'Pricing coverage',
+          label: 'Two ways to set a price',
           context:
             'Calculates selling prices with both markup and profit-margin strategies across ingredient, labor, and overhead costs.'
         },
         {
           kind: 'product',
           value: 'Offline-capable',
-          label: 'Workflow continuity',
+          label: 'Works before sign-in',
           context:
-            'Supports guest use and offline changes, then synchronizes authenticated account data through Supabase.'
+            'Lets a guest calculate and save locally without a connection, then migrate and synchronize data after signing in.'
         },
         {
           kind: 'implementation',
           value: '300+ tests',
-          label: 'Regression coverage',
+          label: 'Pricing changes checked',
           context:
             'Covers pricing logic, persistence, migration, catalog, and interface behavior with more than 300 unit and integration tests.'
         },
@@ -336,33 +335,33 @@ export const projects: ProjectRecord[] = [
       ],
       decisions: [
         {
-          title: 'Reusable recipe variants',
+          title: 'Share one base recipe across variants',
           constraint:
             'Related products needed to share a base recipe without duplicating shared ingredient costs.',
           decision:
             'Model reusable base recipes and allocate shared costs across product variants.',
           rationale:
-            'Keep variant pricing comparable while retaining one source for shared recipe costs.'
+            'Update shared costs once while keeping each variant’s added costs and resulting margin visible.'
         },
         {
-          title: 'Human-confirmed receipt extraction',
+          title: 'Treat receipt OCR as a draft',
           constraint:
             'Receipt text is noisy and cannot safely update ingredient costs without review.',
           decision:
             'Preprocess captured images, extract candidate lines through the available OCR path, and require editable confirmation before catalog or price-history writes.',
           rationale:
-            'Reduce re-entry work without treating uncertain OCR output as trusted pricing data.',
+            'Reduce re-entry work without letting uncertain text silently alter a selling-price calculation.',
           tradeoff:
             'The user remains responsible for checking names, quantities, units, and prices before saving.'
         },
         {
-          title: 'Guest-first offline persistence',
+          title: 'Let the calculator work before sign-in',
           constraint:
             'The calculator needed to remain useful before sign-in and during connectivity loss.',
           decision:
             'Support local guest changes, optional Supabase authentication and synchronization, and guest-data migration.',
           rationale:
-            'Let users begin and continue pricing work without making an account or active connection a prerequisite.'
+            'Make the core calculation immediately useful, then offer cloud sync when the user wants it.'
         }
       ],
       highlights: [
@@ -386,9 +385,9 @@ export const projects: ProjectRecord[] = [
   {
     slug: 'job-pipeline',
     title: 'Job Pipeline',
-    category: 'AI Automation / Developer Tooling',
+    category: 'AI-Assisted Job Search Automation',
     description:
-      'A seven-workflow, resume-driven n8n system that discovers and ranks OnlineJobs.ph listings, builds evidence-supported application packs with Groq, alerts through Slack, records manual outcomes, and publishes guarded analytics and recommendations without submitting applications.',
+      'Seven n8n workflows that find and rank OnlineJobs.ph listings, prepare grounded application drafts with Groq, send Slack alerts, and leave review and submission manual.',
     logo: '',
     technologies: ['n8n', 'Node.js', 'JavaScript', 'Groq API', 'Google Sheets API', 'Google Apps Script', 'Slack Webhooks'],
     completedAt: '2026-07',
@@ -397,119 +396,119 @@ export const projects: ProjectRecord[] = [
     },
     caseStudy: {
       summary:
-        'A policy-driven job discovery and application-review system that coordinates seven disabled-by-default workflows while preserving manual review, submission, and outcome decisions.',
+        'A job-search assistant that reduces the repetitive work around finding, comparing, drafting for, and tracking roles without applying on the candidate’s behalf.',
       roleScope: {
         role: 'Workflow Automation Engineer',
         team: 'Solo project',
         status: 'Validated; disabled by default',
         ownership: [
-          'Designed seven independently scheduled workflows for discovery, generation, alerts, review, analytics, recommendations, and archival.',
-          'Modeled the pipeline around versioned policies, an 89-field canonical record, additive Sheet migration, deterministic validation, and a manual-submission boundary.'
+          'Designed seven independently scheduled n8n workflows for discovery, drafting, Slack alerts, manual review, archival, analytics, and recommendations.',
+          'Built the pipeline from versioned configuration, an 89-field canonical job record, additive Google Sheet migration, and 147 deterministic tests.'
         ]
       },
       problem: {
         audience:
-          'A job candidate who needs to review relevant OnlineJobs.ph listings and prepare grounded application material without delegating submission authority.',
+          'A job candidate reviewing OnlineJobs.ph at scale who still wants to judge fit and submit every application personally.',
         challenge:
-          'Repeated discovery, qualification review, application drafting, alerting, outcome tracking, and analytics can drift across independent automations and active or archived records.',
+          'Finding new listings, removing duplicates, checking fit, drafting from real experience, and tracking outcomes consumes time before an application is even sent.',
         stakes:
-          'Duplicate or stale state can waste review effort, while generated output or aggregate recommendations must never submit an application for the candidate.',
+          'A retry can surface the same role twice, a fluent draft can claim unsupported experience, and an automated sender can take away the candidate’s final judgment.',
         constraints: [
-          'Seven workflows run on independent schedules and must tolerate retries, stale claims, row shifts, and legacy records.',
-          'One versioned candidate profile and policy set must remain the source of truth for generated artifacts.',
-          'Live OnlineJobs.ph, Google Sheets, Groq, Slack, and n8n actions stay disabled by default during deterministic validation.'
+          'The seven n8n workflows run independently and must handle retries, moved rows, unfinished work, and older records.',
+          'Drafts and scoring must stay grounded in one versioned candidate profile and policy set.',
+          'Live OnlineJobs.ph, Google Sheets, Groq, Slack, and n8n actions are disabled by default while deterministic checks run.'
         ]
       },
       solution: {
         summary:
-          'Job Pipeline coordinates discovery, evidence-based ranking, application-pack generation, review, outcomes, and learning while keeping submission manual.',
+          'The pipeline prepares a smaller, better-supported review queue; the candidate decides what is true, worth pursuing, and ready to send.',
         workflow: [
-          'Versioned searches discover listings and reconcile active and archived history around a canonical job identity.',
-          'Qualification and opportunity scoring prioritize work before grounded application packs and idempotent Slack alerts are generated.',
-          'The candidate reviews, applies manually, records outcomes, and receives deduplicated analytics and guarded recommendations.'
+          'Twenty-two evidence-linked searches find listings and compare them with active and archived history using a canonical job identity.',
+          'Qualification and opportunity scores prioritize roles before Groq prepares experience-grounded application material and Slack alerts.',
+          'The candidate performs manual review, submits outside the automation, records outcomes, and receives deduplicated analytics and recommendations.'
         ]
       },
       learnings: {
         lessons: [
-          'Versioned configuration and generated artifacts prevent exported automation from becoming a second source of truth.',
-          'Canonical identity, guarded transitions, and idempotent writes are necessary when independently scheduled workflows share records.'
+          'The safest way to maintain exported automation is to generate it from checked-in rules instead of editing seven copies by hand.',
+          'A durable listing identity matters more than row position when schedules overlap, retries happen, and records move to an archive.'
         ],
         improvements: [
-          'Activate external workflows gradually and inspect live provider, Sheet, and scheduling behavior before increasing automation frequency.'
+          'Enable external services one at a time, inspect real listing, Sheet, model, and alert behavior, then increase the schedule frequency.'
         ],
         unvalidated: [
-          'The disabled-by-default validation proves deterministic behavior, not live conversion improvement or provider reliability.'
+          'The 147 deterministic tests prove checked-in behavior, not better application conversion or reliable live provider performance.'
         ]
       },
       impact: [
         {
           kind: 'product',
           value: '7 workflows',
-          label: 'Automation coverage',
+          label: 'Jobs split by responsibility',
           context:
             'Separates discovery, generation, Slack alerts, manual review, archival, analytics, and recommendations into independently scheduled n8n workflows.'
         },
         {
           kind: 'product',
           value: '22 queries',
-          label: 'Evidence-linked discovery',
+          label: 'Repeatable search coverage',
           context:
             'Runs a versioned search catalog while reconciling active and archived records around one canonical job identity.'
         },
         {
           kind: 'implementation',
           value: '147 tests',
-          label: 'Deterministic validation',
+          label: 'Checked without live actions',
           context:
             'Covers profile and policy contracts, discovery, ranking, generation, review, alerts, archival, analytics, recommendations, generated artifacts, and a synthetic lifecycle.'
         },
         {
           kind: 'product',
           value: 'Manual-only',
-          label: 'Sending boundary',
+          label: 'Candidate keeps control',
           context:
-            'Produces validated application material while requiring the candidate to review and submit every application.'
+            'Prepares application material while requiring the candidate to review and submit every application.'
         }
       ],
       decisions: [
         {
-          title: 'Versioned policy and generated artifacts',
+          title: 'Generate seven automations from one policy',
           constraint:
             'Editing exported workflows directly would let runtime behavior drift from profile, ranking, alert, analytics, and application rules.',
           decision:
             'Treat versioned configuration as the source of truth and generate the seven workflow exports and Sheet setup from it.',
           rationale:
-            'Make critical behavior reviewable, reproducible, and testable before activation.',
+            'Review and test one set of rules before producing the files n8n and Google Sheets consume.',
           validation:
             'The validation command checks generated-artifact drift and runs 147 deterministic tests without live service calls.'
         },
         {
-          title: 'Canonical identity and guarded state transitions',
+          title: 'Give every listing one durable identity',
           constraint:
             'Independent schedules, retries, legacy rows, and reviewer actions could otherwise duplicate work or overwrite a newer decision.',
           decision:
             'Use canonical job identities, append-only claims, processing tokens, state guards, idempotent upserts, and archive confirmation before deletion.',
           rationale:
-            'Preserve one coherent record across active and archived Sheets even when work overlaps or retries.',
+            'Recognize the same listing across active and archived Sheets even when work overlaps or retries.',
           validation:
             'Regression fixtures cover duplicate discovery, stale claims, concurrent review, partial archive writes, row shifts, and legacy records.'
         },
         {
-          title: 'Learning without autonomous submission',
+          title: 'Automate preparation, never submission',
           constraint:
             'The pipeline needed better prioritization and feedback without allowing generated output or aggregate analytics to take action for the candidate.',
           decision:
             'Keep review, Apply Points, submission, and outcomes explicit while limiting analytics and weekly recommendations to versioned, evidence-backed advisory output.',
           rationale:
-            'Improve future decisions while keeping authority at the human boundary.',
+            'Use past outcomes to improve the review queue without making the candidate’s decision.',
           tradeoff:
             'The system prepares and prioritizes work but never applies for a job.'
         }
       ],
       highlights: [
-        'Coordinates discovery, generation, Slack alerts, review, archival, analytics, and recommendations across seven n8n workflows.',
+        'Separates discovery, drafting, Slack alerts, manual review, archival, analytics, and recommendations across seven n8n workflows.',
         'Runs 22 evidence-linked searches, dual-score evaluation, instruction-aware application packs, and canonical cross-sheet reconciliation.',
-        'Generates grounded application material and guarded learning output while keeping review, submission, and outcomes manual.'
+        'Generates grounded application material while the candidate reviews, submits, and records every outcome manually; it never applies for a job.'
       ],
       visuals: [
         {

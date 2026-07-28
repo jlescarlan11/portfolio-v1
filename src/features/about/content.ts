@@ -53,79 +53,53 @@ export interface AboutContent {
 
 export const aboutContent: AboutContent = {
   eyebrow: 'About',
-  title: 'Experience, education, and the stack behind it.',
+  title: 'Product delivery shaped by production operations.',
   intro:
-    'I work across production monitoring, full-stack product delivery, and workflow automation, with a consistent focus on reliable systems, explicit safeguards, and practical user outcomes.',
-  skillsHeading: 'Skills',
-  skillsIntro: 'The tools I reach for most often, grouped by where they show up in the stack.',
+    'My work spans client delivery and production monitoring. I turn requirements into explicit system states, keep trade-offs visible, document the handoff, and verify changes with tests and rollout checks.',
+  skillsHeading: 'Core stack',
+  skillsIntro: 'The tools most relevant to the product, reliability, and automation work I take on.',
   credentialsHeading: 'Credentials',
   credentialsIntro: 'Selected certifications and formal training that support the engineering work.',
   experienceHeading: 'Experience',
   educationHeading: 'Education',
   certificationsVisibleCount: 2,
 
-  // ── Three compact groups: write → build → deploy ─────────────────────────
+  // A focused, evidence-backed stack for the work positioned on this page.
   techCategories: [
     {
-      category: 'Languages',
+      category: 'Product development',
       items: [
         { label: 'TypeScript' },
-        { label: 'JavaScript' },
-        { label: 'Python' },
-        { label: 'Java' },
-        { label: 'Dart' },
-        { label: 'C#' },
-        { label: 'Go' },
-        { label: 'C' },
-        { label: 'C++' },
-        { label: 'SQL' },
-        { label: 'Bash' }
-      ]
-    },
-    {
-      // Frontend frameworks, backend frameworks, libraries, testing, auth
-      category: 'Frameworks & Libraries',
-      items: [
         { label: 'React' },
         { label: 'Next.js' },
         { label: 'React Native' },
         { label: 'Flutter' },
         { label: 'Node.js' },
-        { label: 'Express.js' },
-        { label: 'Spring Boot' },
-        { label: 'ASP.NET' },
-        { label: 'Tailwind CSS' },
-        { label: 'TanStack Query' },
-        { label: 'Redux' },
-        { label: 'Riverpod' },
-        { label: 'Drift' },
-        { label: 'Vite' },
-        { label: 'Vitest' },
-        { label: 'JWT/OAuth2 Authentication' }
+        { label: 'Tailwind CSS' }
       ]
     },
     {
-      // Databases, ORMs, DevOps, cloud, Git
-      category: 'Infrastructure',
+      category: 'Backend and data',
       items: [
+        { label: 'REST APIs' },
         { label: 'PostgreSQL' },
-        { label: 'PostGIS' },
-        { label: 'MySQL' },
-        { label: 'MongoDB' },
-        { label: 'SQLite' },
-        { label: 'Redis' },
-        { label: 'Elasticsearch' },
-        { label: 'Drizzle ORM' },
-        { label: 'Prisma ORM' },
-        { label: 'Docker' },
-        { label: 'Kubernetes' },
-        { label: 'GitHub CI/CD' },
-        { label: 'AWS' },
-        { label: 'Vercel' },
         { label: 'Supabase' },
-        { label: 'Mapbox' },
-        { label: 'Figma' },
-        { label: 'Git' }
+        { label: 'Prisma ORM' },
+        { label: 'Drizzle ORM' },
+        { label: 'MySQL' },
+        { label: 'MongoDB' }
+      ]
+    },
+    {
+      category: 'Delivery and automation',
+      items: [
+        { label: 'Vitest' },
+        { label: 'GitHub Actions' },
+        { label: 'Docker' },
+        { label: 'Vercel' },
+        { label: 'n8n' },
+        { label: 'Groq API' },
+        { label: 'PayMongo' }
       ]
     }
   ],

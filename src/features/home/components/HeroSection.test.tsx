@@ -87,4 +87,22 @@ describe('HeroSection initial-load integration', () => {
     expect(portrait).toBeInTheDocument();
     expect(portrait).toHaveAttribute('data-src', '/hero-image.jpg');
   });
+
+  it('presents services, proof, and a direct hiring path in the opening section', () => {
+    render(<HeroSection {...heroContent} />);
+
+    expect(screen.getByText(heroContent.tagline)).toBeVisible();
+    expect(screen.getByText(heroContent.proof)).toBeVisible();
+
+    for (const service of heroContent.services) {
+      expect(screen.getByText(service)).toBeVisible();
+    }
+
+    expect(
+      screen.getByRole('link', { name: /discuss a project/i })
+    ).toHaveAttribute('href', '#contact');
+    expect(
+      screen.getByRole('link', { name: /review case studies/i })
+    ).toHaveAttribute('href', '#work');
+  });
 });

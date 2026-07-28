@@ -34,7 +34,7 @@ export function ChatBubble() {
       {!isOpen && labelVisible && (
         <div className="flex items-center gap-1.5 border border-surface bg-background/90 pl-3 pr-1.5 py-1.5 backdrop-blur-md">
           <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-subtle-foreground">
-            Ask me about John
+            Ask about John&apos;s work
           </span>
           <button
             onClick={() => setLabelVisible(false)}

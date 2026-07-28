@@ -21,7 +21,7 @@ describe('buildSystemPrompt', () => {
 
   it('grounds project-specific answers with each project technology list', () => {
     expect(buildSystemPrompt()).toContain(
-      'HEALTH (Mobile Application / Civic Tech; technologies: TypeScript, React Native, Expo'
+      'HEALTH (Civic Health / Offline Mobile App; technologies: TypeScript, React Native, Expo'
     );
   });
 
@@ -29,11 +29,11 @@ describe('buildSystemPrompt', () => {
     const prompt = buildSystemPrompt();
 
     expect(prompt).toContain('role: Project and Technical Lead');
-    expect(prompt).toContain('300+ tests — Regression coverage');
-    expect(prompt).toContain('7 workflows — Automation coverage');
+    expect(prompt).toContain('300+ tests — Pricing changes checked');
+    expect(prompt).toContain('7 workflows — Jobs split by responsibility');
     expect(prompt).toContain('Validated; disabled by default');
     expect(prompt).toContain(
-      '**Notable projects:** Rent N Roll, HEALTH, PriceCraft, Job Pipeline'
+      '**Case studies:** Rent N Roll, HEALTH, PriceCraft, Job Pipeline'
     );
   });
 

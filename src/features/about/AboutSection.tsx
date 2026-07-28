@@ -246,6 +246,30 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
     >
       <div className="space-y-14">
 
+        {/* ── EXPERIENCE ── */}
+        <section
+          className={`border-t ${SURFACE.hairline} pt-10`}
+          aria-labelledby="experience-heading"
+        >
+          <SectionLabel id="experience-heading">
+            {content.experienceHeading}
+          </SectionLabel>
+          <ul className="divide-y divide-foreground/5">
+            {experience.map((item, index) => (
+              <TimelineRow
+                key={item.id}
+                title={item.title}
+                subtitle={item.company}
+                startDate={item.startDate}
+                endDate={item.endDate}
+                isCurrent={item.isCurrent}
+                bullets={item.responsibilities}
+                staggerDelay={index * 60}
+              />
+            ))}
+          </ul>
+        </section>
+
         {/* ── SKILLS + CONTRIBUTION GRAPH ── */}
         {skillCategories.length > 0 && (
           <FadeIn
@@ -254,7 +278,16 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
             className={`border-t ${SURFACE.hairline} pt-10`}
             aria-labelledby="skills-heading"
           >
-            <SectionLabel id="skills-heading">Skills</SectionLabel>
+            <SectionLabel id="skills-heading">
+              {content.skillsHeading}
+            </SectionLabel>
+            <Typography
+              variant="body-sm"
+              as="p"
+              className="mb-8 max-w-2xl leading-relaxed text-muted-foreground"
+            >
+              {content.skillsIntro}
+            </Typography>
             <div className="mb-10 space-y-7">
               {skillCategories.map(({ category, items }) => (
                 <div key={category}>
@@ -293,7 +326,9 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
             className={`border-t ${SURFACE.hairline} pt-10`}
             aria-labelledby="credentials-heading"
           >
-            <SectionLabel id="credentials-heading">Credentials</SectionLabel>
+            <SectionLabel id="credentials-heading">
+              {content.credentialsHeading}
+            </SectionLabel>
             <CertificationsList
               certifications={certifications}
               initialVisibleCount={content.certificationsVisibleCount}
@@ -301,34 +336,14 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
           </FadeIn>
         )}
 
-        {/* ── EXPERIENCE ── */}
-        <section
-          className={`border-t ${SURFACE.hairline} pt-10`}
-          aria-labelledby="experience-heading"
-        >
-          <SectionLabel id="experience-heading">Experience</SectionLabel>
-          <ul className="divide-y divide-foreground/5">
-            {experience.map((item, index) => (
-              <TimelineRow
-                key={item.id}
-                title={item.title}
-                subtitle={item.company}
-                startDate={item.startDate}
-                endDate={item.endDate}
-                isCurrent={item.isCurrent}
-                bullets={item.responsibilities}
-                staggerDelay={index * 60}
-              />
-            ))}
-          </ul>
-        </section>
-
         {/* ── EDUCATION ── */}
         <section
           className={`border-t ${SURFACE.hairline} pt-10`}
           aria-labelledby="education-heading"
         >
-          <SectionLabel id="education-heading">Education</SectionLabel>
+          <SectionLabel id="education-heading">
+            {content.educationHeading}
+          </SectionLabel>
           <ul className="divide-y divide-foreground/5">
             {education.map((item, index) => (
               <TimelineRow

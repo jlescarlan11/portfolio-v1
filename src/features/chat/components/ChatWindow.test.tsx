@@ -53,7 +53,7 @@ describe('ChatWindow', () => {
     );
     expect(getByRole('dialog', { name: "John's AI Assistant" })).toBeTruthy();
     expect(getByText(/Hi! I'm John's AI assistant/)).toBeTruthy();
-    expect(getByPlaceholderText(/ask a question/i)).toHaveFocus();
+    expect(getByPlaceholderText(/ask about a project/i)).toHaveFocus();
     expect(getByText(/ready/i)).toHaveClass('text-subtle-foreground');
     expect(queryByText(/WebGPU/i)).toBeNull();
     expect(queryByText(/Download.*Start/i)).toBeNull();
@@ -78,7 +78,7 @@ describe('ChatWindow', () => {
       expect(
         getByRole('dialog', { name: "John's AI Assistant" })
       ).toBeInTheDocument();
-      expect(getByPlaceholderText(/ask a question/i)).toHaveFocus();
+      expect(getByPlaceholderText(/ask about a project/i)).toHaveFocus();
     } finally {
       if (descriptor) {
         Object.defineProperty(
@@ -159,7 +159,7 @@ describe('ChatWindow', () => {
     const { getByPlaceholderText, getByRole } = render(
       <ChatWindow onClose={vi.fn()} />
     );
-    const input = getByPlaceholderText(/ask a question/i);
+    const input = getByPlaceholderText(/ask about a project/i);
 
     fireEvent.change(input, { target: { value: '  Tell me about John.  ' } });
     fireEvent.click(getByRole('button', { name: /send message/i }));
@@ -190,7 +190,7 @@ describe('ChatWindow', () => {
     );
     expect(getByLabelText('Thinking')).toBeTruthy();
     expect(getByText(/answering/i)).toHaveClass('text-subtle-foreground');
-    expect(getByPlaceholderText(/ask a question/i)).toHaveProperty('disabled', true);
+    expect(getByPlaceholderText(/ask about a project/i)).toHaveProperty('disabled', true);
     expect(getByLabelText(/send message/i)).toHaveProperty('disabled', true);
   });
 
@@ -219,7 +219,7 @@ describe('ChatWindow', () => {
 
     expect(getByText(/answer was cut off/i)).toBeTruthy();
     expect(queryByRole('button', { name: /retry/i })).toBeNull();
-    expect(getByPlaceholderText(/ask a question/i)).not.toHaveProperty(
+    expect(getByPlaceholderText(/ask about a project/i)).not.toHaveProperty(
       'disabled',
       true
     );

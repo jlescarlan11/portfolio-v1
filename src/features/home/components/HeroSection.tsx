@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import React from 'react';
 import type { CSSProperties } from 'react';
 import type { HeroContent } from '@/features/home/content';
@@ -13,6 +14,10 @@ export default function HeroSection({
   name,
   role,
   tagline,
+  proof,
+  services,
+  primaryCta,
+  secondaryCta,
   profileImage: { src, alt },
   socialLinks
 }: HeroContent): React.JSX.Element {
@@ -20,15 +25,13 @@ export default function HeroSection({
   const d = {
     role: 320,
     tagline: 440,
-    social: 560,
+    services: 500,
+    cta: 560,
+    social: 620,
     image: 80,
     scroll: 700
   };
 
-  const taglineMatch = tagline.match(/^([^.!?]+)([.!?])/);
-  const shortTagline = taglineMatch
-    ? taglineMatch[1].trim() + taglineMatch[2]
-    : tagline.split(/[.!?]/)[0].trim() + '.';
   const nameWords = name.split(' ');
 
   return (
@@ -54,7 +57,7 @@ export default function HeroSection({
         ].join(' ')}
       >
         {/* ── Left: text content ── */}
-        <div className="order-2 flex flex-col gap-7 lg:order-1 lg:justify-center lg:pr-12">
+        <div className="order-1 flex flex-col gap-7 lg:justify-center lg:pr-12">
 
           {/* Name — word-by-word entrance */}
           <h1
@@ -98,8 +101,51 @@ export default function HeroSection({
               as="p"
               className="max-w-lg leading-relaxed text-muted-foreground"
             >
-              {shortTagline}
+              {tagline}
             </Typography>
+            <Typography
+              variant="body-sm"
+              as="p"
+              className="mt-4 max-w-lg leading-relaxed text-subtle-foreground"
+            >
+              {proof}
+            </Typography>
+          </FadeIn>
+
+          {/* Services */}
+          <FadeIn delay={d.services}>
+            <ul
+              className="flex max-w-xl flex-wrap gap-2"
+              aria-label="Services"
+            >
+              {services.map(service => (
+                <li
+                  key={service}
+                  className="border border-foreground/[0.1] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-subtle-foreground"
+                >
+                  {service}
+                </li>
+              ))}
+            </ul>
+          </FadeIn>
+
+          {/* Primary path */}
+          <FadeIn delay={d.cta}>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+              <Link
+                href={primaryCta.href}
+                className="inline-flex items-center gap-4 border border-foreground px-5 py-3 text-[12px] font-semibold text-foreground transition-colors duration-200 hover:bg-foreground hover:text-background"
+              >
+                {primaryCta.label}
+                <span aria-hidden="true">→</span>
+              </Link>
+              <Link
+                href={secondaryCta.href}
+                className="text-[12px] font-medium text-muted-foreground underline decoration-foreground/20 underline-offset-4 transition-colors duration-200 hover:text-foreground hover:decoration-foreground"
+              >
+                {secondaryCta.label}
+              </Link>
+            </div>
           </FadeIn>
 
           {/* Social links */}
@@ -111,7 +157,7 @@ export default function HeroSection({
         {/* ── Right: profile image with corner brackets ── */}
         <FadeIn
           delay={d.image}
-          className="relative order-1 flex items-center justify-start lg:order-2 lg:justify-end"
+          className="relative order-2 flex items-center justify-start lg:justify-end"
         >
           <div className="relative">
             {/* Top-left corner bracket */}

@@ -160,7 +160,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
             type="text"
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder="Ask a question..."
+            placeholder="Ask about a project..."
             disabled={isStreaming || retryBlocked}
             maxLength={2000}
             className="flex-1 bg-transparent font-mono text-[12px] text-foreground placeholder:text-foreground/40 focus:outline-none disabled:opacity-40"

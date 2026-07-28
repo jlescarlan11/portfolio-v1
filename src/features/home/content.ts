@@ -6,10 +6,19 @@ export interface HomeSocialLink {
   label: string;
 }
 
+export interface HeroCta {
+  label: string;
+  href: string;
+}
+
 export interface HeroContent {
   name: string;
   role: string;
   tagline: string;
+  proof: string;
+  services: string[];
+  primaryCta: HeroCta;
+  secondaryCta: HeroCta;
   profileImage: {
     src: string;
     alt: string;
@@ -20,11 +29,23 @@ export interface HeroContent {
 export const heroContent: HeroContent = {
   name: 'John Lester Escarlan',
   role: 'Full-Stack Software Engineer',
-
-  // Trimmed to one clear sentence — the component further trims to first sentence
-  // so keep this punchy and direct. No filler phrases.
   tagline:
-    'I build reliable full-stack products and guarded automation systems — from marketplaces and offline-first tools to AI-assisted workflows.',
+    'I help product teams ship full-stack features, fix production bottlenecks, and replace fragile manual workflows with tested automation.',
+  proof:
+    'Recent work includes 12+ production-blocking fixes, 15+ release steps removed, and end-to-end delivery across marketplace, offline-first, and AI-assisted systems.',
+  services: [
+    'Full-stack product delivery',
+    'Production debugging and reliability',
+    'Workflow automation and integrations'
+  ],
+  primaryCta: {
+    label: 'Discuss a project',
+    href: '#contact'
+  },
+  secondaryCta: {
+    label: 'Review case studies',
+    href: '#work'
+  },
 
   profileImage: {
     src: '/hero-image.jpg',

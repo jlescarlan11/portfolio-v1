@@ -57,7 +57,7 @@ describe('ChatBubble', () => {
       'aria-expanded',
       'true'
     );
-    expect(screen.getByPlaceholderText(/ask a question/i)).toHaveFocus();
+    expect(screen.getByPlaceholderText(/ask about a project/i)).toHaveFocus();
   });
 
   it('unmounts ChatWindow when close button is triggered', async () => {

@@ -24,7 +24,7 @@ export const MAX_CHAT_STREAM_RESPONSE_BYTES =
 export const WELCOME_MESSAGE: ChatMessage = {
   role: 'assistant',
   content:
-    "Hi! I'm John's AI assistant. Ask me anything about his work, skills, or experience."
+    "Hi—ask about John's services, project evidence, technical stack, or experience."
 };
 
 function prepareClientConversation(
