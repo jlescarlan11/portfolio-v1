@@ -1,6 +1,7 @@
 import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { projects } from '@/features/projects';
 import { siteConfig } from '@/shared/site/config';
 import ProjectPage, { generateMetadata } from './page';
 
@@ -22,6 +23,28 @@ afterEach(() => {
 });
 
 describe('ProjectPage', () => {
+  it.each(projects)(
+    'renders the aligned case-study content for $slug',
+    async (project) => {
+      const page = await ProjectPage({
+        params: Promise.resolve({ slug: project.slug })
+      });
+
+      render(page);
+
+      expect(screen.getByText(project.caseStudy.summary)).toBeVisible();
+      for (const paragraph of project.caseStudy.overview) {
+        expect(screen.getByText(paragraph)).toBeVisible();
+      }
+      for (const highlight of project.caseStudy.highlights) {
+        expect(screen.getByText(highlight)).toBeVisible();
+      }
+      for (const technology of project.technologies) {
+        expect(screen.getByText(technology)).toBeVisible();
+      }
+    }
+  );
+
   it('provides the target used by the global skip link', async () => {
     const page = await ProjectPage({
       params: Promise.resolve({ slug: 'rent-n-roll' })
@@ -92,6 +115,23 @@ describe('ProjectPage', () => {
 });
 
 describe('generateMetadata', () => {
+  it.each(projects)(
+    'uses the aligned summary for $slug descriptions',
+    async (project) => {
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ slug: project.slug })
+      });
+
+      expect(metadata.description).toBe(project.caseStudy.summary);
+      expect(metadata.openGraph).toMatchObject({
+        description: project.caseStudy.summary
+      });
+      expect(metadata.twitter).toMatchObject({
+        description: project.caseStudy.summary
+      });
+    }
+  );
+
   it.each(['health', 'job-pipeline'])(
     'uses the raster fallback for %s instead of missing or SVG artwork',
     async (slug) => {
