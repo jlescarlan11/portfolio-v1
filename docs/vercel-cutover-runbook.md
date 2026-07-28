@@ -86,19 +86,26 @@ Vercel reported these project-specific, rank-one recommended DNS records on
 | `@` | `A` | `64.29.17.1` |
 | `www` | `CNAME` | `6f94bd328a9cf7eb.vercel-dns-017.com.` |
 
-Vercel also reported generic fallback values of apex `A 76.76.21.21` and
-`www CNAME cname.vercel-dns.com.`. Use the project-specific rank-one records
-above unless a fresh Vercel inspection reports different recommendations at
-execution time.
+Vercel also reported generic rank-two fallback values of apex
+`A 76.76.21.21` and `www CNAME cname.vercel-dns.com.`. The high-level
+`vercel domains inspect` output may display that generic address even when the
+domain-config API has a project-specific rank-one recommendation. Use the
+rank-one API values, not the generic CLI fallback.
 
-Re-read the exact requirements immediately before cutover:
+Re-read the project-specific requirements immediately before cutover:
 
 ```bash
-vercel domains inspect johnlesterescarlan.pro --scope lester-s-projects4
-vercel domains inspect www.johnlesterescarlan.pro --scope lester-s-projects4
+vercel api \
+  '/v6/domains/johnlesterescarlan.pro/config?teamId=team_3Iehh9kIbX87EbfdCncg6m8m'
+vercel api \
+  '/v6/domains/www.johnlesterescarlan.pro/config?teamId=team_3Iehh9kIbX87EbfdCncg6m8m'
 ```
 
-If the fresh values differ, stop and update this runbook before editing DNS.
+For the apex, use the first `recommendedIPv4` entry. For `www`, use the first
+`recommendedCNAME` entry. If either rank-one value differs from the recorded
+table, stop and update this runbook before editing DNS. Use
+`vercel domains inspect` separately to review attachment, verification, and
+certificate state.
 
 ## Pre-cutover gates
 
