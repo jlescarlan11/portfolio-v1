@@ -888,10 +888,8 @@ export async function handleChatRequest(
     const providerProtocolFailure =
       error instanceof ProviderStreamProtocolError;
     const classified = classifyProviderError(error, resolved.now());
-    if (classified.category === 'timeout' || providerProtocolFailure) {
-      abortController.abort(error);
-      if (pendingHostedStream) releaseHostedStream(pendingHostedStream);
-    }
+    abortController.abort(error);
+    if (pendingHostedStream) releaseHostedStream(pendingHostedStream);
     emitOutcome(classified.telemetryStatus, {
       errorCategory: providerProtocolFailure
         ? 'provider_protocol'

@@ -874,6 +874,42 @@ describe('handleChatRequest', () => {
     ]);
   });
 
+  it('releases a stream when the first iterator read fails', async () => {
+    let providerSignal: AbortSignal | undefined;
+    const telemetry: ChatTelemetryEvent[] = [];
+    const returnUpstream = vi.fn(async () => ({
+      done: true as const,
+      value: undefined
+    }));
+    const response = await handleChatRequest(request(validBody()), {
+      startChat: ({ signal }) => {
+        providerSignal = signal;
+        return {
+          iterator: {
+            next: async () => {
+              throw new Error('sensitive first chunk failure');
+            },
+            return: returnUpstream
+          },
+          getCompletion: async () => ({ finishReason: 'stop' })
+        };
+      },
+      writeTelemetry: event => telemetry.push(event)
+    });
+    const body = await response.text();
+
+    expect(response.status).toBe(503);
+    expect(body).not.toContain('sensitive first chunk failure');
+    expect(providerSignal?.aborted).toBe(true);
+    expect(returnUpstream).toHaveBeenCalledOnce();
+    expect(telemetry).toEqual([
+      expect.objectContaining({
+        status: 'failed',
+        errorCategory: 'provider'
+      })
+    ]);
+  });
+
   it('assimilates a PromiseLike upstream release', async () => {
     let cleanupStarted = false;
     const response = await handleChatRequest(request(validBody()), {
