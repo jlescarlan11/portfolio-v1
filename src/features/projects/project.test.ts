@@ -41,6 +41,8 @@ test('isRenderableExternalUrl rejects placeholders and unsupported protocols', (
   assert.equal(isRenderableExternalUrl('https://127.0.0.1/admin'), false);
   assert.equal(isRenderableExternalUrl('https://192.168.1.8/admin'), false);
   assert.equal(isRenderableExternalUrl('https://[::1]/admin'), false);
+  assert.equal(isRenderableExternalUrl('https://localhost./admin'), false);
+  assert.equal(isRenderableExternalUrl('https://service.local/admin'), false);
 });
 
 test('formatMonthYear formats to short and long month strings', () => {

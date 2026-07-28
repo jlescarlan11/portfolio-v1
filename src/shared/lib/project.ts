@@ -5,6 +5,18 @@ export function isIpLiteralHostname(hostname: string): boolean {
   );
 }
 
+export function isLocalHostname(hostname: string): boolean {
+  const normalizedHostname = hostname.endsWith('.')
+    ? hostname.slice(0, -1)
+    : hostname;
+  return (
+    normalizedHostname === 'localhost' ||
+    normalizedHostname.endsWith('.localhost') ||
+    normalizedHostname.endsWith('.local') ||
+    normalizedHostname.endsWith('.home.arpa')
+  );
+}
+
 export function isRenderableExternalUrl(url?: string): url is string {
   if (!url) {
     return false;
@@ -25,7 +37,8 @@ export function isRenderableExternalUrl(url?: string): url is string {
       parsedUrl.protocol === 'https:' &&
       !parsedUrl.username &&
       !parsedUrl.password &&
-      !isIpLiteralHostname(parsedUrl.hostname)
+      !isIpLiteralHostname(parsedUrl.hostname) &&
+      !isLocalHostname(parsedUrl.hostname)
     );
   } catch {
     return false;

@@ -1,4 +1,7 @@
-import { isIpLiteralHostname } from '@/shared/lib/project';
+import {
+  isIpLiteralHostname,
+  isLocalHostname
+} from '@/shared/lib/project';
 
 export interface NavItem {
   name: string;
@@ -29,12 +32,6 @@ export interface OverlayContent {
 
 export const PRODUCTION_SITE_URL = 'https://johnlesterescarlan.pro';
 
-const UNSAFE_CANONICAL_HOSTS = new Set([
-  'localhost',
-  '127.0.0.1',
-  '[::1]'
-]);
-
 const MANAGED_DEPLOYMENT_HOSTS = ['vercel.app', 'netlify.app'];
 
 function isManagedDeploymentHostname(hostname: string): boolean {
@@ -59,7 +56,7 @@ export function resolveSiteUrl(value?: string): string {
     const isSecureWebUrl = url.protocol === 'https:';
     const hasCredentials = Boolean(url.username || url.password);
     const isUnsafeHost =
-      UNSAFE_CANONICAL_HOSTS.has(url.hostname) ||
+      isLocalHostname(url.hostname) ||
       isIpLiteralHostname(url.hostname) ||
       isManagedDeploymentHostname(url.hostname);
 
