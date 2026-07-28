@@ -905,6 +905,40 @@ describe('useOnlineChat', () => {
     expect(requestSignal?.aborted).toBe(true);
   });
 
+  it('treats a malformed stream reader result as a protocol error', async () => {
+    let requestSignal: AbortSignal | null | undefined;
+    const response = successResponse();
+    const cancelReader = vi.fn(async () => undefined);
+    const reader = {
+      read: vi.fn(async () =>
+        null as unknown as ReadableStreamReadResult<Uint8Array>
+      ),
+      cancel: cancelReader,
+      releaseLock: vi.fn()
+    };
+    vi.spyOn(response.body!, 'getReader').mockReturnValue(
+      reader as never
+    );
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+        requestSignal = init?.signal;
+        return response;
+      })
+    );
+    const { result } = renderHook(() => useOnlineChat());
+
+    await act(async () => {
+      await result.current.send('Hello');
+    });
+
+    expect(result.current.error).toEqual(
+      expect.objectContaining({ kind: 'protocol', canRetry: true })
+    );
+    expect(requestSignal?.aborted).toBe(true);
+    expect(cancelReader).toHaveBeenCalledOnce();
+  });
+
   it('cancels an open response body after a malformed frame', async () => {
     const cancelBody = vi.fn();
     vi.stubGlobal(

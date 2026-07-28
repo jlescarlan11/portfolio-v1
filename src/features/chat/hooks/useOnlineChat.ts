@@ -105,6 +105,35 @@ function parseStreamFrame(line: string): ChatStreamFrame {
   throw new ChatProtocolError();
 }
 
+function parseStreamReadResult(
+  result: unknown
+): ReadableStreamReadResult<Uint8Array> {
+  if (!isRecord(result)) {
+    throw new ChatProtocolError();
+  }
+
+  try {
+    const done = result.done;
+    if (typeof done !== 'boolean') {
+      throw new ChatProtocolError();
+    }
+    if (done) {
+      return { done: true, value: undefined };
+    }
+
+    const value = result.value;
+    if (
+      Object.prototype.toString.call(value) !== '[object Uint8Array]'
+    ) {
+      throw new ChatProtocolError();
+    }
+    return { done: false, value: value as Uint8Array };
+  } catch (caught: unknown) {
+    if (caught instanceof ChatProtocolError) throw caught;
+    throw new ChatProtocolError();
+  }
+}
+
 function parseRetryAfter(response: Response): number {
   const value = response.headers.get('retry-after');
   if (value === null) return DEFAULT_RETRY_AFTER_SECONDS;
@@ -275,7 +304,7 @@ async function readApiErrorCode(
         return undefined;
       }
 
-      const { done, value } = result;
+      const { done, value } = parseStreamReadResult(result);
       if (done) break;
 
       const chunkBytes = value.byteLength;
@@ -675,7 +704,9 @@ export function useOnlineChat(): UseOnlineChatResult {
         };
 
         while (true) {
-          const { done, value } = await reader.read();
+          const { done, value } = parseStreamReadResult(
+            await reader.read()
+          );
           const chunkBytes = value?.byteLength ?? 0;
           if (!done && chunkBytes === 0) {
             consecutiveEmptyChunks += 1;
