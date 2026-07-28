@@ -29,9 +29,19 @@ const levelOpacity: Record<0 | 1 | 2 | 3 | 4, string> = {
 
 // Full 52 weeks = 1 year
 const WEEKS_TO_SHOW = 52;
+const monthFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  timeZone: 'UTC'
+});
+const dayFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC'
+});
 
 function getMonthLabel(dateStr: string): string {
-  return new Date(dateStr).toLocaleString('en-US', { month: 'short' });
+  return monthFormatter.format(new Date(dateStr));
 }
 
 interface ContributionGraphProps {
@@ -122,7 +132,7 @@ export default async function ContributionGraph({
                   return (
                     <div
                       key={day.date}
-                      title={`${day.contributionCount} contribution${day.contributionCount !== 1 ? 's' : ''} on ${new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}
+                      title={`${day.contributionCount} contribution${day.contributionCount !== 1 ? 's' : ''} on ${dayFormatter.format(new Date(day.date))}`}
                       style={{ gridRowStart: day.weekday + 1 }}
                       className={`h-[13px] w-[13px] flex-shrink-0 transition-opacity duration-150 hover:opacity-60 ${levelOpacity[level]}`}
                     />

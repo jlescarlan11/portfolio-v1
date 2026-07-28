@@ -18,9 +18,9 @@ vi.mock('../github-contributions', () => ({
       {
         contributionDays: [
           {
-            date: '2026-07-28',
+            date: '2026-08-01',
             contributionCount: 2,
-            weekday: 2
+            weekday: 6
           }
         ]
       }
@@ -30,10 +30,12 @@ vi.mock('../github-contributions', () => ({
 
 beforeAll(() => {
   vi.stubGlobal('React', React);
+  vi.stubEnv('TZ', 'America/Los_Angeles');
 });
 
 afterAll(() => {
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
 });
 
 afterEach(() => {
@@ -53,7 +55,16 @@ describe('ContributionGraph', () => {
     render(await ContributionGraph({ username: 'jlescarlan11' }));
 
     expect(screen.getByTitle(/^2 contributions on/)).toHaveStyle({
-      gridRowStart: '3'
+      gridRowStart: '7'
     });
+  });
+
+  it('formats contribution dates in a stable calendar timezone', async () => {
+    render(await ContributionGraph({ username: 'jlescarlan11' }));
+
+    expect(screen.getByText('Aug')).toBeInTheDocument();
+    expect(
+      screen.getByTitle('2 contributions on Aug 1, 2026')
+    ).toBeInTheDocument();
   });
 });
