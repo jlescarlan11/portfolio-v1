@@ -29,13 +29,17 @@ const SECURITY_HEADERS = [
   }
 ];
 
-export function createNextConfig(context?: string): NextConfig {
+export function createNextConfig(
+  context?: string,
+  vercelEnvironment?: string
+): NextConfig {
   return {
     poweredByHeader: false,
     async headers() {
-      const indexingHeaders = getIndexingHeaderRules(context).flatMap(
-        rule => rule.headers
-      );
+      const indexingHeaders = getIndexingHeaderRules(
+        context,
+        vercelEnvironment
+      ).flatMap(rule => rule.headers);
 
       return [
         {
@@ -56,6 +60,9 @@ export function createNextConfig(context?: string): NextConfig {
   };
 }
 
-const nextConfig = createNextConfig(process.env.CONTEXT);
+const nextConfig = createNextConfig(
+  process.env.CONTEXT,
+  process.env.VERCEL_ENV
+);
 
 export default nextConfig;

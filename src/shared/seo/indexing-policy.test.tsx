@@ -24,6 +24,15 @@ describe('shouldPreventIndexing', () => {
   it('fails closed for an unknown context', () => {
     expect(shouldPreventIndexing('future-preview-context')).toBe(true);
   });
+
+  it('prevents indexing in the Vercel preview environment', () => {
+    expect(shouldPreventIndexing(undefined, 'preview')).toBe(true);
+    expect(shouldPreventIndexing(undefined, 'production')).toBe(false);
+    expect(shouldPreventIndexing(undefined, 'development')).toBe(false);
+    expect(
+      shouldPreventIndexing(undefined, 'future-preview-environment')
+    ).toBe(true);
+  });
 });
 
 describe('getIndexingHeaderRules', () => {
@@ -101,6 +110,14 @@ describe('next.config crawler and redirect wiring', () => {
     expect(rules).toHaveLength(1);
     expect(rules?.[0].headers).toContainEqual(
       getIndexingHeaderRules('branch-deploy')[0].headers[0]
+    );
+  });
+
+  it('wires Vercel preview indexing headers into Next.js configuration', async () => {
+    const rules = await createNextConfig(undefined, 'preview').headers?.();
+
+    expect(rules?.[0].headers).toContainEqual(
+      getIndexingHeaderRules(undefined, 'preview')[0].headers[0]
     );
   });
 

@@ -9,10 +9,13 @@ export interface IndexingHeaderRule {
 }
 
 /**
- * Netlify injects CONTEXT as immutable build metadata. Missing CONTEXT is the
- * deterministic local/non-Netlify case; unknown Netlify contexts fail closed.
+ * Netlify and Vercel inject immutable build metadata. Missing values are the
+ * deterministic local/other-provider case; unknown provider values fail closed.
  */
-export function shouldPreventIndexing(context?: string): boolean {
+export function shouldPreventIndexing(
+  context?: string,
+  vercelEnvironment?: string
+): boolean {
   const normalizedContext = context?.trim() || undefined;
 
   switch (normalizedContext) {
@@ -22,6 +25,20 @@ export function shouldPreventIndexing(context?: string): boolean {
     case 'production':
     case 'dev':
     case undefined:
+      break;
+    default:
+      return true;
+  }
+
+  const normalizedVercelEnvironment =
+    vercelEnvironment?.trim() || undefined;
+
+  switch (normalizedVercelEnvironment) {
+    case 'preview':
+      return true;
+    case 'production':
+    case 'development':
+    case undefined:
       return false;
     default:
       return true;
@@ -29,9 +46,10 @@ export function shouldPreventIndexing(context?: string): boolean {
 }
 
 export function getIndexingHeaderRules(
-  context?: string
+  context?: string,
+  vercelEnvironment?: string
 ): IndexingHeaderRule[] {
-  if (!shouldPreventIndexing(context)) {
+  if (!shouldPreventIndexing(context, vercelEnvironment)) {
     return [];
   }
 
