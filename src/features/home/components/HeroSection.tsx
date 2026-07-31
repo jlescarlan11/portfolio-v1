@@ -14,7 +14,6 @@ export default function HeroSection({
   name,
   role,
   tagline,
-  services,
   primaryCta,
   secondaryCta,
   profileImage: { src, alt },
@@ -24,11 +23,10 @@ export default function HeroSection({
   const d = {
     role: 320,
     tagline: 440,
-    services: 500,
-    cta: 560,
-    social: 620,
+    cta: 500,
+    social: 560,
     image: 80,
-    scroll: 700
+    scroll: 640
   };
 
   const nameWords = name.split(' ');
@@ -102,23 +100,6 @@ export default function HeroSection({
             >
               {tagline}
             </Typography>
-          </FadeIn>
-
-          {/* Services */}
-          <FadeIn delay={d.services}>
-            <ul
-              className="flex max-w-xl flex-wrap gap-2"
-              aria-label="Services"
-            >
-              {services.map(service => (
-                <li
-                  key={service}
-                  className="border border-foreground/[0.1] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-subtle-foreground"
-                >
-                  {service}
-                </li>
-              ))}
-            </ul>
           </FadeIn>
 
           {/* Primary path */}

@@ -15,7 +15,6 @@ export interface HeroContent {
   name: string;
   role: string;
   tagline: string;
-  services: string[];
   primaryCta: HeroCta;
   secondaryCta: HeroCta;
   profileImage: {
@@ -30,11 +29,6 @@ export const heroContent: HeroContent = {
   role: 'Full-Stack Software Engineer',
   tagline:
     'I help product teams ship full-stack features, fix production bottlenecks, and replace fragile manual workflows with tested automation.',
-  services: [
-    'Full-stack product delivery',
-    'Production debugging and reliability',
-    'Workflow automation and integrations'
-  ],
   primaryCta: {
     label: 'Discuss a project',
     href: '#contact'
