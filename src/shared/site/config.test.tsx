@@ -46,7 +46,7 @@ describe('siteConfig SEO defaults', () => {
     expect(siteConfig.seo).toMatchObject({
       siteTitle: 'John Lester Escarlan | Full-Stack Engineer for Product Teams',
       description:
-        'Full-stack engineer for product teams that need feature delivery, production debugging, or guarded workflow automation. Review evidence-backed case studies and get in touch.',
+        'Full-stack engineer delivering marketplace, offline-first, and AI-assisted systems, with 12+ production-blocking fixes and 15+ release steps removed.',
       siteName: 'John Lester Escarlan',
       siteUrl: PRODUCTION_SITE_URL,
       socialImage: {

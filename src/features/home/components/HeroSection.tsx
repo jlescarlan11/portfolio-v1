@@ -14,7 +14,6 @@ export default function HeroSection({
   name,
   role,
   tagline,
-  proof,
   services,
   primaryCta,
   secondaryCta,
@@ -102,13 +101,6 @@ export default function HeroSection({
               className="max-w-lg leading-relaxed text-muted-foreground"
             >
               {tagline}
-            </Typography>
-            <Typography
-              variant="body-sm"
-              as="p"
-              className="mt-4 max-w-lg leading-relaxed text-subtle-foreground"
-            >
-              {proof}
             </Typography>
           </FadeIn>
 

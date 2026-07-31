@@ -88,11 +88,13 @@ describe('HeroSection initial-load integration', () => {
     expect(portrait).toHaveAttribute('data-src', '/hero-image.jpg');
   });
 
-  it('presents services, proof, and a direct hiring path in the opening section', () => {
+  it('presents a concise introduction, services, and a direct hiring path', () => {
     render(<HeroSection {...heroContent} />);
 
     expect(screen.getByText(heroContent.tagline)).toBeVisible();
-    expect(screen.getByText(heroContent.proof)).toBeVisible();
+    expect(
+      screen.queryByText(/recent work includes 12\+ production-blocking fixes/i)
+    ).not.toBeInTheDocument();
 
     for (const service of heroContent.services) {
       expect(screen.getByText(service)).toBeVisible();

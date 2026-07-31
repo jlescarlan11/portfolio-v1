@@ -15,7 +15,6 @@ export interface HeroContent {
   name: string;
   role: string;
   tagline: string;
-  proof: string;
   services: string[];
   primaryCta: HeroCta;
   secondaryCta: HeroCta;
@@ -31,8 +30,6 @@ export const heroContent: HeroContent = {
   role: 'Full-Stack Software Engineer',
   tagline:
     'I help product teams ship full-stack features, fix production bottlenecks, and replace fragile manual workflows with tested automation.',
-  proof:
-    'Recent work includes 12+ production-blocking fixes, 15+ release steps removed, and end-to-end delivery across marketplace, offline-first, and AI-assisted systems.',
   services: [
     'Full-stack product delivery',
     'Production debugging and reliability',
