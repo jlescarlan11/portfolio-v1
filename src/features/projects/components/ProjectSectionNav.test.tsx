@@ -44,6 +44,9 @@ describe('ProjectSectionNav', () => {
     vi.stubGlobal('IntersectionObserver', undefined);
     render(<SectionFixtures />);
 
+    expect(
+      screen.getByRole('navigation', { name: 'Case study sections' })
+    ).toHaveClass('project-section-nav');
     for (const [id, label] of sectionNames) {
       expect(screen.getByRole('link', { name: label })).toHaveAttribute(
         'href',

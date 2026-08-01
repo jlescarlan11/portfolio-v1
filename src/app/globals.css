@@ -88,12 +88,14 @@ body {
     justify-content: space-between;
     gap: 3rem;
   }
-}
 
-@media (min-width: 72rem) and (min-height: 62rem) {
   .project-case-study-rail {
+    align-self: stretch;
+  }
+
+  .project-section-nav {
     position: sticky;
-    top: 2rem;
+    top: 1rem;
   }
 }
 

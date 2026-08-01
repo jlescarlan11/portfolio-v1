@@ -132,7 +132,10 @@ export function ProjectSectionNav(): React.JSX.Element {
   }, []);
 
   return (
-    <nav aria-label="Case study sections" className="border-t border-surface pt-5">
+    <nav
+      aria-label="Case study sections"
+      className="project-section-nav border-t border-surface pt-5"
+    >
       <Typography
         variant="caption"
         as="p"
