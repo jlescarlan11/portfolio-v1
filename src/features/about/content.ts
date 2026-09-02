@@ -167,6 +167,28 @@ export const aboutContent: AboutContent = {
         'Diagnose production issues involving React and TypeScript interfaces, Node.js APIs, PostgreSQL schemas and migrations, content assets, and entitlement rules; implement targeted fixes that restore blocked learner and administrator workflows.',
         'Contribute to technical design, code review, automated testing, rollout planning, and reliability improvements across frontend and backend systems.'
       ]
+    },
+    {
+      id: 'exp-asi-software-engineer-intern',
+      title: 'Software Engineer Intern',
+      company: 'Alliance Software Inc. — Cebu City',
+      startDate: '2025-06',
+      endDate: '2025-07',
+      responsibilities: [
+        'Contributed to enterprise web applications using C# and ASP.NET MVC across frontend and backend tasks.',
+        'Collaborated with senior engineers through code reviews, pair programming, and agile ceremonies.'
+      ]
+    },
+    {
+      id: 'exp-bayoa-full-stack-intern',
+      title: 'Full-Stack Developer Intern',
+      company: 'Bayoa Analytics — Remote',
+      startDate: '2024-09',
+      endDate: '2024-11',
+      responsibilities: [
+        'Worked across Node.js and Express APIs and React interfaces for analytics-focused product workflows.',
+        'Built reusable interface components with TypeScript and Tailwind CSS and contributed database and API performance improvements.'
+      ]
     }
   ],
 
