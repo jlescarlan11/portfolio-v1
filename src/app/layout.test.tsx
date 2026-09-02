@@ -39,5 +39,7 @@ describe('RootLayout progressive enhancement', () => {
     expect(markup).toContain(
       '.fade-in-pending{opacity:1!important;animation:none!important}'
     );
+    expect(markup).not.toContain('Preparing portfolio');
+    expect(markup).not.toContain('data-initial-path');
   });
 });

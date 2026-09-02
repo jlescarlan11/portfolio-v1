@@ -71,8 +71,27 @@ describe('ProjectPage', () => {
       for (const visual of project.caseStudy.visuals) {
         expect(screen.getByRole('img', { name: visual.alt })).toBeVisible();
         expect(screen.getByText(visual.caption)).toBeVisible();
+        expect(
+          screen.getAllByText(`Source: ${visual.sourceLabel}`).length
+        ).toBeGreaterThanOrEqual(1);
       }
-    }
+
+      const evidenceRegion = screen.getByRole('region', {
+        name: 'Public evidence'
+      });
+      for (const evidence of project.caseStudy.evidence) {
+        const label = evidence.kind === 'live-product'
+          ? 'Live product'
+          : 'Public repository';
+        expect(
+          within(evidenceRegion).getByRole('link', {
+            name: new RegExp(`^${label} \\(opens in new tab\\)`)
+          })
+        ).toBeVisible();
+        expect(within(evidenceRegion).getByText(evidence.description)).toBeVisible();
+      }
+    },
+    10_000
   );
 
   it('preserves the skip-link target and top portfolio return link', async () => {
@@ -175,12 +194,12 @@ describe('ProjectPage', () => {
 
     expect(
       screen.getAllByRole('link', {
-        name: 'View live (opens in new tab)'
+        name: /^Live product \(opens in new tab\)/
       })
     ).toHaveLength(1);
     expect(
       screen.getAllByRole('link', {
-        name: 'GitHub (opens in new tab)'
+        name: /^Public repository \(opens in new tab\)/
       })
     ).toHaveLength(1);
     for (const link of screen.getAllByRole('link', {

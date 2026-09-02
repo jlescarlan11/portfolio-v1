@@ -82,6 +82,7 @@ describe('AboutSection progressive enhancement', () => {
           name: experience.title
         })
       ).toBeVisible();
+      expect(document.getElementById(experience.id)).toBeInTheDocument();
 
       for (const responsibility of experience.responsibilities) {
         expect(

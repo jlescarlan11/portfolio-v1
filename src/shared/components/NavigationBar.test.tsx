@@ -45,6 +45,17 @@ afterEach(() => {
 });
 
 describe('NavigationBar visibility', () => {
+  it('keeps focus styling inside each navigation link', () => {
+    render(<NavigationBar items={ITEMS} />);
+
+    for (const link of screen.getAllByRole('link')) {
+      expect(link).toHaveClass(
+        'focus-visible:ring-inset',
+        'focus-visible:bg-surface-tint'
+      );
+    }
+  });
+
   it('removes hidden navigation controls from sequential interaction', () => {
     render(<NavigationBar items={ITEMS} />);
     const navigation = screen.getByRole('navigation', {

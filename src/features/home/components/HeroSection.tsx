@@ -8,7 +8,6 @@ import ProfileImage from '@/features/home/components/ProfileImage';
 import SocialLinks from '@/features/home/components/SocialLinks';
 import { Typography } from '@/shared/components/Typography';
 import { FadeIn } from '@/shared/components/FadeIn';
-import { useOptionalInitialLoad } from '@/shared/loading';
 
 export default function HeroSection({
   name,
@@ -19,7 +18,6 @@ export default function HeroSection({
   profileImage: { src, alt },
   socialLinks
 }: HeroContent): React.JSX.Element {
-  const initialLoad = useOptionalInitialLoad();
   const d = {
     role: 320,
     tagline: 440,
@@ -34,7 +32,7 @@ export default function HeroSection({
   return (
     <section
       id="home"
-      className="relative min-h-screen overflow-hidden bg-surface"
+      className="relative min-h-[calc(100svh-14rem)] overflow-hidden bg-surface"
       aria-labelledby="hero-heading"
     >
       <div
@@ -45,7 +43,7 @@ export default function HeroSection({
 
       <div
         className={[
-          'relative z-10 mx-auto grid min-h-screen w-full max-w-5xl',
+          'relative z-10 mx-auto grid min-h-[calc(100svh-14rem)] w-full max-w-5xl',
           'grid-cols-1 lg:grid-cols-[1fr_auto]',
           'items-center',
           'px-6 sm:px-10 md:px-12',
@@ -151,11 +149,6 @@ export default function HeroSection({
               <ProfileImage
                 src={src}
                 alt={alt}
-                onSettled={
-                  initialLoad
-                    ? () => initialLoad.settleMilestone('hero-image')
-                    : undefined
-                }
               />
             </div>
           </div>

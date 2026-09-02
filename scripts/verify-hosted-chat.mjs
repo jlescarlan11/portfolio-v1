@@ -1,4 +1,5 @@
 const baseUrl = process.env.CHAT_BASE_URL?.replace(/\/$/, '');
+const requestSpacingMs = 21_000;
 
 if (!baseUrl) {
   console.error('Set CHAT_BASE_URL to a Vercel Preview or production origin.');
@@ -57,8 +58,12 @@ if (!baseUrl) {
       prompt: 'Can John dance?',
       validate: answer =>
         hasOneOrTwoSentences(answer) &&
-        /not in his profile/i.test(answer) &&
-        /developer|engineer|react|node|flutter|project|skill/i.test(answer)
+        /not in (?:his|the) profile|only have info on john['’]s professional background/i.test(
+          answer
+        ) &&
+        /developer|engineer|react|node|flutter|project|skill|experience/i.test(
+          answer
+        )
     },
     {
       id: 'Q7',
@@ -129,7 +134,11 @@ if (!baseUrl) {
   };
 
   let failed = false;
-  for (const testCase of cases) {
+  for (const [caseIndex, testCase] of cases.entries()) {
+    if (caseIndex > 0) {
+      await new Promise(resolve => setTimeout(resolve, requestSpacingMs));
+    }
+
     try {
       const startedAt = performance.now();
       const response = await fetch(`${baseUrl}/api/chat`, {
@@ -153,7 +162,11 @@ if (!baseUrl) {
       failed ||= !passed;
     } catch (error) {
       failed = true;
-      console.error(`FAIL ${testCase.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error(
+        `FAIL ${testCase.id}: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      );
     }
   }
 

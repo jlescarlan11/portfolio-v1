@@ -1,9 +1,17 @@
+import http from 'node:http';
+import {
+  hasOnlyCanonicalSitemapLocations,
+  isCanonicalHttpsRootRedirect,
+  isCanonicalRedirect
+} from './verification-url.mjs';
+
 const canonicalOrigin = 'https://johnlesterescarlan.pro';
 const baseUrl = (
   process.env.CUTOVER_BASE_URL ?? canonicalOrigin
 ).replace(/\/$/, '');
 const previewUrl = process.env.CUTOVER_PREVIEW_URL?.replace(/\/$/, '');
 const isCanonicalProduction = baseUrl === canonicalOrigin;
+const checkedOrigin = new URL(baseUrl).origin;
 
 const failures = [];
 
@@ -36,6 +44,29 @@ async function request(url, init) {
     );
     return undefined;
   }
+}
+
+async function requestPlainHttpRedirect() {
+  return await new Promise(resolve => {
+    const request = http.get(
+      'http://johnlesterescarlan.pro/',
+      {
+        headers: { Host: 'johnlesterescarlan.pro' },
+        signal: AbortSignal.timeout(20_000)
+      },
+      response => {
+        response.resume();
+        resolve(response);
+      }
+    );
+
+    request.on('error', error => {
+      fail(
+        `http://johnlesterescarlan.pro/ could not be reached: ${error.message}`
+      );
+      resolve(undefined);
+    });
+  });
 }
 
 function hasCanonicalMetadata(html) {
@@ -122,8 +153,8 @@ if (homepage) {
     'the PACU experience ends in August 2026'
   );
   check(
-    html.includes('pre-launch two-sided camera rental marketplace') &&
-      html.includes('three-workflow n8n system'),
+    html.includes('pre-launch marketplace that gives camera owners') &&
+      html.includes('seven n8n workflows'),
     'the resume-aligned project descriptions are present'
   );
 }
@@ -157,9 +188,12 @@ if (legacyResume) {
     'the legacy resume URL returns a permanent redirect'
   );
   check(
-    destination !== null &&
-      new URL(destination, baseUrl).pathname ===
-        '/John_Lester_Escarlan_Resume.pdf',
+    isCanonicalRedirect(
+      destination,
+      `${baseUrl}/project/John_Lester_Escarlan_Resume.pdf`,
+      checkedOrigin,
+      '/John_Lester_Escarlan_Resume.pdf'
+    ),
     'the legacy resume redirect targets the current PDF'
   );
 }
@@ -179,9 +213,7 @@ if (sitemap) {
   const body = await sitemap.text();
   check(sitemap.status === 200, 'sitemap.xml returns HTTP 200');
   check(
-    body.includes(canonicalOrigin) &&
-      !body.includes('.netlify.app') &&
-      !body.includes('.vercel.app'),
+    hasOnlyCanonicalSitemapLocations(body, canonicalOrigin),
     'the sitemap contains only canonical production URLs'
   );
 }
@@ -202,16 +234,19 @@ if (isCanonicalProduction) {
     );
   }
 
-  const httpRedirect = await request('http://johnlesterescarlan.pro/');
+  const httpRedirect = await requestPlainHttpRedirect();
   if (httpRedirect) {
-    const destination = httpRedirect.headers.get('location');
+    const destination = httpRedirect.headers.location;
     check(
-      [301, 308].includes(httpRedirect.status),
+      [301, 308].includes(httpRedirect.statusCode),
       'plain HTTP returns a permanent redirect'
     );
     check(
-      destination !== null &&
-        new URL(destination, canonicalOrigin).protocol === 'https:',
+      isCanonicalHttpsRootRedirect(
+        destination,
+        'http://johnlesterescarlan.pro/',
+        canonicalOrigin
+      ),
       'plain HTTP redirects to HTTPS'
     );
   }

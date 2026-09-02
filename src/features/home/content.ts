@@ -24,6 +24,20 @@ export interface HeroContent {
   socialLinks: HomeSocialLink[];
 }
 
+export interface ImpactSnapshotItem {
+  metric: string;
+  context: string;
+  sourceLabel: string;
+  sourceHref: `#${string}`;
+  sourceExperienceId: string;
+}
+
+export interface ImpactSnapshotContent {
+  eyebrow: string;
+  title: string;
+  items: ImpactSnapshotItem[];
+}
+
 export const heroContent: HeroContent = {
   name: 'John Lester Escarlan',
   role: 'Full-Stack Software Engineer',
@@ -62,6 +76,37 @@ export const heroContent: HeroContent = {
       platform: 'Email',
       url: `mailto:${contactContent.email}`,
       label: 'Send an email to John Lester Escarlan'
+    }
+  ]
+};
+
+export const impactSnapshotContent: ImpactSnapshotContent = {
+  eyebrow: 'Impact snapshot',
+  title: 'Recent outcomes, with the work behind them.',
+  items: [
+    {
+      metric: '25+ incidents',
+      context:
+        'identified and escalated across eight production services before they reached end users.',
+      sourceLabel: 'Incident-response experience',
+      sourceHref: '#exp-wg-monitoring-engineer',
+      sourceExperienceId: 'exp-wg-monitoring-engineer'
+    },
+    {
+      metric: '12+ blockers',
+      context:
+        'resolved in production with an average turnaround under 24 hours, restoring affected client workflows.',
+      sourceLabel: 'Production-fix experience',
+      sourceHref: '#exp-freelance-software-engineer',
+      sourceExperienceId: 'exp-freelance-software-engineer'
+    },
+    {
+      metric: '15+ release steps',
+      context:
+        'removed through automation, saving approximately four engineering hours each week.',
+      sourceLabel: 'Release-automation experience',
+      sourceHref: '#exp-freelance-software-engineer',
+      sourceExperienceId: 'exp-freelance-software-engineer'
     }
   ]
 };

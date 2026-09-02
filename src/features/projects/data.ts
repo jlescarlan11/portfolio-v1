@@ -24,6 +24,13 @@ export const projects: ProjectRecord[] = [
     caseStudy: {
       summary:
         'A pre-launch marketplace that gives camera owners and renters one booking to follow from available dates and verification through payment, handoff, and return.',
+      evidence: [
+        {
+          kind: 'live-product',
+          description:
+            'Public pre-launch marketplace surfaces demonstrate listing and discovery behavior, not adoption, transaction volume, or launch status.'
+        }
+      ],
       roleScope: {
         role: 'Full-Stack Engineer',
         team: 'Solo project',
@@ -116,7 +123,8 @@ export const projects: ProjectRecord[] = [
           alt:
             'Rent N Roll browse page showing DSLR, mirrorless, camcorder, and action-camera categories.',
           caption:
-            'The marketplace starts with category-led discovery so renters can narrow the equipment they want to browse.'
+            'The marketplace starts with category-led discovery so renters can narrow the equipment they want to browse.',
+          sourceLabel: 'Live product'
         },
         {
           kind: 'supporting',
@@ -125,7 +133,8 @@ export const projects: ProjectRecord[] = [
           alt:
             'Rent N Roll equipment detail page with product photos, daily price, deposit amount, booking notice, and availability calendar.',
           caption:
-            'The listing view keeps product media, price, deposit information, booking constraints, and availability in one decision point.'
+            'The listing view keeps product media, price, deposit information, booking constraints, and availability in one decision point.',
+          sourceLabel: 'Live product'
         }
       ]
     }
@@ -145,6 +154,13 @@ export const projects: ProjectRecord[] = [
     caseStudy: {
       summary:
         'A civic health app that helps residents decide whether to seek emergency help, find a nearby facility, or continue to a lower-acuity next step—even with unreliable connectivity.',
+      evidence: [
+        {
+          kind: 'public-repository',
+          description:
+            'The archived public repository documents the safety-first mobile flow, offline record boundaries, and implementation stack.'
+        }
+      ],
       roleScope: {
         role: 'Project and Technical Lead',
         team: 'Five-person hackathon team',
@@ -238,7 +254,8 @@ export const projects: ProjectRecord[] = [
           alt:
             'HEALTH safety check warning residents to contact emergency services when someone is in immediate danger.',
           caption:
-            'The symptom flow begins with a deterministic safety check so immediate-danger guidance appears before any assisted triage.'
+            'The symptom flow begins with a deterministic safety check so immediate-danger guidance appears before any assisted triage.',
+          sourceLabel: 'Public repository'
         }
       ]
     }
@@ -259,6 +276,18 @@ export const projects: ProjectRecord[] = [
     caseStudy: {
       summary:
         'A pricing tool for small food businesses that answers a recurring question: after ingredients, labor, and overhead change, what should this product sell for?',
+      evidence: [
+        {
+          kind: 'live-product',
+          description:
+            'The public PWA demonstrates the current pricing workflow, offline-capable shell, and reviewed receipt-cost entry points.'
+        },
+        {
+          kind: 'public-repository',
+          description:
+            'The public repository contains the pricing, persistence, migration, Row-Level Security, and automated-test implementation.'
+        }
+      ],
       roleScope: {
         role: 'Full-Stack Engineer',
         team: 'Solo project',
@@ -377,7 +406,8 @@ export const projects: ProjectRecord[] = [
           alt:
             'PriceCraft results screen for chocolate chip cookies showing recommended price, break-even price, margin, profit, and cost breakdown.',
           caption:
-            'The results view keeps the recommended selling price beside break-even, margin, per-unit profit, batch profit, and the underlying cost breakdown.'
+            'The results view keeps the recommended selling price beside break-even, margin, per-unit profit, batch profit, and the underlying cost breakdown.',
+          sourceLabel: 'Live product'
         }
       ]
     }
@@ -397,6 +427,13 @@ export const projects: ProjectRecord[] = [
     caseStudy: {
       summary:
         'A job-search assistant that reduces the repetitive work around finding, comparing, drafting for, and tracking roles without applying on the candidate’s behalf.',
+      evidence: [
+        {
+          kind: 'public-repository',
+          description:
+            'The public repository exposes the versioned policies, generated workflow inventory, deterministic tests, and manual-review boundary.'
+        }
+      ],
       roleScope: {
         role: 'Workflow Automation Engineer',
         team: 'Solo project',
@@ -517,7 +554,8 @@ export const projects: ProjectRecord[] = [
           alt:
             'Job Pipeline repository table listing seven workflow exports with their schedules and responsibilities.',
           caption:
-            'The checked-in workflow inventory makes each independently scheduled export and its responsibility explicit before activation.'
+            'The checked-in workflow inventory makes each independently scheduled export and its responsibility explicit before activation.',
+          sourceLabel: 'Public repository'
         }
       ]
     }

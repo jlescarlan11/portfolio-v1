@@ -25,12 +25,8 @@ export default function ContactSection({
         delay={100}
         className="pt-2"
       >
-        {/* ── Availability signal ── */}
-        <div className="mb-8 flex items-center gap-2.5">
-          <span className="relative flex h-2 w-2 flex-shrink-0" aria-hidden="true">
-            <span className="absolute inline-flex h-full w-full animate-ping bg-foreground opacity-20" />
-            <span className="relative inline-flex h-2 w-2 bg-foreground/40" />
-          </span>
+        {/* ── Inquiry scope; intentionally not a current-availability signal ── */}
+        <div className="mb-8">
           <Typography
             variant="caption"
             as="span"

@@ -166,6 +166,23 @@ test('all projects provide complete case-study content', () => {
       project.caseStudy.summary.trim(),
       `${project.title} should have a summary`
     );
+    assert.ok(
+      project.caseStudy.evidence.length > 0 &&
+        project.caseStudy.evidence.every(item =>
+          ['live-product', 'public-repository'].includes(item.kind) &&
+          item.description.trim()
+        ),
+      `${project.title} should have complete public evidence`
+    );
+    for (const item of project.caseStudy.evidence) {
+      const destination = item.kind === 'live-product'
+        ? project.links.liveUrl
+        : project.links.githubUrl;
+      assert.ok(
+        isRenderableExternalUrl(destination),
+        `${project.title} ${item.kind} should map to a safe public destination`
+      );
+    }
     for (const [field, value] of Object.entries(project.caseStudy.problem)) {
       if (field === 'constraints') continue;
       assert.ok(
@@ -268,6 +285,17 @@ test('all projects provide complete case-study content', () => {
       assert.ok(
         visual.caption.trim(),
         `${project.title} should have a non-empty visuals[${index}].caption`
+      );
+      assert.ok(
+        visual.sourceLabel.trim(),
+        `${project.title} should label the source for visuals[${index}]`
+      );
+      const evidenceLabels: string[] = project.caseStudy.evidence.map(item =>
+        item.kind === 'live-product' ? 'Live product' : 'Public repository'
+      );
+      assert.ok(
+        evidenceLabels.includes(visual.sourceLabel),
+        `${project.title} visuals[${index}] should map to a public evidence type`
       );
       if (visual.kind === 'supporting') {
         assert.ok(

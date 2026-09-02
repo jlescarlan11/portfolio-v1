@@ -7,7 +7,7 @@ import {
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  ProjectExternalLinks,
+  ProjectEvidenceLinks,
   ProjectMetaStrip,
   ProjectNarrativeSections
 } from './ProjectCaseStudySections';
@@ -29,21 +29,33 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('ProjectExternalLinks', () => {
+describe('ProjectEvidenceLinks', () => {
   it('renders only safe destinations as secure new-tab links', () => {
     render(
-      <ProjectExternalLinks
-        liveUrl="javascript:alert(1)"
-        githubUrl="https://github.com/example/project"
+      <ProjectEvidenceLinks
+        evidence={[
+          {
+            kind: 'live-product',
+            description: 'Unsafe live destination.'
+          },
+          {
+            kind: 'public-repository',
+            description: 'Reviewed public source.'
+          }
+        ]}
+        links={{
+          liveUrl: 'javascript:alert(1)',
+          githubUrl: 'https://github.com/example/project'
+        }}
       />
     );
 
     expect(
-      screen.queryByRole('link', { name: /View live/ })
+      screen.queryByRole('link', { name: /Live product/ })
     ).not.toBeInTheDocument();
     expect(
       screen.getByRole('link', {
-        name: 'GitHub (opens in new tab)'
+        name: /^Public repository \(opens in new tab\)/
       })
     ).toMatchObject({
       target: '_blank',
@@ -53,7 +65,15 @@ describe('ProjectExternalLinks', () => {
 
   it('omits the link group when neither destination is renderable', () => {
     const { container } = render(
-      <ProjectExternalLinks liveUrl="REPLACE_WITH_URL" />
+      <ProjectEvidenceLinks
+        evidence={[
+          {
+            kind: 'live-product',
+            description: 'Placeholder source.'
+          }
+        ]}
+        links={{ liveUrl: 'REPLACE_WITH_URL' }}
+      />
     );
 
     expect(container).toBeEmptyDOMElement();
@@ -161,7 +181,8 @@ describe('ProjectNarrativeSections', () => {
             section: 'solution',
             src: '/project/example.jpg',
             alt: 'Workflow review screen',
-            caption: 'The review screen keeps the decision in context.'
+            caption: 'The review screen keeps the decision in context.',
+            sourceLabel: 'Public repository'
           }
         ]}
       />
@@ -222,5 +243,6 @@ describe('ProjectNarrativeSections', () => {
     expect(
       screen.getByText('The review screen keeps the decision in context.')
     ).toBeVisible();
+    expect(screen.getByText('Source: Public repository')).toBeVisible();
   });
 });

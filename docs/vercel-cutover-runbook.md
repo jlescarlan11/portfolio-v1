@@ -2,24 +2,36 @@
 
 **Domain:** `johnlesterescarlan.pro`
 
-**Recorded:** 2026-07-28 19:55 Asia/Manila
+**Historical baseline recorded:** 2026-07-28 19:55 Asia/Manila
 
-**Status:** Prepared, not cut over. Public DNS still routes the site to Netlify.
+**Production verified:** 2026-09-02 Asia/Manila
+
+**Status:** Cut over. The canonical domain and `www` redirect are served by
+Vercel.
 
 **Issues:** #23, #24, #25, #26, #27
 
-## Execution boundary
+## Current operating state
 
-This runbook records the reversible preparation completed for issue #26. It
-does not authorize a deployment, DNS edit, Firewall publication, plan change,
-credit purchase, or Netlify removal.
+GitHub `main` is the Vercel Production source. The canonical apex is served by
+Vercel, plain HTTP permanently redirects to HTTPS, and `www` permanently
+redirects to the same path on the apex. Groq is the active hosted-chat provider.
+The production route uses the enforcing `portfolio-chat` Vercel Firewall
+fixed-window rule.
 
-Do not change public DNS until all pre-cutover gates pass. In particular, a
-valid chat request must stream through Groq and the Vercel
-Firewall rule must reject request 21 in Preview. At the time this runbook was
-recorded, Groq was selected to avoid the Vercel AI Gateway card prerequisite.
-The Groq server credential still needs to be configured in Vercel, and the
-Firewall rule remains staged but unpublished.
+The Netlify identifiers, DNS inventory, deployment history, `.netlify`
+metadata, and runtime artifacts below are retained only as a historical
+rollback record. They do not describe the supported production or local
+runtime. Any rollback must be explicitly authorized and revalidated against
+current provider configuration before use. This document does not authorize a
+deployment, DNS edit, plan change, credit purchase, or provider removal.
+
+The repository intentionally retains executable-compatible rollback source in
+`netlify/functions/chat.mts`, its tests, and the App Router's fail-closed
+Netlify marker check. “No active Netlify runtime” means those artifacts are not
+the configured, deployed, or supported request path; it does not mean the
+rollback source has been deleted. Keeping that source is consistent with the
+owner requirement to preserve Netlify history and rollback capability.
 
 ## Systems and identifiers
 
@@ -38,7 +50,7 @@ Firewall rule remains staged but unpublished.
 | Netlify fallback domain | `johnlesterescarlan.netlify.app` |
 | Netlify DNS zone ID | `6a677dc5301eb45e7261b7ff` |
 
-## Complete pre-cutover DNS inventory
+## Historical pre-cutover DNS inventory
 
 The authoritative Netlify DNS API returned exactly these three zone records:
 
@@ -69,7 +81,7 @@ The public baseline at the recorded time was:
 - `www`: no public CNAME; Netlify returned flattened A answers.
 - SOA: `dns1.p01.nsone.net. domains+netlify.netlify.com. 1785167301 43200 7200 1209600 3600`.
 
-## Prepared Vercel domain configuration
+## Historical prepared Vercel domain configuration
 
 Both domains are assigned to the existing Vercel project:
 
@@ -107,7 +119,11 @@ table, stop and update this runbook before editing DNS. Use
 `vercel domains inspect` separately to review attachment, verification, and
 certificate state.
 
-## Pre-cutover gates
+## Historical pre-cutover gates
+
+The unchecked boxes below are the release checklist preserved from the
+2026-07-28 preparation record; they are not a statement of current production
+status.
 
 All boxes must be checked in the same release window:
 
@@ -142,7 +158,7 @@ git rev-parse origin/main
 
 The deployment Git SHA shown by Vercel must equal `origin/main`.
 
-## Cutover procedure
+## Historical cutover procedure
 
 1. Record the fresh timestamp, Vercel-reported DNS requirements, intended Git
    SHA, Ready deployment URL, and verifier output in the release record.
@@ -188,9 +204,8 @@ The deployment Git SHA shown by Vercel must equal `origin/main`.
     representative project page.
 11. Re-run `vercel inspect` for the custom domain and confirm the served
     Production deployment SHA equals the intended `main` SHA.
-12. Keep Netlify available through the agreed observation window. Issue #27's
-    Netlify runtime deletion must not merge until the cutover and rollback
-    window are explicitly accepted.
+12. Preserve the Netlify account and deployment/DNS history as a rollback
+    record until the owner explicitly authorizes its removal.
 
 ## Automated checks
 
@@ -208,6 +223,25 @@ The deployment Git SHA shown by Vercel must equal `origin/main`.
 
 It intentionally does not invoke the model, consume AI credits, mutate
 Firewall counters, prove a deployment Git SHA, or edit DNS.
+
+## Production verification record — 2026-09-02
+
+- Vercel deployment `dpl_92FVFgEwi1DrKTaVQUDJeJA2f5dq` was Ready and promoted
+  to Production from GitHub `main` at
+  `04aff905292d7b95592192fc8bb956cead4d7e1c`, matching `origin/main`.
+- `CUTOVER_BASE_URL=https://johnlesterescarlan.pro node
+  scripts/verify-vercel-cutover.mjs` passed the apex, serving-provider,
+  security-header, canonical metadata, portfolio content, project, resume,
+  robots, sitemap, `www`, and HTTP-to-HTTPS checks. The optional separate
+  Preview-origin indexing check was skipped because no Preview URL was in
+  scope.
+- `CHAT_BASE_URL=https://johnlesterescarlan.pro node
+  scripts/verify-hosted-chat.mjs` passed all seven quality cases with the
+  verifier paced to Groq's documented Free-plan token window.
+- After a quiet rate window, `CHAT_BASE_URL=https://johnlesterescarlan.pro node
+  scripts/verify-chat-rate-limit.mjs` observed one boundary request reach
+  validation and the concurrent request converge to `429` with
+  `Retry-After: 60`; a new request reached validation after the window expired.
 
 ## Rollback triggers
 

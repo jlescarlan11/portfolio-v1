@@ -23,13 +23,6 @@ export interface SeoConfig {
   };
 }
 
-export interface OverlayContent {
-  title: string;
-  eyebrow: string;
-  loadingLabel: string;
-  progressLabel: string;
-}
-
 export const PRODUCTION_SITE_URL = 'https://johnlesterescarlan.pro';
 
 const MANAGED_DEPLOYMENT_HOSTS = ['vercel.app', 'netlify.app'];
@@ -101,11 +94,5 @@ export const siteConfig = {
   },
   footer: {
     copyrightName: 'John Lester Escarlan'
-  },
-  overlay: {
-    title: 'John Lester Escarlan',
-    eyebrow: 'Portfolio',
-    loadingLabel: 'Preparing portfolio',
-    progressLabel: 'Portfolio startup progress'
-  } satisfies OverlayContent
+  }
 } as const;

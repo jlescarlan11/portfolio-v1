@@ -158,6 +158,7 @@ function SkillChip({ label, icon }: SkillChipProps) {
 }
 
 interface TimelineRowProps {
+  id: string;
   title: string;
   subtitle: string;
   startDate: string;
@@ -167,11 +168,11 @@ interface TimelineRowProps {
   staggerDelay?: number;
 }
 
-function TimelineRow({ title, subtitle, startDate, endDate, isCurrent, bullets, staggerDelay = 0 }: TimelineRowProps) {
+function TimelineRow({ id, title, subtitle, startDate, endDate, isCurrent, bullets, staggerDelay = 0 }: TimelineRowProps) {
   const start = formatMonthYear(startDate);
 
   return (
-    <li className="group relative py-7 first:pt-0 last:pb-0">
+    <li id={id} className="group relative scroll-mt-24 py-7 first:pt-0 last:pb-0">
       <span
         className="absolute left-0 top-7 bottom-7 w-px bg-foreground/0 transition-all duration-300 group-hover:bg-foreground/10"
         aria-hidden="true"
@@ -258,6 +259,7 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
             {experience.map((item, index) => (
               <TimelineRow
                 key={item.id}
+                id={item.id}
                 title={item.title}
                 subtitle={item.company}
                 startDate={item.startDate}
@@ -348,6 +350,7 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
             {education.map((item, index) => (
               <TimelineRow
                 key={item.id}
+                id={item.id}
                 title={item.degree}
                 subtitle={item.school}
                 startDate={item.startDate}

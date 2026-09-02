@@ -243,4 +243,31 @@ describe('ChatWindow', () => {
     expect(hookResult.reset).toHaveBeenCalledOnce();
     expect(onClose).toHaveBeenCalledOnce();
   });
+
+  it('contains forward and reverse keyboard focus within the dialog', () => {
+    const { getByRole, getByPlaceholderText } = render(
+      <ChatWindow onClose={vi.fn()} />
+    );
+    const dialog = getByRole('dialog', { name: "John's AI Assistant" });
+    const close = getByRole('button', { name: 'Close chat' });
+    const input = getByPlaceholderText(/ask about a project/i);
+
+    close.focus();
+    fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true });
+    expect(input).toHaveFocus();
+
+    fireEvent.keyDown(dialog, { key: 'Tab' });
+    expect(close).toHaveFocus();
+  });
+
+  it('keeps focus on the only enabled control while streaming', () => {
+    hookResult.isStreaming = true;
+    const { getByRole } = render(<ChatWindow onClose={vi.fn()} />);
+    const dialog = getByRole('dialog', { name: "John's AI Assistant" });
+    const close = getByRole('button', { name: 'Close chat' });
+
+    close.focus();
+    fireEvent.keyDown(dialog, { key: 'Tab' });
+    expect(close).toHaveFocus();
+  });
 });

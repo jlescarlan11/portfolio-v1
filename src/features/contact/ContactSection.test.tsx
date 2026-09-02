@@ -25,6 +25,14 @@ afterEach(() => {
 });
 
 describe('ContactSection', () => {
+  it('states only the approved inquiry scope and response commitment', () => {
+    const { container } = render(<ContactSection content={contactContent} />);
+
+    expect(screen.getByText('Freelance and contract inquiries')).toBeVisible();
+    expect(screen.getByText(/reply within 48 hours/i)).toBeVisible();
+    expect(container.innerHTML).not.toMatch(/animate-ping|available now|timezone/i);
+  });
+
   it('announces that the resume opens in a new tab', () => {
     render(<ContactSection content={contactContent} />);
 

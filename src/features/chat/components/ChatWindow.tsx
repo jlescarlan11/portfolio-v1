@@ -7,6 +7,11 @@ import { CHAT_WINDOW_ID } from './chat-window-contract';
 
 const CHAT_WINDOW_TITLE_ID = 'portfolio-chat-window-title';
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+const FOCUSABLE_SELECTOR = [
+  'button:not([disabled])',
+  'input:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])'
+].join(',');
 
 function prefersReducedMotion(): boolean {
   return (
@@ -64,17 +69,51 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
     onClose();
   }
 
+  function handleDialogKeyDown(
+    event: React.KeyboardEvent<HTMLDivElement>
+  ): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      handleClose();
+      return;
+    }
+
+    if (event.key !== 'Tab') return;
+
+    const focusable = Array.from(
+      event.currentTarget.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+    );
+    if (focusable.length === 0) {
+      event.preventDefault();
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement;
+
+    if (
+      event.shiftKey &&
+      (active === first || !event.currentTarget.contains(active))
+    ) {
+      event.preventDefault();
+      last.focus();
+    } else if (
+      !event.shiftKey &&
+      (active === last || !event.currentTarget.contains(active))
+    ) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   return (
     <div
       id={CHAT_WINDOW_ID}
       role="dialog"
+      aria-modal="true"
       aria-labelledby={CHAT_WINDOW_TITLE_ID}
-      onKeyDown={(event) => {
-        if (event.key === 'Escape') {
-          event.preventDefault();
-          handleClose();
-        }
-      }}
+      onKeyDown={handleDialogKeyDown}
       className="relative flex h-[min(520px,calc(100dvh-7rem))] w-[calc(100vw-3rem)] max-w-80 flex-col overflow-hidden border border-surface bg-background shadow-2xl sm:w-96 sm:max-w-none"
     >
       {/* corner brackets */}
@@ -158,6 +197,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
           <input
             ref={inputRef}
             type="text"
+            aria-label="Ask about a project"
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder="Ask about a project..."

@@ -1,31 +1,22 @@
 import React from 'react';
 import {
   cleanup,
-  fireEvent,
   render,
   screen
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  InitialLoadProvider,
-  useInitialLoad
-} from '@/shared/loading';
 import { heroContent } from '@/features/home/content';
 import HeroSection from './HeroSection';
 
 vi.mock('./ProfileImage', () => ({
   default: ({
     alt,
-    src,
-    onSettled
+    src
   }: {
     alt: string;
     src: string;
-    onSettled?: (outcome: 'loaded') => void;
   }) => (
-    <button data-src={src} onClick={() => onSettled?.('loaded')}>
-      Settle {alt}
-    </button>
+    <div role="img" aria-label={alt} data-src={src} />
   )
 }));
 
@@ -33,12 +24,7 @@ vi.mock('./SocialLinks', () => ({
   default: () => <nav aria-label="Social links" />
 }));
 
-function ReadinessProbe(): React.JSX.Element {
-  const { status, completedCount } = useInitialLoad();
-  return <output>{status}:{completedCount}</output>;
-}
-
-describe('HeroSection initial-load integration', () => {
+describe('HeroSection', () => {
   beforeEach(() => {
     vi.stubGlobal(
       'IntersectionObserver',
@@ -61,28 +47,11 @@ describe('HeroSection initial-load integration', () => {
     vi.restoreAllMocks();
   });
 
-  it('settles the hero-image milestone from the portrait callback', () => {
-    render(
-      <InitialLoadProvider>
-        <ReadinessProbe />
-        <HeroSection {...heroContent} />
-      </InitialLoadProvider>
-    );
-
-    expect(screen.getByText('loading:2')).toBeInTheDocument();
-    fireEvent.click(
-      screen.getByRole('button', {
-        name: `Settle ${heroContent.profileImage.alt}`
-      })
-    );
-    expect(screen.getByText('ready:3')).toBeInTheDocument();
-  });
-
-  it('renders without readiness reporting outside the initial-load coordinator', () => {
+  it('renders the portrait without making its load state a content gate', () => {
     render(<HeroSection {...heroContent} />);
 
-    const portrait = screen.getByRole('button', {
-      name: `Settle ${heroContent.profileImage.alt}`
+    const portrait = screen.getByRole('img', {
+      name: heroContent.profileImage.alt
     });
     expect(portrait).toBeInTheDocument();
     expect(portrait).toHaveAttribute('data-src', '/hero-image.jpg');
@@ -107,6 +76,7 @@ describe('HeroSection initial-load integration', () => {
     expect(
       screen.getByRole('link', { name: /discuss a project/i })
     ).toHaveAttribute('href', '#contact');
+    expect(heroContent.primaryCta.label).toBe('Discuss a project');
     expect(
       screen.getByRole('link', { name: /review case studies/i })
     ).toHaveAttribute('href', '#work');

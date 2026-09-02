@@ -1,6 +1,12 @@
 import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, fireEvent, cleanup, screen } from '@testing-library/react';
+import {
+  render,
+  fireEvent,
+  cleanup,
+  screen,
+  waitFor
+} from '@testing-library/react';
 import { ChatBubble } from './ChatBubble';
 
 afterEach(cleanup);
@@ -40,6 +46,16 @@ describe('ChatBubble', () => {
     );
   });
 
+  it('defers the promotional label below the desktop breakpoint and supports dismissal', () => {
+    const { getByText, getByRole, queryByText } = render(<ChatBubble />);
+    const label = getByText(/ask about john's work/i).parentElement;
+
+    expect(label).toHaveClass('hidden', 'lg:flex');
+    fireEvent.click(getByRole('button', { name: 'Dismiss' }));
+    expect(queryByText(/ask about john's work/i)).not.toBeInTheDocument();
+    expect(getByRole('button', { name: /open ai chat/i })).toBeVisible();
+  });
+
   it('mounts ChatWindow when button is clicked', async () => {
     const { getByRole } = render(<ChatBubble />);
     const launcher = getByRole('button', { name: /open ai chat/i });
@@ -53,10 +69,12 @@ describe('ChatBubble', () => {
       'id',
       'portfolio-chat-window'
     );
-    expect(getByRole('button', { name: /close ai chat/i })).toHaveAttribute(
-      'aria-expanded',
+    expect(getByRole('dialog', { name: "John's AI Assistant" })).toHaveAttribute(
+      'aria-modal',
       'true'
     );
+    expect(getByRole('button', { name: 'Close chat' })).toBeVisible();
+    expect(screen.queryByRole('button', { name: /open ai chat/i })).toBeNull();
     expect(screen.getByPlaceholderText(/ask about a project/i)).toHaveFocus();
   });
 
@@ -65,13 +83,36 @@ describe('ChatBubble', () => {
     fireEvent.click(getByRole('button', { name: /open ai chat/i }));
     fireEvent.click(await screen.findByLabelText('Close chat'));
     expect(queryByTestId('chat-window-wrapper')).toBeNull();
-    expect(getByRole('button', { name: /open ai chat/i })).toHaveFocus();
+    await waitFor(() => {
+      expect(getByRole('button', { name: /open ai chat/i })).toHaveFocus();
+    });
   });
 
-  it('unmounts ChatWindow from the floating toggle while open', () => {
-    const { getByRole, queryByTestId } = render(<ChatBubble />);
+  it('makes body-level background content inert while the modal is open', async () => {
+    const background = document.createElement('main');
+    background.setAttribute('aria-hidden', 'false');
+    document.body.append(background);
+    const { getByRole } = render(
+      <>
+        <a href="#main">Skip to main content</a>
+        <ChatBubble />
+      </>
+    );
+    const skipLink = getByRole('link', { name: 'Skip to main content' });
+
     fireEvent.click(getByRole('button', { name: /open ai chat/i }));
-    fireEvent.click(getByRole('button', { name: /close ai chat/i }));
-    expect(queryByTestId('chat-window-wrapper')).toBeNull();
+    await screen.findByRole('dialog', { name: "John's AI Assistant" });
+
+    expect(background).toHaveAttribute('inert');
+    expect(background).toHaveAttribute('aria-hidden', 'true');
+    expect(skipLink).toHaveAttribute('inert');
+    expect(skipLink).toHaveAttribute('aria-hidden', 'true');
+
+    fireEvent.click(getByRole('button', { name: 'Close chat' }));
+    expect(background).not.toHaveAttribute('inert');
+    expect(background).toHaveAttribute('aria-hidden', 'false');
+    expect(skipLink).not.toHaveAttribute('inert');
+    expect(skipLink).not.toHaveAttribute('aria-hidden');
+    background.remove();
   });
 });

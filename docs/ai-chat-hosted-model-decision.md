@@ -2,10 +2,10 @@
 
 **Date:** 2026-07-27
 
-**Updated:** 2026-07-28
+**Updated:** 2026-09-02
 
-**Status:** Groq selected; Preview release verification awaits a server
-credential and the unpublished Firewall rule
+**Status:** Active in Vercel Production with Groq and the enforcing
+`portfolio-chat` Firewall rule
 
 **Issues:** #6, #7, #8, #9, #10, #24, #25
 
@@ -106,16 +106,14 @@ Application code does not accept or construct a caller-provided key; the SDK
 uses Vercel's normalized connection-IP signal for its default anonymous key.
 Vercel owns the counter outside the function process.
 
-The corresponding WAF rule is a fixed window of 20 requests per 60 seconds. The
-rule is currently staged as a valid, log-only draft:
+The corresponding production WAF rule is an enforcing fixed window:
 
 - Rule: `Portfolio chat SDK rate limit`
 - Rate-limit ID: `portfolio-chat`
 - Algorithm: fixed window
 - Limit: 20 requests / 60 seconds
 - Key: IP
-- Exceeded action: log during staging; change to rate-limit only after Preview
-  validation
+- Exceeded action: rate limit
 
 The SDK counter is distributed across function instances within a Vercel
 region. Vercel documents the counters as regional, so a client routed through
@@ -243,8 +241,8 @@ batch, fine-tuning, or other stateful feature requests.
 
 ## Quality regression corpus
 
-The selected provider and model must pass these cases on a Vercel Preview before
-release:
+The selected provider and model must pass these cases on a Vercel Preview or
+the production origin before release:
 
 | ID | Prompt | Required behavior |
 | --- | --- | --- |
@@ -260,15 +258,22 @@ For Q1, Markdown structure must remain valid. For Q2–Q7, the answer must follo
 the existing one-or-two-sentence rule. No response may claim facts absent from
 the assembled profile.
 
+The corpus verifier spaces live requests by 21 seconds. The pacing keeps the
+trusted system context plus generated output within Groq's documented
+Free-plan token window; an unpaced seven-request burst is not a representative
+production check and can exhaust the provider token rate before the application
+request limit is reached. Every case makes exactly one request; any transport,
+HTTP, streaming-contract, or provider error fails the verification run so a
+later success cannot mask an unhealthy response.
+
 ## Release and rollback
 
-1. Add `GROQ_API_KEY` to Preview and Production as a sensitive server-only
+1. Keep `GROQ_API_KEY` in Preview and Production as a sensitive server-only
    variable, and use `.env.local` for local development. Do not upgrade the
    Groq organization from Free.
-2. Publish the staged Firewall rule in log-only mode and verify that Preview
-   chat requests match the `portfolio-chat` rule.
-3. Change the rule's exceeded action to rate-limit in Preview scope, publish it,
-   and run:
+2. Confirm candidate requests match the existing `portfolio-chat` rule without
+   changing its 20-request/60-second fixed-window contract.
+3. After at least 60 seconds with no requests from the verifier client, run:
 
    ```bash
    CHAT_BASE_URL=https://<preview-host> pnpm verify:chat:rate-limit
@@ -279,8 +284,9 @@ the assembled profile.
 4. Run `CHAT_BASE_URL=https://<preview-host> pnpm verify:chat` once, inspect
    sanitized application events, and confirm the Groq account remains within
    its current Free-plan limits.
-5. Only after those gates pass, change the Firewall rule to production
-   enforcement and complete the domain cutover.
+5. Keep production enforcement enabled. A rule change, provider change, or
+   domain change requires a separately authorized release and a fresh
+   verification record.
 
 Roll back inference by restoring the previous Vercel deployment or selecting a
 tested registered adapter through `HOSTED_CHAT_PROVIDER`. Never set an

@@ -1,8 +1,10 @@
 import Image from 'next/image';
 import type {
   ProjectDecision,
+  ProjectEvidence,
   ProjectImpact,
   ProjectLearnings,
+  ProjectLinks,
   ProjectProblem,
   ProjectRoleScope,
   ProjectSolution,
@@ -14,7 +16,7 @@ import { FadeIn } from '@/shared/components/FadeIn';
 import { NewTabNotice } from '@/shared/components/NewTabNotice';
 import { Typography } from '@/shared/components/Typography';
 import { formatMonthYear, isRenderableExternalUrl } from '@/shared/lib/project';
-import { SURFACE, TYPOGRAPHY_STYLES } from '@/shared/styles/shared';
+import { SURFACE } from '@/shared/styles/shared';
 
 interface ProjectMetaStripProps {
   roleScope: ProjectRoleScope;
@@ -23,9 +25,9 @@ interface ProjectMetaStripProps {
   technologies: string[];
 }
 
-interface ProjectExternalLinksProps {
-  liveUrl?: string;
-  githubUrl?: string;
+interface ProjectEvidenceLinksProps {
+  evidence: ProjectEvidence[];
+  links: ProjectLinks;
 }
 
 interface ProjectNarrativeSectionsProps {
@@ -71,46 +73,64 @@ export function ProjectSectionLabel({
   );
 }
 
-export function ProjectExternalLinks({
-  liveUrl,
-  githubUrl
-}: ProjectExternalLinksProps) {
-  const safeLiveUrl = isRenderableExternalUrl(liveUrl) ? liveUrl : undefined;
-  const safeGithubUrl = isRenderableExternalUrl(githubUrl)
-    ? githubUrl
-    : undefined;
+const evidenceLabels: Record<ProjectEvidence['kind'], string> = {
+  'live-product': 'Live product',
+  'public-repository': 'Public repository'
+};
 
-  if (!safeLiveUrl && !safeGithubUrl) return null;
+export function ProjectEvidenceLinks({
+  evidence,
+  links
+}: ProjectEvidenceLinksProps) {
+  const safeEvidence = evidence.flatMap(item => {
+    const url = item.kind === 'live-product'
+      ? links.liveUrl
+      : links.githubUrl;
+    return isRenderableExternalUrl(url) ? [{ ...item, url }] : [];
+  });
+
+  if (safeEvidence.length === 0) return null;
 
   return (
-    <nav aria-label="Project links" className="mt-7 flex flex-wrap gap-4">
-      {safeLiveUrl ? (
-        <a
-          href={safeLiveUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 border border-foreground px-4 py-2 text-xs font-medium text-foreground transition-colors duration-200 hover:bg-foreground hover:text-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
-        >
-          View live
-          <span aria-hidden="true" className="opacity-50">
-            ↗
-          </span>
-          <NewTabNotice />
-        </a>
-      ) : null}
-      {safeGithubUrl ? (
-        <a
-          href={safeGithubUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`${TYPOGRAPHY_STYLES.linkSecondary} inline-flex items-center py-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground`}
-        >
-          GitHub
-          <span aria-hidden="true"> ↗</span>
-          <NewTabNotice />
-        </a>
-      ) : null}
-    </nav>
+    <section
+      aria-labelledby="public-evidence-heading"
+      className={`mb-10 border-y ${SURFACE.hairline} py-7 md:mb-12`}
+    >
+      <div className="mb-5 max-w-2xl space-y-2">
+        <Typography variant="h3" as="h2" id="public-evidence-heading">
+          Public evidence
+        </Typography>
+        <Typography variant="body-sm" as="p" className="text-muted-foreground">
+          These reviewed public sources support the adjacent build claims; they
+          do not imply adoption or unmeasured outcomes.
+        </Typography>
+      </div>
+      <ul className="grid gap-px overflow-hidden border border-surface bg-surface-divider sm:grid-cols-2">
+        {safeEvidence.map(item => (
+          <li key={`${item.kind}-${item.url}`} className="min-w-0 bg-surface">
+            <a
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex h-full min-h-11 flex-col p-5 transition-colors duration-200 hover:bg-surface-tint focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-foreground"
+            >
+              <Typography variant="label" as="span" className="text-foreground">
+                {evidenceLabels[item.kind]}
+                <span aria-hidden="true" className="ml-1 opacity-50">↗</span>
+                <NewTabNotice />
+              </Typography>
+              <Typography
+                variant="body-sm"
+                as="span"
+                className="mt-2 leading-relaxed text-muted-foreground group-hover:text-foreground"
+              >
+                {item.description}
+              </Typography>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -257,6 +277,9 @@ function ProjectFigure({ visual }: ProjectFigureProps) {
         as="figcaption"
         className="border-t border-surface px-4 py-3 leading-relaxed text-muted-foreground"
       >
+        <span className="mb-1 block font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground">
+          Source: {visual.sourceLabel}
+        </span>
         {visual.caption}
       </Typography>
     </figure>

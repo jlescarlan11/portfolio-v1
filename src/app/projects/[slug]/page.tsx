@@ -8,7 +8,7 @@ import {
   getProjectSlugs
 } from '@/features/projects';
 import {
-  ProjectExternalLinks,
+  ProjectEvidenceLinks,
   ProjectMetaStrip,
   ProjectNarrativeSections
 } from '@/features/projects/components/ProjectCaseStudySections';
@@ -95,6 +95,9 @@ export function ProjectHero({ visual, fallbackSrc, title }: ProjectHeroProps) {
           as="figcaption"
           className="border-t border-surface px-4 py-3 leading-relaxed text-muted-foreground"
         >
+          <span className="mb-1 block font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground">
+            Source: {visual.sourceLabel}
+          </span>
           {visual.caption}
         </Typography>
       </figure>
@@ -271,11 +274,6 @@ export default async function ProjectPage({
             >
               {project.caseStudy.summary}
             </Typography>
-
-            <ProjectExternalLinks
-              liveUrl={project.links.liveUrl}
-              githubUrl={project.links.githubUrl}
-            />
           </div>
         </FadeIn>
 
@@ -286,6 +284,11 @@ export default async function ProjectPage({
             title={project.title}
           />
         </FadeIn>
+
+        <ProjectEvidenceLinks
+          evidence={project.caseStudy.evidence}
+          links={project.links}
+        />
 
         <div className="project-case-study-layout">
           <FadeIn

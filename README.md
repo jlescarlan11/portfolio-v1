@@ -11,10 +11,12 @@
 **Live →** [johnlesterescarlan.pro](https://johnlesterescarlan.pro)
 
 `https://johnlesterescarlan.pro` is the canonical public address. Production
-traffic still resolves to Netlify while the gated Vercel migration is prepared;
-the generated provider domains are fallbacks, not preferred portfolio URLs.
-See the [Vercel cutover runbook](docs/vercel-cutover-runbook.md) for the
-verified DNS inventory, release gates, and rollback procedure.
+traffic is served by Vercel; generated provider domains are fallbacks, not
+preferred portfolio URLs. The retained Netlify account, deployment history,
+DNS inventory, and `.netlify` metadata are historical rollback records, not a
+supported runtime. See the
+[Vercel production runbook](docs/vercel-cutover-runbook.md) for the verified
+production state and rollback history.
 
 ---
 
@@ -95,8 +97,9 @@ pnpm dev
 Open [http://localhost:3000](http://localhost:3000) to view the site.
 
 The portfolio runs locally with `pnpm dev`; only a real chat request needs a
-Groq key. The Netlify development path remains available solely for rollback
-compatibility until the production cutover and observation window are complete.
+Groq key. Local and hosted development use the Next.js route; the retained
+Netlify artifacts document the former deployment and are not an active
+development path.
 
 ---
 
@@ -189,8 +192,9 @@ full contract and operational policy.
    Firewall traffic, and sanitized application outcomes.
 
 `CHAT_BASE_URL` is only the public preview/production origin; it is not a
-credential. The verification script makes seven real model requests, so do not
-run it repeatedly without checking Groq usage and remaining Free-plan limits.
+credential. The verification script paces seven real model requests to stay
+within the documented Groq Free-plan token window, so allow roughly three
+minutes and do not run it repeatedly without checking remaining account limits.
 
 GitHub `main` is the Vercel Production source; eligible pull requests and other
 branches produce Vercel Previews. Preview responses must remain

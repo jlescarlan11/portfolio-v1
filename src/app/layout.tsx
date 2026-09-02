@@ -31,22 +31,20 @@ export default function RootLayout({
         {/* Inline script runs synchronously before paint — prevents flash of wrong theme */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var d=document.documentElement;try{var s=localStorage.getItem('theme');var t=(s==='dark'||s==='light')?s:window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';d.setAttribute('data-theme',t);}catch(e){}try{window.__portfolioInitialPath=window.location.pathname;d.setAttribute('data-initial-path',window.__portfolioInitialPath);}catch(e){}})();`
+            __html: `(function(){var d=document.documentElement;try{var s=localStorage.getItem('theme');var t=(s==='dark'||s==='light')?s:window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';d.setAttribute('data-theme',t);}catch(e){}})();`
           }}
         />
       </head>
       <body
         className={`${playfairDisplay.variable} ${GeistSans.variable} ${GeistMono.variable} antialiased`}
       >
-        <div data-initial-load-global>
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:border focus:border-surface-strong focus:bg-surface focus:px-3 focus:py-2 focus:text-foreground"
-          >
-            Skip to main content
-          </a>
-          <ChatBubble />
-        </div>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:border focus:border-surface-strong focus:bg-surface focus:px-3 focus:py-2 focus:text-foreground"
+        >
+          Skip to main content
+        </a>
+        <ChatBubble />
         {children}
       </body>
     </html>

@@ -44,6 +44,14 @@ interface ProjectVisualBase {
   src: string;
   alt: string;
   caption: string;
+  sourceLabel: string;
+}
+
+export type ProjectEvidenceKind = 'live-product' | 'public-repository';
+
+export interface ProjectEvidence {
+  kind: ProjectEvidenceKind;
+  description: string;
 }
 
 export interface ProjectHeroVisual extends ProjectVisualBase {
@@ -68,6 +76,7 @@ export interface ProjectDecision {
 
 export interface ProjectCaseStudy {
   summary: string;
+  evidence: ProjectEvidence[];
   roleScope: ProjectRoleScope;
   problem: ProjectProblem;
   solution: ProjectSolution;

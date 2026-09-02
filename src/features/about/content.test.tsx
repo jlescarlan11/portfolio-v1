@@ -4,9 +4,7 @@ import { aboutContent } from './content';
 const expectedExperienceOrder = [
   'exp-wg-monitoring-engineer',
   'exp-freelance-software-engineer',
-  'exp-pharmacy-acute-care-software-engineer',
-  'exp-asi-software-engineer-intern',
-  'exp-bayoa-full-stack-intern'
+  'exp-pharmacy-acute-care-software-engineer'
 ];
 
 function getExperienceCopy(): string {
@@ -20,7 +18,7 @@ function getExperienceCopy(): string {
 }
 
 describe('about experience content', () => {
-  it('lists the resume-backed roles in current-first order', () => {
+  it('prioritizes the three resume roles in current-first order', () => {
     expect(aboutContent.experience.map(item => item.id)).toEqual(
       expectedExperienceOrder
     );
@@ -58,9 +56,7 @@ describe('about experience content', () => {
       '12+ production-blocking defects',
       '15+ manual steps',
       '25+ incidents across eight production services',
-      'eight recovery runbooks',
-      'five production features using C# and ASP.NET Core MVC',
-      '800 milliseconds to 150 milliseconds'
+      'eight recovery runbooks'
     ]) {
       expect(copy).toContain(claim);
     }
