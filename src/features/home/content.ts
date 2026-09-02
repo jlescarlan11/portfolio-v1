@@ -27,9 +27,6 @@ export interface HeroContent {
 export interface ImpactSnapshotItem {
   metric: string;
   context: string;
-  sourceLabel: string;
-  sourceHref: `#${string}`;
-  sourceExperienceId: string;
 }
 
 export interface ImpactSnapshotContent {
@@ -81,32 +78,20 @@ export const heroContent: HeroContent = {
 };
 
 export const impactSnapshotContent: ImpactSnapshotContent = {
-  eyebrow: 'Impact snapshot',
-  title: 'Recent outcomes, with the work behind them.',
+  eyebrow: 'Impact',
+  title: 'A few results from my work.',
   items: [
     {
-      metric: '25+ incidents',
-      context:
-        'identified and escalated across eight production services before they reached end users.',
-      sourceLabel: 'Incident-response experience',
-      sourceHref: '#exp-wg-monitoring-engineer',
-      sourceExperienceId: 'exp-wg-monitoring-engineer'
+      metric: '25+ issues caught early',
+      context: 'Found issues in eight online services before users ran into them.'
     },
     {
-      metric: '12+ blockers',
-      context:
-        'resolved in production with an average turnaround under 24 hours, restoring affected client workflows.',
-      sourceLabel: 'Production-fix experience',
-      sourceHref: '#exp-freelance-software-engineer',
-      sourceExperienceId: 'exp-freelance-software-engineer'
+      metric: '12+ urgent problems fixed',
+      context: 'Fixed problems that blocked client work, usually within 24 hours.'
     },
     {
-      metric: '15+ release steps',
-      context:
-        'removed through automation, saving approximately four engineering hours each week.',
-      sourceLabel: 'Release-automation experience',
-      sourceHref: '#exp-freelance-software-engineer',
-      sourceExperienceId: 'exp-freelance-software-engineer'
+      metric: '4 hours saved each week',
+      context: 'Automated more than 15 manual release steps.'
     }
   ]
 };

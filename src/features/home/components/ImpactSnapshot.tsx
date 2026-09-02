@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import type { ImpactSnapshotContent } from '@/features/home/content';
 import { Typography } from '@/shared/components/Typography';
 import { TYPOGRAPHY_STYLES } from '@/shared/styles/shared';
@@ -36,7 +35,7 @@ export default function ImpactSnapshot({
         <dl className="grid grid-cols-1 gap-px bg-surface-divider sm:grid-cols-3">
           {items.map((item) => (
             <div
-              key={`${item.metric}-${item.sourceExperienceId}`}
+              key={item.metric}
               className="flex min-w-0 flex-col bg-surface px-0 py-5 sm:px-5 sm:first:pl-0 sm:last:pr-0"
             >
               <Typography variant="h4" as="dt" className="font-semibold">
@@ -49,13 +48,6 @@ export default function ImpactSnapshot({
               >
                 {item.context}
               </Typography>
-              <Link
-                href={item.sourceHref}
-                className={`${TYPOGRAPHY_STYLES.linkSecondary} mt-4 inline-flex min-h-11 w-fit items-center gap-1.5 py-2`}
-              >
-                {item.sourceLabel}
-                <span aria-hidden="true">↓</span>
-              </Link>
             </div>
           ))}
         </dl>
