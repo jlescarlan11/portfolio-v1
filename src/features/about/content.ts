@@ -58,7 +58,7 @@ export const aboutContent: AboutContent = {
     'My work spans client delivery and production monitoring. I turn requirements into explicit system states, keep trade-offs visible, document the handoff, and verify changes with tests and rollout checks.',
   skillsHeading: 'Core stack',
   skillsIntro: 'The tools most relevant to the product, reliability, and automation work I take on.',
-  credentialsHeading: 'Credentials',
+  credentialsHeading: 'Certificates',
   credentialsIntro: 'Selected certifications and formal training that support the engineering work.',
   experienceHeading: 'Experience',
   educationHeading: 'Education',
