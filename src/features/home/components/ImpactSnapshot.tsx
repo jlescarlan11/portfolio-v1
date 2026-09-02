@@ -10,10 +10,11 @@ export default function ImpactSnapshot({
 }: ImpactSnapshotContent): React.JSX.Element {
   return (
     <section
-      className="border-t border-surface-subtle bg-surface px-6 py-10 sm:px-10 md:px-12 md:py-12"
+      id="impact"
+      className="scroll-mt-24 border-y border-surface-subtle bg-surface px-6 py-16 sm:px-10 sm:py-20 md:px-12 md:py-24 lg:py-28"
       aria-labelledby="impact-snapshot-heading"
     >
-      <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[minmax(0,14rem)_1fr] lg:items-start">
+      <div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[minmax(0,14rem)_1fr] lg:items-start lg:gap-14">
         <header className="space-y-3">
           <Typography
             variant="caption"

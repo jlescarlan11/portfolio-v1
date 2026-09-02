@@ -58,7 +58,10 @@ describe('HeroSection', () => {
   });
 
   it('presents a concise introduction and a direct hiring path', () => {
-    render(<HeroSection {...heroContent} />);
+    const { container } = render(<HeroSection {...heroContent} />);
+
+    expect(container.querySelector('#home')).toHaveClass('min-h-svh');
+    expect(container.querySelector('#home > div.relative.z-10')).toHaveClass('min-h-svh');
 
     expect(screen.getByText(heroContent.tagline)).toBeVisible();
     expect(

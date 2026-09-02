@@ -19,9 +19,10 @@ describe('ImpactSnapshot', () => {
   it('presents three contextualized, experience-backed outcomes', () => {
     render(<ImpactSnapshot {...impactSnapshotContent} />);
 
-    expect(
-      screen.getByRole('region', { name: impactSnapshotContent.title })
-    ).toBeInTheDocument();
+    const section = screen.getByRole('region', { name: impactSnapshotContent.title });
+    expect(section).toBeInTheDocument();
+    expect(section).toHaveAttribute('id', 'impact');
+    expect(section).toHaveClass('border-y', 'py-16', 'md:py-24');
     expect(impactSnapshotContent.items).toHaveLength(3);
 
     for (const item of impactSnapshotContent.items) {

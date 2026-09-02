@@ -32,7 +32,7 @@ export default function HeroSection({
   return (
     <section
       id="home"
-      className="relative min-h-[calc(100svh-14rem)] overflow-hidden bg-surface"
+      className="relative min-h-svh overflow-hidden bg-surface"
       aria-labelledby="hero-heading"
     >
       <div
@@ -43,7 +43,7 @@ export default function HeroSection({
 
       <div
         className={[
-          'relative z-10 mx-auto grid min-h-[calc(100svh-14rem)] w-full max-w-5xl',
+          'relative z-10 mx-auto grid min-h-svh w-full max-w-5xl',
           'grid-cols-1 lg:grid-cols-[1fr_auto]',
           'items-center',
           'px-6 sm:px-10 md:px-12',
