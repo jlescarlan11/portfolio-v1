@@ -9,7 +9,8 @@ import { projects, projectsSectionContent } from './data.ts';
 import type { ProjectRecord } from './types.ts';
 import {
   formatMonthYear,
-  isRenderableExternalUrl
+  isRenderableExternalUrl,
+  isRenderableInternalPath
 } from '../../shared/lib/project.ts';
 import { aboutContent } from '../../features/about/content.ts';
 
@@ -362,6 +363,19 @@ test('isRenderableExternalUrl rejects placeholders and unsupported protocols', (
   assert.equal(isRenderableExternalUrl('https://[::1]/admin'), false);
   assert.equal(isRenderableExternalUrl('https://localhost./admin'), false);
   assert.equal(isRenderableExternalUrl('https://service.local/admin'), false);
+});
+
+test('isRenderableInternalPath accepts safe portfolio assets', () => {
+  assert.equal(
+    isRenderableInternalPath('/certificates/gci-world-april-2026.pdf'),
+    true
+  );
+});
+
+test('isRenderableInternalPath rejects external and ambiguous paths', () => {
+  assert.equal(isRenderableInternalPath('https://example.com/file.pdf'), false);
+  assert.equal(isRenderableInternalPath('//example.com/file.pdf'), false);
+  assert.equal(isRenderableInternalPath('/\\example.com/file.pdf'), false);
 });
 
 test('formatMonthYear formats to short and long month strings', () => {

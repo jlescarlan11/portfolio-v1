@@ -194,6 +194,12 @@ export const aboutContent: AboutContent = {
 
   certifications: [
     {
+      name: 'GCI World April 2026',
+      issuer: 'Matsuo-Iwasawa Laboratory, The University of Tokyo',
+      year: '2026',
+      url: '/certificates/gci-world-april-2026.pdf'
+    },
+    {
       name: 'Amazon Junior Software Developer with Generative AI',
       issuer: 'Amazon',
       year: '2025',

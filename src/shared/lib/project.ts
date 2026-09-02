@@ -45,6 +45,28 @@ export function isRenderableExternalUrl(url?: string): url is string {
   }
 }
 
+export function isRenderableInternalPath(path?: string): path is string {
+  if (!path) {
+    return false;
+  }
+
+  const trimmedPath = path.trim();
+  if (
+    !trimmedPath.startsWith('/') ||
+    trimmedPath.startsWith('//') ||
+    trimmedPath.includes('\\')
+  ) {
+    return false;
+  }
+
+  try {
+    const siteOrigin = 'https://portfolio.invalid';
+    return new URL(trimmedPath, siteOrigin).origin === siteOrigin;
+  } catch {
+    return false;
+  }
+}
+
 export function formatMonthYear(
   value: string,
   month: 'short' | 'long' = 'short'

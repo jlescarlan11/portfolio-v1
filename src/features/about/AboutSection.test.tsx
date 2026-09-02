@@ -1,6 +1,12 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { cleanup, render, screen, within } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within
+} from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import AboutSection from './AboutSection';
 import { aboutContent } from './content';
@@ -112,6 +118,17 @@ describe('AboutSection progressive enhancement', () => {
 
   it('announces that certification links open in a new tab', () => {
     render(<AboutSection content={aboutContent} />);
+
+    const hiddenCertificationCount =
+      aboutContent.certifications.length -
+      aboutContent.certificationsVisibleCount;
+    if (hiddenCertificationCount > 0) {
+      fireEvent.click(
+        screen.getByRole('button', {
+          name: `Show ${hiddenCertificationCount} more`
+        })
+      );
+    }
 
     for (const certification of aboutContent.certifications) {
       expect(
