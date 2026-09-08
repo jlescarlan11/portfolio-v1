@@ -33,7 +33,7 @@ describe('buildSystemPrompt', () => {
     expect(prompt).toContain('7 workflows — Jobs split by responsibility');
     expect(prompt).toContain('Validated; disabled by default');
     expect(prompt).toContain(
-      '**Case studies:** Rent N Roll, HEALTH, PriceCraft, Job Pipeline'
+      '**Case studies:** Rent N Roll, HEALTH, PriceCraft, Regex2NFA, Job Pipeline, PACU'
     );
   });
 

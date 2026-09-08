@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import SectionFrame from '@/shared/components/SectionFrame';
 import { Typography } from '@/shared/components/Typography';
 import { FadeIn } from '@/shared/components/FadeIn';
@@ -303,9 +304,14 @@ function DossierTile({ project, tileIndex, ctaLabel }: DossierTileProps) {
 // ─── Main section ──────────────────────────────────────────────────────────────
 
 export default function ProjectsSection({ projects, content }: ProjectsSectionProps) {
+  const [showAllProjects, setShowAllProjects] = useState(false);
+
   if (!projects || projects.length === 0) return null;
 
   const [featured, ...rest] = projects;
+  const initialGridCount = 3;
+  const visibleProjects = showAllProjects ? rest : rest.slice(0, initialGridCount);
+  const hiddenProjectCount = Math.max(0, rest.length - initialGridCount);
 
   return (
     <SectionFrame
@@ -323,11 +329,12 @@ export default function ProjectsSection({ projects, content }: ProjectsSectionPr
 
         {rest.length > 0 && (
           <div
+            id="additional-projects"
             className={`border-t ${SURFACE.hairline} bg-surface-strong grid grid-cols-1 md:grid-cols-3 gap-px`}
             role="list"
             aria-label="Additional projects"
           >
-            {rest.map((project, i) => (
+            {visibleProjects.map((project, i) => (
               <div key={project.slug} role="listitem">
                 <DossierTile
                   project={project}
@@ -336,6 +343,21 @@ export default function ProjectsSection({ projects, content }: ProjectsSectionPr
                 />
               </div>
             ))}
+          </div>
+        )}
+
+        {hiddenProjectCount > 0 && (
+          <div className={`border-t ${SURFACE.hairline} bg-surface px-5 py-4 flex justify-center`}>
+            <button
+              type="button"
+              aria-controls="additional-projects"
+              aria-expanded={showAllProjects}
+              onClick={() => setShowAllProjects(value => !value)}
+              className={`${TYPOGRAPHY_STYLES.linkPrimary} bg-transparent border-0 cursor-pointer inline-flex items-center gap-2`}
+            >
+              {showAllProjects ? 'See fewer projects' : `See more projects (${hiddenProjectCount})`}
+              {showAllProjects ? <FiChevronUp aria-hidden="true" /> : <FiChevronDown aria-hidden="true" />}
+            </button>
           </div>
         )}
       </div>

@@ -253,8 +253,10 @@ describe('ProjectPage', () => {
   it.each([
     ['rent-n-roll', 'health'],
     ['health', 'pricecraft'],
-    ['pricecraft', 'job-pipeline'],
-    ['job-pipeline', 'rent-n-roll']
+    ['pricecraft', 'regex2nfa'],
+    ['regex2nfa', 'job-pipeline'],
+    ['job-pipeline', 'pacu'],
+    ['pacu', 'rent-n-roll']
   ])('links %s to the source-ordered next project %s', async (slug, nextSlug) => {
     const nextProject = projects.find(project => project.slug === nextSlug);
     if (!nextProject) throw new Error(`${nextSlug} fixture is missing`);

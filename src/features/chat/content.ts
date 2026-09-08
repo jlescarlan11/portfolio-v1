@@ -35,17 +35,19 @@ export function buildSystemPrompt(): string {
           ? `status: ${p.caseStudy.roleScope.status}`
           : undefined
       ].filter((value): value is string => Boolean(value)).join('; ');
-      const impact = p.caseStudy.impact
-        .map(item => `${item.value} — ${item.label}`)
-        .join('; ');
-      const decisions = p.caseStudy.decisions
-        .map(decision => decision.title)
-        .join('; ');
+      const featuredImpact =
+        (p.slug === 'pricecraft'
+          ? p.caseStudy.impact.find(item => item.kind === 'implementation')
+          : undefined) ??
+        p.caseStudy.impact[0];
+      const impact = featuredImpact
+        ? `${featuredImpact.value} — ${featuredImpact.label}`
+        : 'No public metric';
       const links = Object.values(p.links)
         .filter((value): value is string => Boolean(value))
         .join(', ');
 
-      return `${p.title} (${p.category}; technologies: ${p.technologies.join(', ')}; ${roleScope}): ${p.description} Evidence: ${impact}. Decisions: ${decisions}. URLs: ${links}`;
+      return `${p.title} (${p.category}; technologies: ${p.technologies.join(', ')}; ${roleScope}): ${p.caseStudy.highlights[0]} Evidence: ${impact}. URLs: ${links}`;
     })
     .join('\n');
 
@@ -92,7 +94,7 @@ CANONICAL EXAMPLES:
 
   - **Services:** Full-stack delivery, production debugging, workflow automation
   - **Evidence:** 12+ production-blocking fixes, 15+ release steps removed, eight production services monitored
-  - **Case studies:** Rent N Roll, HEALTH, PriceCraft, Job Pipeline
+  - **Case studies:** Rent N Roll, HEALTH, PriceCraft, Regex2NFA, Job Pipeline, PACU
 
   Reach him at ${contactContent.email} or [LinkedIn](https://www.linkedin.com/in/john-lester-escarlan/)
 - "Where has John worked?" → John has worked at Pharmacy & Acute Care University, through Upwork, and at Wind's Gate Philippines, Alliance Software Inc., and Bayoa Analytics.

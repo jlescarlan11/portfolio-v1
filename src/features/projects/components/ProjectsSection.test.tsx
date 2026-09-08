@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, cleanup, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { projects, projectsSectionContent } from '@/features/projects';
 import ProjectsSection from './ProjectsSection';
@@ -38,7 +38,7 @@ describe('ProjectsSection progressive enhancement', () => {
       within(featuredCard!).getByText(projects[0].caseStudy.summary)
     ).toBeVisible();
 
-    for (const project of projects.slice(1)) {
+    for (const project of projects.slice(1, 4)) {
       const projectCard = screen
         .getByRole('heading', { name: project.title })
         .closest('article');
@@ -47,6 +47,19 @@ describe('ProjectsSection progressive enhancement', () => {
         within(projectCard!).getByText(project.caseStudy.highlights[0])
       ).toBeVisible();
     }
+
+    for (const project of projects.slice(4)) {
+      expect(screen.queryByRole('heading', { name: project.title })).not.toBeInTheDocument();
+    }
+    const seeMore = screen.getByRole('button', { name: /see more projects/i });
+    expect(seeMore).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(seeMore);
+
+    for (const project of projects.slice(4)) {
+      expect(screen.getByRole('heading', { name: project.title })).toBeVisible();
+    }
+    expect(screen.getByRole('button', { name: /see fewer projects/i })).toHaveAttribute('aria-expanded', 'true');
   });
 
   it('renders compact project cards when ResizeObserver is unavailable', () => {

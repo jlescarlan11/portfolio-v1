@@ -22,7 +22,7 @@ production state and rollback history.
 
 ## Overview
 
-This is the source code for my personal portfolio site — built with Next.js 15 and the App Router. It presents four evidence-backed case studies: **Rent N Roll** (a two-sided rental marketplace), **HEALTH** (safety-gated healthcare navigation), **PriceCraft** (an offline-capable pricing PWA with receipt-assisted cost capture), and **Job Pipeline** (a policy-driven, human-reviewed job discovery and application workflow). The architecture follows a feature-based structure for clean separation of concerns and long-term maintainability.
+This is the source code for my personal portfolio site — built with Next.js 15 and the App Router. It presents six evidence-backed case studies: **Rent N Roll** (a two-sided rental marketplace), **HEALTH** (safety-gated healthcare navigation), **PriceCraft** (an offline-capable pricing PWA with receipt-assisted cost capture), **Regex2NFA** (an interactive automata visualization workspace), **Job Pipeline** (a policy-driven, human-reviewed job discovery and application workflow), and **PACU** (a mixed-platform pharmacy education experience spanning WordPress, Airtable, and custom full-stack builds). The architecture follows a feature-based structure for clean separation of concerns and long-term maintainability.
 
 ---
 

@@ -18,7 +18,9 @@ const EXPECTED_PROJECT_SLUGS = [
   'rent-n-roll',
   'health',
   'pricecraft',
-  'job-pipeline'
+  'regex2nfa',
+  'job-pipeline',
+  'pacu'
 ];
 
 function getProjectCopy(project: ProjectRecord): string {
@@ -81,7 +83,7 @@ test('project order and featured project remain stable', () => {
   assert.equal(projects[0].title, 'Rent N Roll');
 });
 
-test('project section names the four distinct products without unsupported adoption claims', () => {
+test('project section names the product range without unsupported adoption claims', () => {
   const sectionCopy = [
     projectsSectionContent.title,
     projectsSectionContent.intro
@@ -90,9 +92,11 @@ test('project section names the four distinct products without unsupported adopt
   assertIncludesEvery(
     sectionCopy,
     [
+      'pharmacy learning platform',
       'rental marketplace',
       'civic health app',
       'pricing tool',
+      'automata workspace',
       'job-search pipeline',
       'user problem',
       'what I owned',
@@ -103,7 +107,7 @@ test('project section names the four distinct products without unsupported adopt
   assert.doesNotMatch(sectionCopy, /ships? to real users/i);
 });
 
-test('case-study openings describe four concrete user problems', () => {
+test('case-study openings describe concrete user problems', () => {
   const expectedProblemLanguage: Record<string, string[]> = {
     'rent-n-roll': [
       'camera owners',
@@ -124,12 +128,25 @@ test('case-study openings describe four concrete user problems', () => {
       'base recipe',
       'real margins'
     ],
+    regex2nfa: [
+      'students',
+      'regular expressions',
+      'state structure',
+      'building intuition'
+    ],
     'job-pipeline': [
       'job candidate',
       'OnlineJobs.ph',
       'removing duplicates',
       'unsupported experience',
       'final judgment'
+    ],
+    pacu: [
+      'pharmacy professionals',
+      'courses',
+      'WordPress',
+      'Airtable',
+      'subscription entitlements'
     ]
   };
 
@@ -328,8 +345,10 @@ test('getNextProject follows source order and wraps the final project', () => {
   const expectedNextProjects: Record<string, string> = {
     'rent-n-roll': 'health',
     health: 'pricecraft',
-    pricecraft: 'job-pipeline',
-    'job-pipeline': 'rent-n-roll'
+    pricecraft: 'regex2nfa',
+    regex2nfa: 'job-pipeline',
+    'job-pipeline': 'pacu',
+    pacu: 'rent-n-roll'
   };
 
   for (const [slug, nextSlug] of Object.entries(expectedNextProjects)) {
@@ -597,6 +616,43 @@ test('Job Pipeline copy reflects the version 2.0 architecture and manual boundar
   );
 });
 
+test('PACU copy covers the mixed-platform client delivery scope', () => {
+  const pacu = projects.find(project => project.slug === 'pacu');
+  assert.ok(pacu, 'PACU should exist');
+
+  const copy = getProjectCopy(pacu);
+  assertIncludesEvery(
+    copy,
+    [
+      'WordPress',
+      'Airtable',
+      'custom',
+      'React',
+      'TypeScript',
+      'Node.js',
+      'PostgreSQL',
+      'admin workflows',
+      'personalized study programs',
+      'eBook',
+      'review reminders',
+      'subscription'
+    ],
+    'PACU copy'
+  );
+  assert.equal(pacu.completedAt, '2026-08');
+  assert.equal(pacu.client, 'Pharmacy & Acute Care University');
+  assert.equal(pacu.caseStudy.roleScope.role, 'Full-Stack Engineer (Contract)');
+  assert.equal(
+    pacu.caseStudy.roleScope.status,
+    'Live client platform; contract completed'
+  );
+  assertIncludesEvery(
+    pacu.technologies.join(' '),
+    ['WordPress', 'Airtable', 'React', 'TypeScript', 'Node.js', 'PostgreSQL'],
+    'PACU technologies'
+  );
+});
+
 test('project evidence reuses the established live and GitHub destinations', () => {
   const expectedLinks: Record<string, ProjectRecord['links']> = {
     'rent-n-roll': {
@@ -609,8 +665,15 @@ test('project evidence reuses the established live and GitHub destinations', () 
       githubUrl: 'https://github.com/jlescarlan11/pricecraft',
       liveUrl: 'https://pricecraft.netlify.app/'
     },
+    regex2nfa: {
+      liveUrl: 'https://regex2nfa.vercel.app',
+      githubUrl: 'https://github.com/jlescarlan11/regex2nfa'
+    },
     'job-pipeline': {
       githubUrl: 'https://github.com/jlescarlan11/Job-Pipeline'
+    },
+    pacu: {
+      liveUrl: 'https://pharmacyacute.com'
     }
   };
 
@@ -628,7 +691,9 @@ test('each short description stays aligned with visible case-study positioning',
     'rent-n-roll': ['pre-launch', 'marketplace', 'PayMongo'],
     health: ['health', 'Gemini', 'offline'],
     pricecraft: ['pricing', 'PWA', 'receipt'],
-    'job-pipeline': ['seven', 'n8n', 'manual']
+    regex2nfa: ['interactive', 'regular expressions', 'Thompson'],
+    'job-pipeline': ['seven', 'n8n', 'manual'],
+    pacu: ['pharmacy', 'WordPress', 'Airtable', 'custom']
   };
 
   for (const project of projects) {
@@ -664,7 +729,9 @@ test('project outcomes distinguish delivered value from implementation evidence'
     'rent-n-roll': ['24 queries'],
     health: [],
     pricecraft: ['300+ tests'],
-    'job-pipeline': ['147 tests']
+    regex2nfa: ['4 routes'],
+    'job-pipeline': ['147 tests'],
+    pacu: []
   };
 
   for (const project of projects) {
