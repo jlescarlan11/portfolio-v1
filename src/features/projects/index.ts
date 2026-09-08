@@ -6,4 +6,7 @@ export {
   getProjectSlugs
 } from './lib/projects.ts';
 export type { ProjectRecord, ProjectsSectionContent } from './types.ts';
-export { default as ProjectsSection } from './components/ProjectsSection';
+export {
+  default as ProjectsSection,
+  ProjectDossierGrid
+} from './components/ProjectsSection';

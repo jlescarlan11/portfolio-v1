@@ -2,7 +2,6 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import SectionFrame from '@/shared/components/SectionFrame';
 import { Typography } from '@/shared/components/Typography';
 import { FadeIn } from '@/shared/components/FadeIn';
@@ -15,6 +14,21 @@ import type { ProjectRecord, ProjectsSectionContent } from '@/features/projects/
 interface ProjectsSectionProps {
   projects: ProjectRecord[];
   content: ProjectsSectionContent;
+}
+
+type ProjectCardRecord = Pick<
+  ProjectRecord,
+  'slug' | 'title' | 'category' | 'technologies' | 'completedAt' | 'links'
+> & {
+  caseStudy: Pick<ProjectRecord['caseStudy'], 'summary' | 'highlights'>;
+};
+
+interface ProjectDossierGridProps {
+  projects: ProjectCardRecord[];
+  ctaLabel: string;
+  startIndex?: number;
+  className?: string;
+  ariaLabel?: string;
 }
 
 // ─── LiveBadge ────────────────────────────────────────────────────────────────
@@ -149,7 +163,7 @@ function CaseFileCard({ project, ctaLabel }: CaseFileCardProps) {
 // ─── DossierTile (compact grid card) ──────────────────────────────────────────
 
 interface DossierTileProps {
-  project: ProjectRecord;
+  project: ProjectCardRecord;
   tileIndex: number;
   ctaLabel: string;
 }
@@ -301,16 +315,42 @@ function DossierTile({ project, tileIndex, ctaLabel }: DossierTileProps) {
   );
 }
 
+export function ProjectDossierGrid({
+  projects,
+  ctaLabel,
+  startIndex = 0,
+  className = '',
+  ariaLabel = 'Projects'
+}: ProjectDossierGridProps) {
+  if (projects.length === 0) return null;
+
+  return (
+    <div
+      className={`bg-surface-strong grid grid-cols-1 gap-px md:grid-cols-3 ${className}`}
+      role="list"
+      aria-label={ariaLabel}
+    >
+      {projects.map((project, index) => (
+        <div key={project.slug} role="listitem">
+          <DossierTile
+            project={project}
+            tileIndex={startIndex + index}
+            ctaLabel={ctaLabel}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── Main section ──────────────────────────────────────────────────────────────
 
 export default function ProjectsSection({ projects, content }: ProjectsSectionProps) {
-  const [showAllProjects, setShowAllProjects] = useState(false);
-
   if (!projects || projects.length === 0) return null;
 
   const [featured, ...rest] = projects;
   const initialGridCount = 3;
-  const visibleProjects = showAllProjects ? rest : rest.slice(0, initialGridCount);
+  const visibleProjects = rest.slice(0, initialGridCount);
   const hiddenProjectCount = Math.max(0, rest.length - initialGridCount);
 
   return (
@@ -327,37 +367,23 @@ export default function ProjectsSection({ projects, content }: ProjectsSectionPr
           <CaseFileCard project={featured} ctaLabel={content.ctaLabel} />
         )}
 
-        {rest.length > 0 && (
-          <div
-            id="additional-projects"
-            className={`border-t ${SURFACE.hairline} bg-surface-strong grid grid-cols-1 md:grid-cols-3 gap-px`}
-            role="list"
-            aria-label="Additional projects"
-          >
-            {visibleProjects.map((project, i) => (
-              <div key={project.slug} role="listitem">
-                <DossierTile
-                  project={project}
-                  tileIndex={i + 1}
-                  ctaLabel={content.ctaLabel}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+        <ProjectDossierGrid
+          projects={visibleProjects}
+          ctaLabel={content.ctaLabel}
+          startIndex={1}
+          className={`border-t ${SURFACE.hairline}`}
+          ariaLabel="Additional projects"
+        />
 
         {hiddenProjectCount > 0 && (
           <div className={`border-t ${SURFACE.hairline} bg-surface px-5 py-4 flex justify-center`}>
-            <button
-              type="button"
-              aria-controls="additional-projects"
-              aria-expanded={showAllProjects}
-              onClick={() => setShowAllProjects(value => !value)}
-              className={`${TYPOGRAPHY_STYLES.linkPrimary} bg-transparent border-0 cursor-pointer inline-flex items-center gap-2`}
+            <Link
+              href="/projects"
+              className={`${TYPOGRAPHY_STYLES.linkPrimary} inline-flex items-center gap-2`}
             >
-              {showAllProjects ? 'See fewer projects' : `See more projects (${hiddenProjectCount})`}
-              {showAllProjects ? <FiChevronUp aria-hidden="true" /> : <FiChevronDown aria-hidden="true" />}
-            </button>
+              See all projects ({projects.length})
+              <span aria-hidden="true">→</span>
+            </Link>
           </div>
         )}
       </div>

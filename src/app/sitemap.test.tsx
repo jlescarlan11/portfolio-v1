@@ -4,12 +4,13 @@ import { getProjectSlugs } from '@/features/projects';
 import { PRODUCTION_SITE_URL } from '@/shared/site/config';
 
 describe('sitemap metadata route', () => {
-  it('lists the homepage and every project exactly once', () => {
+  it('lists the homepage, project archive, and every project exactly once', () => {
     const entries = sitemap();
     const urls = entries.map((entry) => entry.url);
 
     expect(urls).toEqual([
       PRODUCTION_SITE_URL,
+      `${PRODUCTION_SITE_URL}/projects`,
       ...getProjectSlugs().map(
         (slug) => `${PRODUCTION_SITE_URL}/projects/${slug}`
       )
