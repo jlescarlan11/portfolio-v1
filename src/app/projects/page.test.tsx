@@ -6,7 +6,7 @@ import ProjectsPage, { metadata } from './page';
 
 beforeEach(() => {
   vi.stubGlobal('React', React);
-  vi.stubGlobal('ResizeObserver', undefined);
+  vi.stubGlobal('IntersectionObserver', undefined);
 });
 
 afterEach(() => {
@@ -25,6 +25,18 @@ describe('ProjectsPage', () => {
     expect(screen.getByText(`${projects.length} case studies`)).toBeVisible();
 
     const list = screen.getByRole('list', { name: 'All projects' });
+    expect(list).toHaveAttribute('data-layout', 'archive');
+    expect(list).toHaveClass(
+      'grid-cols-1',
+      'sm:grid-cols-2',
+      'lg:grid-cols-3'
+    );
+
+    const headings = within(list).getAllByRole('heading', { level: 3 });
+    expect(headings.map(heading => heading.textContent)).toEqual(
+      projects.map(project => project.title)
+    );
+
     for (const project of projects) {
       expect(
         within(list).getByRole('heading', { name: project.title })
@@ -34,7 +46,23 @@ describe('ProjectsPage', () => {
           name: `${projectsSectionContent.ctaLabel}: ${project.title}`
         })
       ).toHaveAttribute('href', `/projects/${project.slug}`);
+      expect(
+        within(list).getByRole('img', {
+          name: project.listing.thumbnail.alt
+        })
+      ).toBeVisible();
     }
+  });
+
+  it('keeps PACU capability scope visible in the archive', () => {
+    render(<ProjectsPage />);
+
+    const pacuLink = screen.getByRole('link', {
+      name: `${projectsSectionContent.ctaLabel}: PACU`
+    });
+    expect(within(pacuLink).getByText('WordPress')).toBeVisible();
+    expect(within(pacuLink).getByText('Airtable')).toBeVisible();
+    expect(within(pacuLink).getByText('Custom Build')).toBeVisible();
   });
 
   it('keeps the skip-link target and return path available', () => {

@@ -92,10 +92,26 @@ export interface ProjectLinks {
   githubUrl?: string;
 }
 
+export type ProjectThumbnailFit = 'cover' | 'contain';
+
+export interface ProjectListingThumbnail {
+  src: string;
+  alt: string;
+  fit: ProjectThumbnailFit;
+  objectPosition?: string;
+}
+
+export interface ProjectListing {
+  capabilities: string[];
+  thumbnail: ProjectListingThumbnail;
+  homepageRank?: 1 | 2 | 3;
+}
+
 export interface ProjectRecord {
   slug: string;
   title: string;
   category: string;
+  listing: ProjectListing;
   description: string;
   logo: string;
   technologies: string[];

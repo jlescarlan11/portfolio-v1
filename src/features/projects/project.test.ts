@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  getHomepageProjects,
   getNextProject,
   getProjectBySlug,
   getProjectSlugs
@@ -78,9 +79,55 @@ test('project slugs are unique', () => {
   assert.equal(new Set(slugs).size, slugs.length);
 });
 
-test('project order and featured project remain stable', () => {
+test('project source order and homepage selection remain stable', () => {
   assert.deepEqual(getProjectSlugs(), EXPECTED_PROJECT_SLUGS);
   assert.equal(projects[0].title, 'Rent N Roll');
+  assert.deepEqual(
+    getHomepageProjects().map(project => project.slug),
+    ['rent-n-roll', 'health', 'pricecraft']
+  );
+});
+
+test('every project provides valid listing metadata', () => {
+  const homepageRanks = projects
+    .map(project => project.listing.homepageRank)
+    .filter((rank): rank is 1 | 2 | 3 => rank !== undefined);
+
+  assert.deepEqual([...homepageRanks].sort(), [1, 2, 3]);
+  assert.equal(new Set(homepageRanks).size, 3);
+
+  for (const project of projects) {
+    assert.ok(
+      project.listing.capabilities.length > 0 &&
+        project.listing.capabilities.every(capability => capability.trim()),
+      `${project.title} should have non-empty listing capabilities`
+    );
+    assert.ok(
+      isRenderableInternalPath(project.listing.thumbnail.src),
+      `${project.title} should have a safe local listing thumbnail`
+    );
+    assert.ok(
+      project.listing.thumbnail.alt.trim(),
+      `${project.title} should have listing thumbnail alt text`
+    );
+    assert.ok(
+      ['cover', 'contain'].includes(project.listing.thumbnail.fit),
+      `${project.title} should have a supported thumbnail fit`
+    );
+  }
+
+  const pacu = getProjectBySlug('pacu');
+  assert.ok(pacu, 'PACU project should exist');
+  assert.deepEqual(pacu.listing.capabilities, [
+    'WordPress',
+    'Airtable',
+    'Custom Build'
+  ]);
+  assert.equal(pacu.listing.thumbnail.fit, 'contain');
+
+  const regex2nfa = getProjectBySlug('regex2nfa');
+  assert.ok(regex2nfa, 'Regex2NFA project should exist');
+  assert.equal(regex2nfa.listing.thumbnail.fit, 'contain');
 });
 
 test('project section names the product range without unsupported adoption claims', () => {
