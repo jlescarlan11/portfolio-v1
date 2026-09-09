@@ -1,357 +1,233 @@
-'use client';
-
-import { useLayoutEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import SectionFrame from '@/shared/components/SectionFrame';
 import { Typography } from '@/shared/components/Typography';
 import { FadeIn } from '@/shared/components/FadeIn';
 import { formatMonthYear, isRenderableExternalUrl } from '@/shared/lib/project';
 import { SURFACE, TYPOGRAPHY_STYLES } from '@/shared/styles/shared';
+import { selectHomepageProjects } from '@/features/projects/lib/projects';
 import type { ProjectRecord, ProjectsSectionContent } from '@/features/projects/types';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface ProjectsSectionProps {
   projects: ProjectRecord[];
   content: ProjectsSectionContent;
 }
 
-type ProjectCardRecord = Pick<
-  ProjectRecord,
-  'slug' | 'title' | 'category' | 'technologies' | 'completedAt' | 'links'
-> & {
-  caseStudy: Pick<ProjectRecord['caseStudy'], 'summary' | 'highlights'>;
-};
-
-interface ProjectDossierGridProps {
-  projects: ProjectCardRecord[];
+interface ProjectCardProps {
+  project: ProjectRecord;
   ctaLabel: string;
-  startIndex?: number;
+  imageSizes: string;
+}
+
+interface ProjectGridProps {
+  projects: ProjectRecord[];
+  ctaLabel: string;
+  layout?: 'homepage' | 'archive';
   className?: string;
   ariaLabel?: string;
 }
 
-// ─── LiveBadge ────────────────────────────────────────────────────────────────
-
-interface LiveBadgeProps {
-  url: string;
-  projectTitle: string;
-}
-
-function LiveBadge({ url, projectTitle }: LiveBadgeProps) {
+function LiveStatus({ title }: { title: string }) {
   return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={`Live site for ${projectTitle} (opens in new tab)`}
-      className="inline-flex items-center gap-1.5 opacity-70 hover:opacity-100 transition-opacity duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
+    <span
+      aria-label={`${title} has a live product`}
+      className="absolute left-3 top-3 inline-flex items-center gap-1.5 border border-black/10 bg-white/90 px-2 py-1 text-black backdrop-blur-sm"
     >
       <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
-        <span className="absolute inline-flex h-full w-full animate-ping bg-foreground opacity-20" />
-        <span className="relative inline-flex h-1.5 w-1.5 bg-foreground/70" />
+        <span className="absolute inline-flex h-full w-full motion-safe:animate-ping bg-black opacity-20" />
+        <span className="relative inline-flex h-1.5 w-1.5 bg-black/70" />
       </span>
-      <span className="caption uppercase tracking-[0.14em] text-foreground">Live</span>
-    </a>
-  );
-}
-
-// ─── CategoryPill ─────────────────────────────────────────────────────────────
-
-interface CategoryPillProps {
-  category: string;
-}
-
-function CategoryPill({ category }: CategoryPillProps) {
-  const label = category.split(' / ')[0];
-  return (
-    <span className={`inline-block border ${SURFACE.hairline} px-2 py-0.5`}>
-      <span className="caption uppercase tracking-[0.12em] text-subtle-foreground">{label}</span>
+      <span className="caption uppercase tracking-[0.14em]">Live</span>
     </span>
   );
 }
 
-// ─── CaseFileCard (featured / full-width) ─────────────────────────────────────
-
-interface CaseFileCardProps {
-  project: ProjectRecord;
-  ctaLabel: string;
-}
-
-function CaseFileCard({ project, ctaLabel }: CaseFileCardProps) {
-  const { slug, title, category, technologies, completedAt, links, caseStudy } = project;
-  const hasLive = isRenderableExternalUrl(links.liveUrl);
+function ProjectCard({ project, ctaLabel, imageSizes }: ProjectCardProps) {
+  const {
+    slug,
+    title,
+    listing,
+    technologies,
+    completedAt,
+    links,
+    caseStudy
+  } = project;
+  const titleId = `project-card-title-${slug}`;
+  const capabilityLabels = new Set(
+    listing.capabilities.map(capability => capability.toLowerCase())
+  );
+  const distinctTechnologies = technologies.filter(
+    technology => !capabilityLabels.has(technology.toLowerCase())
+  );
+  const visibleTechnologies = distinctTechnologies.slice(0, 2);
+  const hiddenTechnologyCount = Math.max(
+    0,
+    distinctTechnologies.length - visibleTechnologies.length
+  );
+  const outcome = caseStudy.highlights[0] ?? caseStudy.summary;
+  const isContainedThumbnail = listing.thumbnail.fit === 'contain';
 
   return (
-    <FadeIn
-      as="article"
-      delay={80}
-      aria-labelledby="case-file-featured-title"
-      className="pl-5 pr-6 pt-5 pb-5 bg-surface"
+    <Link
+      href={`/projects/${slug}`}
+      aria-label={`${ctaLabel}: ${title}`}
+      className="group block h-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground"
     >
-      {/* Header row */}
-      <header className="flex flex-wrap items-start justify-between gap-3 mb-4">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <span className="caption font-mono tabular-nums text-subtle-foreground tracking-[0.14em]">
-              No.&nbsp;01
-            </span>
-            {hasLive && <LiveBadge url={links.liveUrl!} projectTitle={title} />}
+      <article
+        aria-labelledby={titleId}
+        className="flex h-full flex-col bg-surface transition-colors duration-200 group-hover:bg-surface-tint"
+      >
+        <div
+          className={`relative aspect-video w-full overflow-hidden border-b ${SURFACE.hairline} ${
+            isContainedThumbnail ? 'bg-white' : 'bg-surface-muted'
+          }`}
+        >
+          <Image
+            src={listing.thumbnail.src}
+            alt={listing.thumbnail.alt}
+            fill
+            sizes={imageSizes}
+            style={{ objectPosition: listing.thumbnail.objectPosition ?? 'center' }}
+            className={`${
+              isContainedThumbnail ? 'object-contain' : 'object-cover'
+            } transition-transform duration-500 motion-safe:group-hover:scale-[1.02] motion-reduce:transition-none`}
+          />
+          {isRenderableExternalUrl(links.liveUrl) ? (
+            <LiveStatus title={title} />
+          ) : null}
+        </div>
+
+        <div className="flex flex-1 flex-col p-4 sm:p-5">
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <ul
+              aria-label={`${title} capabilities`}
+              className="flex flex-wrap gap-1.5"
+            >
+              {listing.capabilities.map(capability => (
+                <li key={capability}>
+                  <span
+                    className={`caption inline-block border ${SURFACE.hairline} px-2 py-0.5 uppercase tracking-[0.1em] text-subtle-foreground`}
+                  >
+                    {capability}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <time
+              dateTime={completedAt}
+              className="caption shrink-0 whitespace-nowrap font-mono tabular-nums text-subtle-foreground/70"
+            >
+              {formatMonthYear(completedAt, 'short')}
+            </time>
           </div>
+
           <Typography
-            variant="h3"
+            variant="h4"
             as="h3"
-            id="case-file-featured-title"
-            className="text-foreground leading-tight"
+            id={titleId}
+            className="mb-3 leading-snug text-foreground"
           >
             {title}
           </Typography>
-        </div>
 
-        <div className="text-right space-y-1 shrink-0">
-          <p className="caption text-subtle-foreground uppercase tracking-[0.12em]">
-            {category.split(' / ')[1] ?? category}
-          </p>
-          <p className="caption font-mono tabular-nums text-subtle-foreground">
-            {formatMonthYear(completedAt, 'short')}
-          </p>
-        </div>
-      </header>
+          <Typography
+            variant="body-sm"
+            as="p"
+            className="mb-6 line-clamp-3 text-muted-foreground"
+          >
+            {outcome}
+          </Typography>
 
-      {/* Pull-quote */}
-      <blockquote className="border-l border-foreground/40 pl-4 mb-5" aria-label="Project summary">
-        <p className="body text-muted-foreground">{caseStudy.summary}</p>
-      </blockquote>
+          <footer
+            className={`mt-auto flex flex-wrap items-end justify-between gap-4 border-t pt-4 ${SURFACE.hairline}`}
+          >
+            <ul
+              aria-label={`${title} technology stack`}
+              className="flex flex-wrap gap-1.5"
+            >
+              {visibleTechnologies.map(technology => (
+                <li key={technology}>
+                  <span
+                    className={`caption whitespace-nowrap border px-2 py-0.5 font-mono ${SURFACE.hairline} text-subtle-foreground`}
+                  >
+                    {technology}
+                  </span>
+                </li>
+              ))}
+              {hiddenTechnologyCount > 0 ? (
+                <li>
+                  <span
+                    className={`caption whitespace-nowrap border px-2 py-0.5 font-mono ${SURFACE.hairline} text-subtle-foreground`}
+                  >
+                    +{hiddenTechnologyCount}
+                  </span>
+                </li>
+              ) : null}
+            </ul>
 
-      {/* Highlights */}
-      {caseStudy.highlights.length > 0 && (
-        <ul className="grid grid-cols-1 gap-y-2 mb-6" aria-label="Project highlights">
-          {caseStudy.highlights.map((h) => (
-            <li key={h} className="flex items-start gap-2">
-              <span className="mt-[0.5em] w-1.5 h-px bg-foreground/40 shrink-0" aria-hidden="true" />
-              <span className="body-sm text-muted-foreground">{h}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {/* Footer: tech stack + CTA */}
-      <footer className={`flex flex-wrap items-center justify-between gap-4 pt-4 border-t ${SURFACE.hairline}`}>
-        <ul className="flex flex-wrap gap-1.5" aria-label={`${title} technology stack`}>
-          {technologies.map((tech) => (
-            <li key={tech}>
-              <span className={`caption font-mono px-2 py-0.5 border ${SURFACE.hairline} text-subtle-foreground whitespace-nowrap`}>
-                {tech}
+            <span className={`${TYPOGRAPHY_STYLES.linkPrimary} inline-flex items-center gap-2`}>
+              {ctaLabel}
+              <span
+                aria-hidden="true"
+                className="transition-transform duration-200 motion-safe:group-hover:translate-x-1 motion-reduce:transition-none"
+              >
+                →
               </span>
-            </li>
-          ))}
-        </ul>
-        <nav aria-label={`Links for ${title}`}>
-          <Link
-            href={`/projects/${slug}`}
-            className={TYPOGRAPHY_STYLES.linkPrimary}
-            aria-label={`${ctaLabel}: ${title}`}
-          >
-            {ctaLabel} →
-          </Link>
-        </nav>
-      </footer>
-    </FadeIn>
-  );
-}
-
-// ─── DossierTile (compact grid card) ──────────────────────────────────────────
-
-interface DossierTileProps {
-  project: ProjectCardRecord;
-  tileIndex: number;
-  ctaLabel: string;
-}
-
-function DossierTile({ project, tileIndex, ctaLabel }: DossierTileProps) {
-  const { slug, title, category, technologies, completedAt, links, caseStudy } = project;
-  const fileNumber = String(tileIndex + 1).padStart(2, '0');
-  const hasLive = isRenderableExternalUrl(links.liveUrl);
-  const delay = tileIndex * 80 + 80;
-
-  const measureRef = useRef<HTMLDivElement>(null);
-  const rowRef = useRef<HTMLDivElement>(null);
-  const [visibleCount, setVisibleCount] = useState(technologies.length);
-
-  useLayoutEffect(() => {
-    const measure = measureRef.current;
-    const row = rowRef.current;
-    if (!measure || !row) return;
-
-    const recalc = () => {
-      const rowWidth = row.offsetWidth;
-      const gap = 6; // gap-1.5
-
-      const pillEls = Array.from(measure.querySelectorAll<HTMLElement>('[data-pill]'));
-      const plusEl = measure.querySelector<HTMLElement>('[data-plus]');
-      const dateEl = measure.querySelector<HTMLElement>('[data-date]');
-
-      if (!pillEls.length) return;
-
-      const pillWidths = pillEls.map((el) => el.offsetWidth);
-      const plusWidth = plusEl?.offsetWidth ?? 36;
-      const dateWidth = (dateEl?.offsetWidth ?? 0) + gap;
-
-      let available = rowWidth - dateWidth;
-      let fit = 0;
-
-      for (let i = 0; i < pillWidths.length; i++) {
-        const isLast = i === pillWidths.length - 1;
-        const pillCost = pillWidths[i] + gap;
-        const plusCost = isLast ? 0 : plusWidth + gap;
-
-        if (available < pillCost + plusCost) break;
-        available -= pillCost;
-        fit++;
-        if (isLast) break;
-      }
-
-      setVisibleCount(Math.max(1, fit));
-    };
-
-    recalc();
-    let active = true;
-    let observer: ResizeObserver | undefined;
-
-    try {
-      const fontsReady = document.fonts?.ready;
-      if (fontsReady) {
-        void Promise.resolve(fontsReady).then(
-          () => {
-            if (active) recalc();
-          },
-          () => {}
-        );
-      }
-    } catch {}
-
-    if (typeof ResizeObserver === 'function') {
-      observer = new ResizeObserver(recalc);
-      observer.observe(row);
-    }
-
-    return () => {
-      active = false;
-      observer?.disconnect();
-    };
-  }, [technologies]);
-
-  const overflowCount = technologies.length - visibleCount;
-  const pillClass = `caption font-mono px-2 py-0.5 border ${SURFACE.hairline} text-subtle-foreground whitespace-nowrap`;
-
-  return (
-    <FadeIn
-      as="article"
-      delay={delay}
-      aria-labelledby={`dossier-tile-title-${tileIndex}`}
-      className="relative flex flex-col bg-surface h-full"
-    >
-      <div className="px-4 pt-4 pb-0">
-        <CategoryPill category={category} />
-      </div>
-
-      <div className="flex flex-col flex-1 px-4 pt-3 pb-4">
-        <div className="flex items-center gap-3 mb-1">
-          <span className="caption font-mono tabular-nums text-subtle-foreground/60 tracking-[0.12em]">
-            No.&nbsp;{fileNumber}
-          </span>
-          {hasLive && <LiveBadge url={links.liveUrl!} projectTitle={title} />}
-        </div>
-
-        <Typography
-          variant="h4"
-          as="h3"
-          id={`dossier-tile-title-${tileIndex}`}
-          className="text-foreground leading-snug mb-3"
-        >
-          {title}
-        </Typography>
-
-        <p className="body-sm text-muted-foreground flex-1 mb-4">
-          {caseStudy.highlights[0] ?? caseStudy.summary}
-        </p>
-
-        {/* Hidden measurement layer — all pills rendered at full width for sampling */}
-        <div className="h-0 overflow-hidden" aria-hidden="true">
-          <div ref={measureRef} className="flex gap-1.5">
-            {technologies.map((tech) => (
-              <span key={tech} data-pill className={pillClass}>{tech}</span>
-            ))}
-            <span data-plus className={pillClass}>+99</span>
-            <span data-date className="caption font-mono tabular-nums whitespace-nowrap">
-              {formatMonthYear(completedAt, 'short')}
             </span>
-          </div>
+          </footer>
         </div>
-
-        <div ref={rowRef} className={`flex items-center gap-1.5 mb-4 pt-3 border-t ${SURFACE.hairline}`}>
-          {technologies.slice(0, visibleCount).map((tech) => (
-            <span key={tech} className={pillClass}>{tech}</span>
-          ))}
-          {overflowCount > 0 && (
-            <span className={pillClass}>+{overflowCount}</span>
-          )}
-          <span className="ml-auto caption font-mono tabular-nums text-subtle-foreground/60 shrink-0 whitespace-nowrap">
-            {formatMonthYear(completedAt, 'short')}
-          </span>
-        </div>
-
-        <nav aria-label={`Links for ${title}`}>
-          <Link
-            href={`/projects/${slug}`}
-            className={TYPOGRAPHY_STYLES.linkPrimary}
-            aria-label={`${ctaLabel}: ${title}`}
-          >
-            {ctaLabel} →
-          </Link>
-        </nav>
-      </div>
-    </FadeIn>
+      </article>
+    </Link>
   );
 }
 
-export function ProjectDossierGrid({
+export function ProjectGrid({
   projects,
   ctaLabel,
-  startIndex = 0,
+  layout = 'archive',
   className = '',
   ariaLabel = 'Projects'
-}: ProjectDossierGridProps) {
+}: ProjectGridProps) {
   if (projects.length === 0) return null;
 
+  const gridColumns =
+    layout === 'homepage'
+      ? 'grid-cols-1 md:grid-cols-3'
+      : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+  const imageSizes =
+    layout === 'homepage'
+      ? '(max-width: 767px) calc(100vw - 3rem), (max-width: 1280px) 33vw, 320px'
+      : '(max-width: 639px) calc(100vw - 2.5rem), (max-width: 1023px) 50vw, 384px';
+
   return (
-    <div
-      className={`bg-surface-strong grid grid-cols-1 gap-px md:grid-cols-3 ${className}`}
-      role="list"
+    <ul
       aria-label={ariaLabel}
+      data-layout={layout}
+      className={`grid gap-px bg-surface-strong ${gridColumns} ${className}`}
     >
       {projects.map((project, index) => (
-        <div key={project.slug} role="listitem">
-          <DossierTile
+        <FadeIn
+          as="li"
+          key={project.slug}
+          delay={index * 80 + 80}
+          className="h-full"
+        >
+          <ProjectCard
             project={project}
-            tileIndex={startIndex + index}
             ctaLabel={ctaLabel}
+            imageSizes={imageSizes}
           />
-        </div>
+        </FadeIn>
       ))}
-    </div>
+    </ul>
   );
 }
-
-// ─── Main section ──────────────────────────────────────────────────────────────
 
 export default function ProjectsSection({ projects, content }: ProjectsSectionProps) {
   if (!projects || projects.length === 0) return null;
 
-  const [featured, ...rest] = projects;
-  const initialGridCount = 3;
-  const visibleProjects = rest.slice(0, initialGridCount);
-  const hiddenProjectCount = Math.max(0, rest.length - initialGridCount);
+  const homepageProjects = selectHomepageProjects(projects);
+  const hasMoreProjects = projects.length > homepageProjects.length;
 
   return (
     <SectionFrame
@@ -363,29 +239,26 @@ export default function ProjectsSection({ projects, content }: ProjectsSectionPr
       showTopBorder
     >
       <div className={`border ${SURFACE.hairline}`}>
-        {featured && (
-          <CaseFileCard project={featured} ctaLabel={content.ctaLabel} />
-        )}
-
-        <ProjectDossierGrid
-          projects={visibleProjects}
+        <ProjectGrid
+          projects={homepageProjects}
           ctaLabel={content.ctaLabel}
-          startIndex={1}
-          className={`border-t ${SURFACE.hairline}`}
-          ariaLabel="Additional projects"
+          layout="homepage"
+          ariaLabel="Selected projects"
         />
 
-        {hiddenProjectCount > 0 && (
-          <div className={`border-t ${SURFACE.hairline} bg-surface px-5 py-4 flex justify-center`}>
+        {hasMoreProjects ? (
+          <div
+            className={`flex justify-center border-t bg-surface px-5 py-4 ${SURFACE.hairline}`}
+          >
             <Link
               href="/projects"
-              className={`${TYPOGRAPHY_STYLES.linkPrimary} inline-flex items-center gap-2`}
+              className={`${TYPOGRAPHY_STYLES.linkPrimary} inline-flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground`}
             >
-              See all projects ({projects.length})
+              See all {projects.length} projects
               <span aria-hidden="true">→</span>
             </Link>
           </div>
-        )}
+        ) : null}
       </div>
     </SectionFrame>
   );

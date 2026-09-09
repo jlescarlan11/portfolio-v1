@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ProjectDossierGrid, projects, projectsSectionContent } from '@/features/projects';
+import { ProjectGrid, projects, projectsSectionContent } from '@/features/projects';
 import { FadeIn } from '@/shared/components/FadeIn';
 import { Typography } from '@/shared/components/Typography';
 import { siteConfig } from '@/shared/site/config';
@@ -38,19 +38,6 @@ export const metadata: Metadata = {
 };
 
 export default function ProjectsPage(): React.JSX.Element {
-  const projectCards = projects.map(project => ({
-    slug: project.slug,
-    title: project.title,
-    category: project.category,
-    technologies: project.technologies,
-    completedAt: project.completedAt,
-    links: project.links,
-    caseStudy: {
-      summary: project.caseStudy.summary,
-      highlights: project.caseStudy.highlights
-    }
-  }));
-
   return (
     <main
       id="main-content"
@@ -104,9 +91,10 @@ export default function ProjectsPage(): React.JSX.Element {
           </div>
         </FadeIn>
 
-        <ProjectDossierGrid
-          projects={projectCards}
+        <ProjectGrid
+          projects={projects}
           ctaLabel={projectsSectionContent.ctaLabel}
+          layout="archive"
           className={`border ${SURFACE.hairline}`}
           ariaLabel="All projects"
         />

@@ -5,6 +5,21 @@ export function getAllProjects(): ProjectRecord[] {
   return projects;
 }
 
+export function selectHomepageProjects(
+  projectRecords: ProjectRecord[]
+): ProjectRecord[] {
+  return projectRecords
+    .filter(project => project.listing.homepageRank !== undefined)
+    .sort(
+      (left, right) =>
+        left.listing.homepageRank! - right.listing.homepageRank!
+    );
+}
+
+export function getHomepageProjects(): ProjectRecord[] {
+  return selectHomepageProjects(projects);
+}
+
 export function getProjectSlugs(): string[] {
   return projects.map((project) => project.slug);
 }

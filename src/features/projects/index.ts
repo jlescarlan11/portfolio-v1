@@ -1,12 +1,19 @@
 export { projects, projectsSectionContent } from './data.ts';
 export {
   getAllProjects,
+  getHomepageProjects,
   getNextProject,
   getProjectBySlug,
-  getProjectSlugs
+  getProjectSlugs,
+  selectHomepageProjects
 } from './lib/projects.ts';
-export type { ProjectRecord, ProjectsSectionContent } from './types.ts';
+export type {
+  ProjectListing,
+  ProjectListingThumbnail,
+  ProjectRecord,
+  ProjectsSectionContent
+} from './types.ts';
 export {
   default as ProjectsSection,
-  ProjectDossierGrid
+  ProjectGrid
 } from './components/ProjectsSection';

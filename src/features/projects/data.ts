@@ -13,6 +13,17 @@ export const projects: ProjectRecord[] = [
     slug: 'rent-n-roll',
     title: 'Rent N Roll',
     category: 'Marketplace / Booking and Payments',
+    listing: {
+      capabilities: ['Custom Build', 'Marketplace'],
+      homepageRank: 1,
+      thumbnail: {
+        src: '/project/rent-n-roll.jpg',
+        alt:
+          'Rent N Roll marketplace browse page with camera categories and featured equipment.',
+        fit: 'cover',
+        objectPosition: 'center'
+      }
+    },
     description:
       'A pre-launch camera rental marketplace that guides owners and renters through availability, identity verification, digital contracts, handoff confirmation, and PayMongo payment and deposit handling.',
     logo: '/project/rent-n-roll.jpg',
@@ -143,6 +154,17 @@ export const projects: ProjectRecord[] = [
     slug: 'health',
     title: 'HEALTH',
     category: 'Civic Health / Offline Mobile App',
+    listing: {
+      capabilities: ['Custom Build', 'Mobile App'],
+      homepageRank: 2,
+      thumbnail: {
+        src: '/project/health-safety-check.png',
+        alt:
+          'HEALTH mobile safety check directing residents to emergency help before assisted triage.',
+        fit: 'cover',
+        objectPosition: 'center'
+      }
+    },
     description:
       'A Naga City health app that routes immediate-danger and mental-health inputs before Gemini, keeps supported care records available offline, and helped a five-person team reach the top 15 of 200+ hackathon teams.',
     logo: '/project/health.svg',
@@ -264,6 +286,17 @@ export const projects: ProjectRecord[] = [
     slug: 'pricecraft',
     title: 'PriceCraft',
     category: 'Pricing PWA / Small Business',
+    listing: {
+      capabilities: ['Custom Build', 'PWA'],
+      homepageRank: 3,
+      thumbnail: {
+        src: '/project/pricecraft-results.png',
+        alt:
+          'PriceCraft pricing results with recommended price, break-even price, margin, and cost breakdown.',
+        fit: 'cover',
+        objectPosition: 'center'
+      }
+    },
     description:
       'A live, installable pricing PWA that helps small food businesses turn recipe costs into selling prices, reuse costs across variants, and update an ingredient catalog from reviewed receipt lines.',
     logo: '/project/pricecraft.svg',
@@ -416,6 +449,16 @@ export const projects: ProjectRecord[] = [
     slug: 'regex2nfa',
     title: 'Regex2NFA',
     category: 'Computer Science Education / Interactive Visualization',
+    listing: {
+      capabilities: ['Custom Build', 'Visualization'],
+      thumbnail: {
+        src: '/project/regex2nfa-workspace.jpg',
+        alt:
+          'Regex2NFA workspace showing a Thompson NFA graph and input simulation controls.',
+        fit: 'contain',
+        objectPosition: 'center'
+      }
+    },
     description:
       'An interactive automata workspace that converts regular expressions into Thompson NFAs, exposes epsilon transitions, and animates accepted or rejected input strings.',
     logo: '',
@@ -543,6 +586,16 @@ export const projects: ProjectRecord[] = [
     slug: 'job-pipeline',
     title: 'Job Pipeline',
     category: 'AI-Assisted Job Search Automation',
+    listing: {
+      capabilities: ['Automation', 'AI Workflow'],
+      thumbnail: {
+        src: '/project/job-pipeline-workflows.png',
+        alt:
+          'Job Pipeline repository table listing seven scheduled automation workflows and their responsibilities.',
+        fit: 'cover',
+        objectPosition: 'center'
+      }
+    },
     description:
       'Seven n8n workflows that find and rank OnlineJobs.ph listings, prepare grounded application drafts with Groq, send Slack alerts, and leave review and submission manual.',
     logo: '',
@@ -691,6 +744,16 @@ export const projects: ProjectRecord[] = [
     slug: 'pacu',
     title: 'PACU',
     category: 'Pharmacy Education / Web Platform',
+    listing: {
+      capabilities: ['WordPress', 'Airtable', 'Custom Build'],
+      thumbnail: {
+        src: '/project/pacu-logo.png',
+        alt:
+          'Orange PACU wordmark for Pharmacy and Acute Care University.',
+        fit: 'contain',
+        objectPosition: 'center'
+      }
+    },
     description:
       'The Pharmacy & Acute Care University web platform combines a WordPress content and marketing site, Airtable-supported operations, and custom full-stack learning experiences for pharmacy professionals.',
     logo: '/project/pacu-logo.png',
