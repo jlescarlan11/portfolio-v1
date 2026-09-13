@@ -11,6 +11,9 @@ describe('sitemap metadata route', () => {
     expect(urls).toEqual([
       PRODUCTION_SITE_URL,
       `${PRODUCTION_SITE_URL}/projects`,
+      `${PRODUCTION_SITE_URL}/experience`,
+      `${PRODUCTION_SITE_URL}/stack`,
+      `${PRODUCTION_SITE_URL}/certifications`,
       ...getProjectSlugs().map(
         (slug) => `${PRODUCTION_SITE_URL}/projects/${slug}`
       )

@@ -93,6 +93,6 @@ describe('ProjectsSection', () => {
     expect(
       screen.queryByRole('link', { name: /Live site for/i })
     ).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Rent N Roll has a live product')).toBeVisible();
+    expect(screen.getByLabelText('Rent N Roll: Pre-launch')).toBeVisible();
   });
 });

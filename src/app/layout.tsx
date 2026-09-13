@@ -1,17 +1,11 @@
 import type { Metadata } from 'next';
-import { Playfair_Display } from 'next/font/google';
-import { GeistSans } from 'geist/font/sans';
-import { GeistMono } from 'geist/font/mono';
+import { Poppins } from 'next/font/google';
 import React from 'react';
 import { ChatBubble } from '@/features/chat';
 import { homepageMetadata } from '@/shared/seo/homepage-metadata';
 import './globals.css';
 
-const playfairDisplay = Playfair_Display({
-  variable: '--font-playfair',
-  subsets: ['latin'],
-  weight: ['400', '600', '700', '900']
-});
+const poppins = Poppins({ variable: '--font-poppins', subsets: ['latin'], weight: ['400', '500'], display: 'swap' });
 
 export const metadata: Metadata = homepageMetadata;
 
@@ -36,7 +30,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${playfairDisplay.variable} ${GeistSans.variable} ${GeistMono.variable} antialiased`}
+        className={`${poppins.variable} antialiased`}
       >
         <a
           href="#main-content"

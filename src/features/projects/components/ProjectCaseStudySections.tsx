@@ -66,7 +66,7 @@ export function ProjectSectionLabel({
       variant="caption"
       as="h2"
       id={id}
-      className="mb-5 text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle-foreground"
+      className="mb-5 text-base font-medium uppercase tracking-[0.12em] text-subtle-foreground"
     >
       {children}
     </Typography>
@@ -170,7 +170,7 @@ export function ProjectMetaStrip({
             <Typography
               variant="caption"
               as="dt"
-              className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground"
+              className="text-base font-medium uppercase tracking-[0.1em] text-subtle-foreground"
             >
               {fact.label}
             </Typography>
@@ -192,7 +192,7 @@ export function ProjectMetaStrip({
           <Typography
             variant="caption"
             as="dt"
-            className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground"
+            className="text-base font-medium uppercase tracking-[0.1em] text-subtle-foreground"
           >
             Owned
           </Typography>
@@ -227,7 +227,7 @@ export function ProjectMetaStrip({
             <Typography
               variant="caption"
               as="span"
-              className={`inline-flex items-center border ${SURFACE.hairline} px-2.5 py-1 text-[11px] text-muted-foreground`}
+              className={`inline-flex items-center border ${SURFACE.hairline} px-2.5 py-1 text-base text-muted-foreground`}
             >
               {technology}
             </Typography>
@@ -277,7 +277,7 @@ function ProjectFigure({ visual }: ProjectFigureProps) {
         as="figcaption"
         className="border-t border-surface px-4 py-3 leading-relaxed text-muted-foreground"
       >
-        <span className="mb-1 block font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground">
+        <span className="mb-1 block font-sans text-base font-medium uppercase tracking-[0.1em] text-subtle-foreground">
           Source: {visual.sourceLabel}
         </span>
         {visual.caption}
@@ -322,7 +322,7 @@ function DecisionDetail({ label, value }: DecisionDetailProps) {
       <Typography
         variant="caption"
         as="dt"
-        className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground"
+        className="text-base font-medium uppercase tracking-[0.1em] text-subtle-foreground"
       >
         {label}
       </Typography>
@@ -351,7 +351,7 @@ function OutcomeList({
       <Typography
         variant="caption"
         as="h3"
-        className="mb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground"
+        className="mb-3 text-base font-medium uppercase tracking-[0.1em] text-subtle-foreground"
       >
         {title}
       </Typography>
@@ -363,21 +363,21 @@ function OutcomeList({
           >
             <span
               aria-hidden="true"
-              className="absolute right-4 top-4 font-mono text-[10px] tabular-nums text-foreground/20"
+              className="absolute right-4 top-4 font-sans text-base tabular-nums text-foreground/20"
             >
               {String(index + 1).padStart(2, '0')}
             </span>
             <Typography
               variant="h3"
               as="p"
-              className="break-words pr-8 font-semibold text-foreground"
+              className="break-words pr-8 font-medium text-foreground"
             >
               {item.value}
             </Typography>
             <Typography
               variant="caption"
               as="h4"
-              className="mt-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground"
+              className="mt-1 text-base font-medium uppercase tracking-[0.1em] text-subtle-foreground"
             >
               {item.label}
             </Typography>
@@ -438,7 +438,7 @@ export function ProjectNarrativeSections({
               <Typography
                 variant="caption"
                 as="dt"
-                className="text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground"
+                className="text-base font-medium uppercase tracking-[0.1em] text-subtle-foreground"
               >
                 {label}
               </Typography>
@@ -456,7 +456,7 @@ export function ProjectNarrativeSections({
           <Typography
             variant="caption"
             as="h3"
-            className="mb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground"
+            className="mb-3 text-base font-medium uppercase tracking-[0.1em] text-subtle-foreground"
           >
             Constraints
           </Typography>
@@ -487,7 +487,7 @@ export function ProjectNarrativeSections({
             <li key={step} className="grid grid-cols-[2rem_minmax(0,1fr)] gap-3">
               <span
                 aria-hidden="true"
-                className="font-mono text-[11px] tabular-nums text-subtle-foreground"
+                className="font-sans text-base tabular-nums text-subtle-foreground"
               >
                 {String(index + 1).padStart(2, '0')}
               </span>
@@ -522,14 +522,14 @@ export function ProjectNarrativeSections({
             >
               <span
                 aria-hidden="true"
-                className="absolute -left-3 top-0 flex h-6 w-6 items-center justify-center border border-surface bg-surface font-mono text-[10px] tabular-nums text-subtle-foreground"
+                className="absolute -left-3 top-0 flex h-6 w-6 items-center justify-center border border-surface bg-surface font-sans text-base tabular-nums text-subtle-foreground"
               >
                 {String(index + 1).padStart(2, '0')}
               </span>
               <Typography
                 variant="h3"
                 as="h3"
-                className="mb-5 font-semibold text-foreground"
+                className="mb-5 font-medium text-foreground"
               >
                 {decision.title}
               </Typography>
@@ -592,7 +592,7 @@ export function ProjectNarrativeSections({
               <Typography
                 variant="caption"
                 as="h3"
-                className="mb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground"
+                className="mb-3 text-base font-medium uppercase tracking-[0.1em] text-subtle-foreground"
               >
                 {title}
               </Typography>

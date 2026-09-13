@@ -238,3 +238,20 @@ src/
 ---
 
 _Designed and built by John Lester Escarlan._
+
+## Selected portfolio layout
+
+The home page uses a floating About / Experience / Projects navigation, a combined
+hero and biography, expandable experience and stack, date-free credentials, an interactive
+three-project preview, GitHub activity, and a compact footer. All six case studies remain
+available through the archive. Text uses Poppins at 16px or 24px and weights 400 or
+500. See `design-qa.md` for visual verification.
+
+GitHub contributions use server-side GraphQL when `GITHUB_TOKEN` is configured,
+with a direct public GitHub calendar fallback when the token is absent or fails.
+Dates, daily counts, and the total are validated before caching for 24 hours.
+If both sources fail, the section links to the real GitHub profile. The public
+fallback depends on GitHub’s calendar markup and fails safely if that changes. The assistant retains its existing API.
+
+On Node 25, run tests with `NODE_OPTIONS=--no-experimental-webstorage pnpm test`
+to prevent Node's experimental global storage from shadowing jsdom's Storage.

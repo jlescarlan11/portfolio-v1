@@ -14,8 +14,8 @@ vi.mock('next/image', async () => {
 
   const MockImage = ReactModule.forwardRef<
     HTMLImageElement,
-    React.ImgHTMLAttributes<HTMLImageElement> & { priority?: boolean }
-  >(function MockImage({ priority, alt = '', ...props }, ref) {
+    React.ImgHTMLAttributes<HTMLImageElement> & { priority?: boolean; unoptimized?: boolean }
+  >(function MockImage({ priority, unoptimized, alt = '', ...props }, ref) {
     return (
       // The production component remains next/image; this native element exposes
       // its load, error, cache, and decode boundaries to the component tests.
@@ -24,6 +24,7 @@ vi.mock('next/image', async () => {
         ref={ref}
         alt={alt}
         data-priority={String(Boolean(priority))}
+        data-unoptimized={String(Boolean(unoptimized))}
         {...props}
       />
     );

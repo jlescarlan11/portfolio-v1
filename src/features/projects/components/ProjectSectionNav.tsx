@@ -139,7 +139,7 @@ export function ProjectSectionNav(): React.JSX.Element {
       <Typography
         variant="caption"
         as="p"
-        className="mb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground"
+        className="mb-3 text-base font-medium uppercase tracking-[0.1em] text-subtle-foreground"
       >
         On this page
       </Typography>
@@ -164,7 +164,7 @@ export function ProjectSectionNav(): React.JSX.Element {
               >
                 <span
                   aria-hidden="true"
-                  className="font-mono text-[10px] tabular-nums text-subtle-foreground"
+                  className="font-sans text-base tabular-nums text-subtle-foreground"
                 >
                   {String(index + 1).padStart(2, '0')}
                 </span>

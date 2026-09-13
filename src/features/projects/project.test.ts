@@ -121,7 +121,7 @@ test('every project provides valid listing metadata', () => {
   assert.deepEqual(pacu.listing.capabilities, [
     'WordPress',
     'Airtable',
-    'Custom Build'
+    'Web Development'
   ]);
   assert.equal(pacu.listing.thumbnail.fit, 'contain');
 

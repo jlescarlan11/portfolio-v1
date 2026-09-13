@@ -125,11 +125,11 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
         <div>
           <p
             id={CHAT_WINDOW_TITLE_ID}
-            className="font-serif text-sm font-semibold tracking-tight text-foreground"
+            className="font-sans text-base font-medium tracking-tight text-foreground"
           >
             John&apos;s AI Assistant
           </p>
-          <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.12em]">
+          <p className="mt-0.5 font-sans text-base uppercase tracking-[0.12em]">
             {isStreaming ? (
               <span className="text-subtle-foreground">● Answering</span>
             ) : error ? (
@@ -142,7 +142,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
         <button
           onClick={handleClose}
           aria-label="Close chat"
-          className="inline-flex size-6 items-center justify-center font-mono text-xs text-subtle-foreground transition-colors hover:text-foreground"
+          className="inline-flex size-11 shrink-0 items-center justify-center font-sans text-base text-subtle-foreground transition-colors hover:text-foreground"
         >
           ✕
         </button>
@@ -175,7 +175,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
             role="alert"
             className="flex items-center justify-between gap-3 border-t border-surface px-4 py-2"
           >
-            <p className="font-mono text-[10px] leading-relaxed text-subtle-foreground">
+            <p className="font-sans text-base leading-relaxed text-subtle-foreground">
               {error.message}
             </p>
             {error.canRetry && (
@@ -183,7 +183,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
                 type="button"
                 onClick={() => void retry()}
                 disabled={isStreaming || retryBlocked}
-                className="inline-flex min-h-6 shrink-0 items-center font-mono text-[10px] uppercase tracking-[0.1em] text-foreground underline decoration-foreground/30 underline-offset-2 disabled:opacity-30"
+                className="inline-flex min-h-11 shrink-0 items-center font-sans text-base uppercase tracking-[0.1em] text-foreground underline decoration-foreground/30 underline-offset-2 disabled:opacity-30"
               >
                 Retry
               </button>
@@ -203,13 +203,13 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
             placeholder="Ask about a project..."
             disabled={isStreaming || retryBlocked}
             maxLength={2000}
-            className="flex-1 bg-transparent font-mono text-[12px] text-foreground placeholder:text-foreground/40 focus:outline-none disabled:opacity-40"
+            className="min-w-0 flex-1 bg-transparent font-sans text-base text-foreground placeholder:text-foreground/40 focus:outline-none disabled:opacity-40"
           />
           <button
             type="submit"
             aria-label="Send message"
             disabled={isStreaming || retryBlocked || !input.trim()}
-            className="inline-flex size-6 items-center justify-center font-mono text-sm text-subtle-foreground transition-colors hover:text-foreground disabled:opacity-30"
+            className="inline-flex size-11 shrink-0 items-center justify-center font-sans text-base text-subtle-foreground transition-colors hover:text-foreground disabled:opacity-30"
           >
             →
           </button>

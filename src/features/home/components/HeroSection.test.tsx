@@ -54,34 +54,17 @@ describe('HeroSection', () => {
       name: heroContent.profileImage.alt
     });
     expect(portrait).toBeInTheDocument();
-    expect(portrait).toHaveAttribute('data-src', '/hero-image.jpg');
+    expect(portrait).toHaveAttribute('data-src', '/hero-dither.png');
   });
 
   it('presents a concise introduction and a direct hiring path', () => {
     const { container } = render(<HeroSection {...heroContent} />);
 
-    expect(container.querySelector('#home')).toHaveClass('min-h-svh');
-    expect(container.querySelector('#home > div.relative.z-10')).toHaveClass('min-h-svh');
-
-    expect(screen.getByText(heroContent.tagline)).toBeVisible();
-    expect(
-      screen.queryByText(/recent work includes 12\+ production-blocking fixes/i)
-    ).not.toBeInTheDocument();
-
-    for (const removedService of [
-      'Full-stack product delivery',
-      'Production debugging and reliability',
-      'Workflow automation and integrations'
-    ]) {
-      expect(screen.queryByText(removedService)).not.toBeInTheDocument();
-    }
-
-    expect(
-      screen.getByRole('link', { name: /discuss a project/i })
-    ).toHaveAttribute('href', '#contact');
-    expect(heroContent.primaryCta.label).toBe('Discuss a project');
-    expect(
-      screen.getByRole('link', { name: /review case studies/i })
-    ).toHaveAttribute('href', '#work');
+    expect(container.querySelector('#about')).toBeInTheDocument();
+    expect(screen.getByText(/I study Computer Science/)).toBeVisible();
+    expect(screen.getByRole('link', { name: /Email me/ })).toHaveAttribute('href', 'mailto:jlescarlan11@gmail.com');
+    expect(screen.getByRole('link', { name: 'Résumé' })).toHaveAttribute('href', '/John_Lester_Escarlan_Resume.pdf');
+    expect(screen.getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', 'https://github.com/jlescarlan11');
+    expect(screen.queryByRole('button', { name: /copy email/i })).not.toBeInTheDocument();
   });
 });

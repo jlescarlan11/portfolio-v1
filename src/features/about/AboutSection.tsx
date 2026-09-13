@@ -119,7 +119,7 @@ function SectionLabel({ children, id }: { children: string; id: string }) {
       variant="caption"
       as="h3"
       id={id}
-      className="mb-6 text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle-foreground"
+      className="mb-6 text-base font-medium uppercase tracking-[0.12em] text-subtle-foreground"
     >
       {children}
     </Typography>
@@ -148,7 +148,7 @@ function SkillChip({ label, icon }: SkillChipProps) {
         <Typography
           variant="caption"
           as="span"
-          className="text-[11px] text-muted-foreground leading-none"
+          className="text-base text-muted-foreground leading-none"
         >
           {label}
         </Typography>
@@ -185,7 +185,7 @@ function TimelineRow({ id, title, subtitle, startDate, endDate, isCurrent, bulle
           <Typography
             variant="h4"
             as="h4"
-            className="font-semibold leading-snug transition-colors duration-200 group-hover:text-foreground"
+            className="font-medium leading-snug transition-colors duration-200 group-hover:text-foreground"
           >
             <span className="relative inline-block after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-full after:bg-foreground/30 after:origin-left after:scale-x-0 after:transition-transform after:duration-200 group-hover:after:scale-x-100">
               {title}
@@ -194,7 +194,7 @@ function TimelineRow({ id, title, subtitle, startDate, endDate, isCurrent, bulle
           <Typography
             variant="caption"
             as="p"
-            className="flex-shrink-0 font-mono text-[11px] tabular-nums text-subtle-foreground/70"
+            className="flex-shrink-0 font-sans text-base tabular-nums text-subtle-foreground/70"
           >
             <time dateTime={startDate}>{start}</time>
             <span className="mx-1 opacity-40">—</span>
@@ -205,7 +205,7 @@ function TimelineRow({ id, title, subtitle, startDate, endDate, isCurrent, bulle
             )}
           </Typography>
         </div>
-        <Typography variant="caption" as="p" className="mb-4 text-[12px] text-subtle-foreground">
+        <Typography variant="caption" as="p" className="mb-4 text-base text-subtle-foreground">
           {subtitle}
         </Typography>
         {bullets.length > 0 && (
@@ -296,7 +296,7 @@ export default function AboutSection({ content, contributionSlot }: AboutSection
                   <Typography
                     variant="caption"
                     as="h4"
-                    className="mb-3 text-[10px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground"
+                    className="mb-3 text-base font-medium uppercase tracking-[0.1em] text-subtle-foreground"
                   >
                     {category}
                   </Typography>

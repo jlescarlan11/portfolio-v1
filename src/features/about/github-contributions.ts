@@ -223,13 +223,92 @@ export async function fetchGitHubContributionData(
   }
 }
 
+// GitHub's public calendar supplies exact counts in tooltips, not data-level colors.
+// Parse only dates/counts; never render or execute provider HTML.
+export function parsePublicGitHubCalendar(html: string): GitHubContributionData {
+  if (html.length > 2_000_000) throw new GitHubContributionDataError();
+  const attribute = (tag: string, name: string): string | undefined =>
+    tag.match(new RegExp(`\\b${name}=["']([^"']*)["']`))?.[1];
+  const counts = new Map<string, number>();
+  for (const match of html.matchAll(/<tool-tip\b([^>]*)>([\s\S]*?)<\/tool-tip>/g)) {
+    const id = attribute(match[1], 'for');
+    if (!id?.startsWith('contribution-day-component-')) continue;
+    const count = match[2].trim().match(/^(No|\d+(?:,\d{3})*) contributions? on /)?.[1];
+    if (!count || counts.has(id)) throw new GitHubContributionDataError();
+    counts.set(id, count === 'No' ? 0 : Number(count.replaceAll(',', '')));
+  }
+  const days: ContributionDay[] = [];
+  for (const match of html.matchAll(/<td\b[^>]*>/g)) {
+    const date = attribute(match[0], 'data-date');
+    if (!date) continue;
+    const parsedDate = parseCanonicalCalendarDate(date);
+    const id = attribute(match[0], 'id');
+    const count = id ? counts.get(id) : undefined;
+    if (!parsedDate || count === undefined) throw new GitHubContributionDataError();
+    days.push({ date, contributionCount: count, weekday: parsedDate.getUTCDay() });
+  }
+  if (days.length < 365 || days.length > 378) throw new GitHubContributionDataError();
+  days.sort((a, b) => a.date.localeCompare(b.date));
+  const weeks: ContributionWeek[] = [];
+  days.forEach((day, index) => {
+    if (index > 0 && Date.parse(day.date) - Date.parse(days[index - 1].date) !== 86_400_000) {
+      throw new GitHubContributionDataError();
+    }
+    if (index === 0 || day.weekday === 0) weeks.push({ contributionDays: [] });
+    weeks[weeks.length - 1].contributionDays.push(day);
+  });
+  const heading = html.match(/<h2\b[^>]*id=["']js-contribution-activity-description["'][^>]*>([\s\S]*?)<\/h2>/)?.[1];
+  const total = heading?.match(/([\d,]+)\s+contributions?\s+in the last year/);
+  if (!total) throw new GitHubContributionDataError();
+  return parseGitHubContributionData({ data: { user: { contributionsCollection: {
+    contributionCalendar: { totalContributions: Number(total[1].replaceAll(',', '')), weeks }
+  } } } });
+}
+
+export async function fetchPublicGitHubContributionData(
+  username: string,
+  fetcher: Fetcher = fetch
+): Promise<GitHubContributionData> {
+  const normalized = normalizeGitHubUsername(username);
+  if (!normalized) throw new GitHubContributionDataError();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), GITHUB_REQUEST_TIMEOUT_MS);
+  try {
+    const response = await fetcher(`https://github.com/users/${normalized}/contributions`, {
+      headers: { Accept: 'text/html', 'Accept-Language': 'en-US' },
+      cache: 'no-store',
+      signal: controller.signal
+    });
+    if (!response.ok) throw new GitHubContributionDataError();
+    return parsePublicGitHubCalendar(await response.text());
+  } catch {
+    throw new GitHubContributionDataError();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export async function loadGitHubContributionData(
+  username: string,
+  token?: string,
+  fetcher: Fetcher = fetch
+): Promise<GitHubContributionData> {
+  if (token?.trim()) {
+    try {
+      return await fetchGitHubContributionData(username, token, fetcher);
+    } catch {
+      // A missing/expired token must not hide data already public on GitHub.
+    }
+  }
+  return fetchPublicGitHubContributionData(username, fetcher);
+}
+
 const getCachedGitHubContributionData = unstable_cache(
   async (username: string): Promise<GitHubContributionData> => {
     const token = process.env.GITHUB_TOKEN?.trim();
-    if (!token) throw new GitHubContributionDataError();
-    return fetchGitHubContributionData(username, token);
+    return loadGitHubContributionData(username, token);
   },
-  ['github-contribution-calendar-v1'],
+  ['github-contribution-calendar-v2'],
   { revalidate: 86_400 }
 );
 
@@ -241,11 +320,6 @@ export async function getGitHubContributionData(
     console.warn(
       'GitHub username invalid — contribution graph will not render.'
     );
-    return null;
-  }
-
-  if (!process.env.GITHUB_TOKEN?.trim()) {
-    console.warn('GITHUB_TOKEN not set — contribution graph will not render.');
     return null;
   }
 

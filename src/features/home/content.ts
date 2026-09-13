@@ -50,7 +50,7 @@ export const heroContent: HeroContent = {
   },
 
   profileImage: {
-    src: '/hero-image.jpg',
+    src: '/hero-dither.png',
     alt: 'Portrait of John Lester Escarlan'
   },
   socialLinks: [

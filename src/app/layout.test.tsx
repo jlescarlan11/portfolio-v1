@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import RootLayout from './layout';
 
 vi.mock('next/font/google', () => ({
-  Playfair_Display: () => ({ variable: '--font-playfair' })
+  Poppins: () => ({ variable: '--font-poppins' })
 }));
 vi.mock('geist/font/sans', () => ({
   GeistSans: { variable: '--font-geist-sans' }

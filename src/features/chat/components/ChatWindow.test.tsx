@@ -148,11 +148,11 @@ describe('ChatWindow', () => {
     expect(dialog).toHaveClass('sm:max-w-none');
   });
 
-  it('gives compact dialog controls at least a 24px pointer target', () => {
+  it('gives compact dialog controls a 44px pointer target', () => {
     const { getByRole } = render(<ChatWindow onClose={vi.fn()} />);
 
-    expect(getByRole('button', { name: 'Close chat' })).toHaveClass('size-6');
-    expect(getByRole('button', { name: 'Send message' })).toHaveClass('size-6');
+    expect(getByRole('button', { name: 'Close chat' })).toHaveClass('size-11');
+    expect(getByRole('button', { name: 'Send message' })).toHaveClass('size-11');
   });
 
   it('trims and submits one non-empty message', () => {
@@ -203,7 +203,7 @@ describe('ChatWindow', () => {
     const { getByRole } = render(<ChatWindow onClose={vi.fn()} />);
 
     fireEvent.click(getByRole('button', { name: /retry/i }));
-    expect(getByRole('button', { name: /retry/i })).toHaveClass('min-h-6');
+    expect(getByRole('button', { name: /retry/i })).toHaveClass('min-h-11');
     expect(hookResult.retry).toHaveBeenCalledOnce();
   });
 

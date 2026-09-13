@@ -14,7 +14,7 @@ export const projects: ProjectRecord[] = [
     title: 'Rent N Roll',
     category: 'Marketplace / Booking and Payments',
     listing: {
-      capabilities: ['Custom Build', 'Marketplace'],
+      capabilities: ['Web Development', 'Marketplace'],
       homepageRank: 1,
       thumbnail: {
         src: '/project/rent-n-roll.jpg',
@@ -155,7 +155,7 @@ export const projects: ProjectRecord[] = [
     title: 'HEALTH',
     category: 'Civic Health / Offline Mobile App',
     listing: {
-      capabilities: ['Custom Build', 'Mobile App'],
+      capabilities: ['Mobile App'],
       homepageRank: 2,
       thumbnail: {
         src: '/project/health-safety-check.png',
@@ -287,7 +287,7 @@ export const projects: ProjectRecord[] = [
     title: 'PriceCraft',
     category: 'Pricing PWA / Small Business',
     listing: {
-      capabilities: ['Custom Build', 'PWA'],
+      capabilities: ['Web Development', 'PWA'],
       homepageRank: 3,
       thumbnail: {
         src: '/project/pricecraft-results.png',
@@ -450,7 +450,7 @@ export const projects: ProjectRecord[] = [
     title: 'Regex2NFA',
     category: 'Computer Science Education / Interactive Visualization',
     listing: {
-      capabilities: ['Custom Build', 'Visualization'],
+      capabilities: ['Web Development', 'Visualization'],
       thumbnail: {
         src: '/project/regex2nfa-workspace.jpg',
         alt:
@@ -745,7 +745,7 @@ export const projects: ProjectRecord[] = [
     title: 'PACU',
     category: 'Pharmacy Education / Web Platform',
     listing: {
-      capabilities: ['WordPress', 'Airtable', 'Custom Build'],
+      capabilities: ['WordPress', 'Airtable', 'Web Development'],
       thumbnail: {
         src: '/project/pacu-logo.png',
         alt:

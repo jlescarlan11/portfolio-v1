@@ -25,14 +25,14 @@ export default function FooterSection({
             <Typography
               variant="label"
               as="p"
-              className="font-semibold text-foreground"
+              className="font-medium text-foreground"
             >
               {copyrightName}
             </Typography>
             <Typography
               variant="caption"
               as="p"
-              className="mt-1 text-[11px] text-subtle-foreground/60"
+              className="mt-1 text-base text-subtle-foreground"
             >
               Full-Stack Software Engineer
             </Typography>
@@ -45,7 +45,7 @@ export default function FooterSection({
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-[12px] text-subtle-foreground transition-colors duration-200 hover:text-foreground"
+                    className="text-base text-subtle-foreground transition-colors duration-200 hover:text-foreground"
                   >
                     {link.name}
                   </Link>
@@ -60,7 +60,7 @@ export default function FooterSection({
           <Typography
             variant="caption"
             as="span"
-            className="text-[11px] text-subtle-foreground/50"
+            className="text-base text-subtle-foreground"
           >
             &copy; {year} {copyrightName}. All rights reserved.
           </Typography>

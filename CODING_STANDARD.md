@@ -86,6 +86,12 @@ Rules:
 
 ### 1.7.1 Typography Standards (Tailwind CSS Only)
 
+**Portfolio override (approved September 12, 2026):** Poppins throughout,
+24px for the hero and major headings, 16px for all other text; weights 400 and
+500 only. The role classes in `src/app/globals.css` are the source of truth.
+This selected system supersedes the older size and weight examples below.
+Preserve semantic heading levels; use spacing and muted neutral text for hierarchy.
+
 Use this guide for all typography across the app. The goal is consistent hierarchy, readability, accessibility, and visual calm.
 
 Core principles:

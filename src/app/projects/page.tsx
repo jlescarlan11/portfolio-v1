@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ProjectGrid, projects, projectsSectionContent } from '@/features/projects';
+import Image from 'next/image';
+import { projects, projectsSectionContent } from '@/features/projects';
 import { FadeIn } from '@/shared/components/FadeIn';
 import { Typography } from '@/shared/components/Typography';
 import { siteConfig } from '@/shared/site/config';
-import { SURFACE } from '@/shared/styles/shared';
 
 const pageTitle = 'All Projects';
 const pageDescription =
@@ -37,67 +37,54 @@ export const metadata: Metadata = {
   }
 };
 
+const previews: Record<string, string> = {
+  'rent-n-roll': 'Camera rentals, from discovery to return.',
+  health: 'Offline health records and guided care for Naga City residents.',
+  pricecraft: 'Recipe costing and selling prices for small food businesses.',
+  regex2nfa: 'Turn regular expressions into interactive, animated automata.',
+  'job-pipeline': 'An automated workflow for tracking job opportunities.',
+  pacu: 'Learning and subscription tools for pharmacy professionals.',
+};
+
 export default function ProjectsPage(): React.JSX.Element {
   return (
-    <main
-      id="main-content"
-      tabIndex={-1}
-      className="bg-surface px-5 pb-24 pt-12 sm:px-8 md:px-12 md:pb-32 md:pt-20"
-    >
-      <div className="mx-auto max-w-6xl">
-        <FadeIn as="header" className="mb-10 md:mb-12">
-          <div className="mb-12 flex items-center justify-between border-b border-surface pb-6">
-            <Link
-              href="/#work"
-              prefetch={false}
-              className="group flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.15em] text-foreground transition-colors hover:text-muted-foreground"
-            >
-              <span
-                aria-hidden="true"
-                className="transition-transform group-hover:-translate-x-1"
-              >
-                ←
-              </span>
-              Back to selected work
-            </Link>
-            <Typography
-              variant="caption"
-              as="span"
-              className="font-mono text-[11px] text-subtle-foreground"
-            >
-              {projects.length} case studies
-            </Typography>
+    <main id="main-content" tabIndex={-1} className="bg-surface px-6 pb-24 pt-28 md:pb-32 md:pt-32">
+      <div className="mx-auto max-w-3xl">
+        <FadeIn as="header" className="mb-14">
+          <Link href="/#work" prefetch={false} className="portfolio-link mb-10">
+            <span aria-hidden="true">←</span> Back to projects
+          </Link>
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <Typography variant="h1" as="h1">All projects</Typography>
+            <span className="text-muted-foreground">{projects.length} case studies</span>
           </div>
-
-          <div className="max-w-3xl">
-            <Typography
-              variant="caption"
-              as="p"
-              className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle-foreground"
-            >
-              Project archive
-            </Typography>
-            <Typography variant="h1" as="h1" className="text-foreground">
-              All projects
-            </Typography>
-            <Typography
-              variant="body"
-              as="p"
-              className="mt-5 max-w-2xl leading-relaxed text-muted-foreground"
-            >
-              Every case study, from client platforms and product builds to
-              educational tools and tested automation.
-            </Typography>
-          </div>
+          <p className="mt-4 text-muted-foreground">A selection of products, client work, and experiments.</p>
         </FadeIn>
 
-        <ProjectGrid
-          projects={projects}
-          ctaLabel={projectsSectionContent.ctaLabel}
-          layout="archive"
-          className={`border ${SURFACE.hairline}`}
-          ariaLabel="All projects"
-        />
+        <ul aria-label="All projects" data-layout="archive" className="grid grid-cols-1 gap-16 md:gap-20">
+          {projects.map(project => (
+            <li key={project.slug}>
+              <Link href={`/projects/${project.slug}`} aria-label={`${projectsSectionContent.ctaLabel}: ${project.title}`} className="group block rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-foreground">
+                <article>
+                  <div className={`relative aspect-video overflow-hidden rounded-xl border border-surface ${project.listing.thumbnail.fit === 'contain' ? 'bg-white' : 'bg-surface-muted'}`}>
+                    <Image src={project.listing.thumbnail.src} alt={project.listing.thumbnail.alt} fill
+                      sizes="(max-width: 816px) calc(100vw - 48px), 768px"
+                      style={{ objectPosition: project.listing.thumbnail.objectPosition ?? 'center' }}
+                      className={`${project.listing.thumbnail.fit === 'contain' ? 'object-contain' : 'object-cover'} transition-transform duration-500 motion-safe:group-hover:scale-[1.02] motion-reduce:transition-none`} />
+                  </div>
+                  <div className="mt-6 flex items-center justify-between gap-4">
+                    <h3 className="font-medium">{project.title}</h3>
+                    <span aria-hidden="true" className="text-muted-foreground transition-transform motion-safe:group-hover:translate-x-1">↗</span>
+                  </div>
+                  <p className="mt-2 text-muted-foreground">{previews[project.slug] ?? project.description}</p>
+                  <ul aria-label={`${project.title} capabilities`} className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground">
+                    {project.listing.capabilities.map(capability => <li key={capability}>{capability}</li>)}
+                  </ul>
+                </article>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
     </main>
   );

@@ -81,15 +81,14 @@ export const siteConfig = {
   } satisfies SeoConfig,
   navigation: {
     header: [
-      { name: 'Work', href: '/#work' },
       { name: 'About', href: '/#about' },
-      { name: 'Contact', href: '/#contact' }
+      { name: 'Experience', href: '/#experience' },
+      { name: 'Projects', href: '/#work' }
     ] satisfies NavItem[],
     footer: [
-      { name: 'Home', href: '/#home' },
-      { name: 'Work', href: '/#work' },
       { name: 'About', href: '/#about' },
-      { name: 'Contact', href: '/#contact' }
+      { name: 'Experience', href: '/#experience' },
+      { name: 'Projects', href: '/#work' }
     ] satisfies NavItem[]
   },
   footer: {

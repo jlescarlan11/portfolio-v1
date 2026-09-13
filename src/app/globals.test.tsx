@@ -19,18 +19,9 @@ describe('reduced-motion styles', () => {
 });
 
 describe('project case-study layout styles', () => {
-  it('uses a 680–720px desktop story column and keeps section navigation sticky at laptop heights', () => {
-    expect(stylesheet).toContain(
-      'grid-template-columns: minmax(220px, 280px) minmax(680px, 720px);'
-    );
-    expect(stylesheet).not.toContain(
-      '@media (min-width: 72rem) and (min-height:'
-    );
-    expect(stylesheet).toMatch(
-      /\.project-case-study-rail\s*\{\s*align-self: stretch;/
-    );
-    expect(stylesheet).toMatch(
-      /\.project-section-nav\s*\{\s*position: sticky;\s*top: 1rem;/
-    );
+  it('keeps case studies in one reading column with inline navigation', () => {
+    expect(stylesheet).toContain('.project-case-study-layout { display: block; max-width: 760px;');
+    expect(stylesheet).toContain('.project-section-nav { position: static; }');
+    expect(stylesheet).toContain('.project-section-nav ol { display: flex;');
   });
 });

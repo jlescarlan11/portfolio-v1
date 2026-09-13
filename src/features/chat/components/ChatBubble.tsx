@@ -85,13 +85,13 @@ export function ChatBubble() {
       )}
       {!isOpen && labelVisible && (
         <div className="hidden items-center gap-1.5 border border-surface bg-background/90 py-1.5 pl-3 pr-1.5 backdrop-blur-md lg:flex">
-          <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-subtle-foreground">
+          <span className="font-sans text-base uppercase tracking-[0.15em] text-subtle-foreground">
             Ask about John&apos;s work
           </span>
           <button
             onClick={() => setLabelVisible(false)}
             aria-label="Dismiss"
-            className="inline-flex size-6 items-center justify-center font-mono text-[10px] leading-none text-subtle-foreground/50 transition-colors hover:text-foreground"
+            className="inline-flex size-6 items-center justify-center font-sans text-base leading-none text-subtle-foreground/50 transition-colors hover:text-foreground"
           >
             ✕
           </button>

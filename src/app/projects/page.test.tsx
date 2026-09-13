@@ -27,9 +27,7 @@ describe('ProjectsPage', () => {
     const list = screen.getByRole('list', { name: 'All projects' });
     expect(list).toHaveAttribute('data-layout', 'archive');
     expect(list).toHaveClass(
-      'grid-cols-1',
-      'sm:grid-cols-2',
-      'lg:grid-cols-3'
+      'grid-cols-1'
     );
 
     const headings = within(list).getAllByRole('heading', { level: 3 });
@@ -62,7 +60,7 @@ describe('ProjectsPage', () => {
     });
     expect(within(pacuLink).getByText('WordPress')).toBeVisible();
     expect(within(pacuLink).getByText('Airtable')).toBeVisible();
-    expect(within(pacuLink).getByText('Custom Build')).toBeVisible();
+    expect(within(pacuLink).getByText('Web Development')).toBeVisible();
   });
 
   it('keeps the skip-link target and return path available', () => {
@@ -71,7 +69,7 @@ describe('ProjectsPage', () => {
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content');
     expect(screen.getByRole('main')).toHaveAttribute('tabindex', '-1');
     expect(
-      screen.getByRole('link', { name: 'Back to selected work' })
+      screen.getByRole('link', { name: 'Back to projects' })
     ).toHaveAttribute('href', '/#work');
   });
 

@@ -62,7 +62,7 @@ export function CertificationsList({
                 ) : cert.name}
               </Typography>
               {cert.issuer && (
-                <Typography variant="caption" as="p" className="mt-1 text-[11px] text-subtle-foreground">
+                <Typography variant="caption" as="p" className="mt-1 text-base text-subtle-foreground">
                   {cert.issuer}
                 </Typography>
               )}
@@ -73,7 +73,7 @@ export function CertificationsList({
                   variant="caption"
                   as="time"
                   dateTime={cert.year}
-                  className="font-mono text-[10px] tabular-nums text-subtle-foreground"
+                  className="font-sans text-base tabular-nums text-subtle-foreground"
                 >
                   {cert.year}
                 </Typography>
@@ -86,7 +86,7 @@ export function CertificationsList({
         <button
           type="button"
           onClick={() => setShowAll((v) => !v)}
-          className="mt-5 text-[12px] font-medium text-subtle-foreground underline underline-offset-4 decoration-foreground/20 transition-colors duration-200 hover:text-foreground hover:decoration-foreground"
+          className="mt-5 text-base font-medium text-subtle-foreground underline underline-offset-4 decoration-foreground/20 transition-colors duration-200 hover:text-foreground hover:decoration-foreground"
         >
           {showAll ? 'Show less' : `Show ${hiddenCount} more`}
         </button>

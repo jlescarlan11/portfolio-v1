@@ -30,7 +30,7 @@ export default function ContactSection({
           <Typography
             variant="caption"
             as="span"
-            className="text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle-foreground"
+            className="text-base font-medium uppercase tracking-[0.12em] text-subtle-foreground"
           >
             {content.prompt}
           </Typography>
@@ -45,7 +45,7 @@ export default function ContactSection({
             <Typography
               variant="label"
               as="span"
-              className="font-semibold transition-colors duration-200 group-hover:text-background"
+              className="font-medium transition-colors duration-200 group-hover:text-background"
             >
               {content.primaryCtaLabel}
             </Typography>

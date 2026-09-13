@@ -77,7 +77,7 @@ export default function NavigationBar({
 
   const pillBase = [
     'flex items-center gap-1',
-    'border px-2 py-1.5 sm:px-3 sm:py-2',
+    'rounded-full border px-1 py-1 sm:px-3 sm:py-2',
     'backdrop-blur-md transition-colors duration-500',
     isPastHero
       ? 'border-foreground/15 bg-background/80'
@@ -89,7 +89,7 @@ export default function NavigationBar({
       aria-label="main navigation"
       inert={!isVisible}
       className={[
-        'fixed top-6 left-1/2 z-50 -translate-x-1/2',
+        'fixed top-4 left-1/2 z-50 -translate-x-1/2 max-w-[calc(100vw-1rem)]',
         'transition-all duration-300 ease-out',
         isVisible
           ? 'translate-y-0 opacity-100'
@@ -111,7 +111,7 @@ export default function NavigationBar({
                   setIsVisible(true);
                 }}
                 className={[
-                  'group block px-4 py-2 sm:py-1.5',
+                  'group block rounded-full px-2 py-2 sm:px-4',
                   'transition-colors duration-200',
                   'hover:bg-surface-tint focus-visible:bg-surface-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/40',
                   'active:bg-surface-tint-strong'
@@ -121,7 +121,7 @@ export default function NavigationBar({
                   <Typography
                     variant="label"
                     as="span"
-                    className="text-[13px] text-muted-foreground transition-colors duration-200 group-hover:text-foreground"
+                    className="text-base text-muted-foreground transition-colors duration-200 group-hover:text-foreground"
                   >
                     {item.name}
                   </Typography>

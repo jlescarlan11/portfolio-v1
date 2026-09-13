@@ -14,6 +14,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.9
     },
+    ...['experience', 'stack', 'certifications'].map(path => ({
+      url: `${siteConfig.seo.siteUrl}/${path}`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7
+    })),
     ...getProjectSlugs().map((slug) => ({
       url: `${siteConfig.seo.siteUrl}/projects/${slug}`,
       changeFrequency: 'yearly' as const,

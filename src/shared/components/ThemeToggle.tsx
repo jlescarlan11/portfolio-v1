@@ -90,7 +90,7 @@ export function ThemeToggle(): React.JSX.Element {
       onClick={toggle}
       aria-label={mounted ? `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode` : 'Toggle theme'}
       className={[
-        'flex items-center justify-center w-8 h-8',
+        'flex items-center justify-center w-11 h-11',
         'text-muted-foreground transition-colors duration-200',
         'hover:text-foreground',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20',
@@ -98,8 +98,8 @@ export function ThemeToggle(): React.JSX.Element {
       ].join(' ')}
     >
       {theme === 'dark'
-        ? <FaSun size={13} aria-hidden="true" />
-        : <FaMoon size={13} aria-hidden="true" />
+        ? <FaSun size={20} aria-hidden="true" />
+        : <FaMoon size={20} aria-hidden="true" />
       }
     </button>
   );

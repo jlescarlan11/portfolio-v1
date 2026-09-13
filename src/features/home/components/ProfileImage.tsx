@@ -130,6 +130,7 @@ export default function ProfileImage({
             height={300}
             className="block h-full w-full object-cover grayscale"
             priority
+            unoptimized
             onLoad={(event) => verifyUsableImage(event.currentTarget)}
             onError={() => settle('fallback')}
           />

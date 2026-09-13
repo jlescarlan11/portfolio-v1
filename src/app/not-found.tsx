@@ -14,7 +14,7 @@ export default function NotFound(): React.JSX.Element {
         className="w-full max-w-xl border border-surface p-8 sm:p-12"
       >
         <p
-          className="mb-4 font-semibold uppercase tracking-[0.16em] text-subtle-foreground"
+          className="mb-4 font-medium uppercase tracking-[0.16em] text-subtle-foreground"
         >
           Error 404
         </p>

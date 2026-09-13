@@ -7,12 +7,8 @@ import {
   getProjectBySlug,
   getProjectSlugs
 } from '@/features/projects';
-import {
-  ProjectEvidenceLinks,
-  ProjectMetaStrip,
-  ProjectNarrativeSections
-} from '@/features/projects/components/ProjectCaseStudySections';
-import { ProjectSectionNav } from '@/features/projects/components/ProjectSectionNav';
+import { isRenderableExternalUrl } from '@/shared/lib/project';
+import { NewTabNotice } from '@/shared/components/NewTabNotice';
 import type { ProjectHeroVisual } from '@/features/projects/types';
 import { FadeIn } from '@/shared/components/FadeIn';
 import { Typography } from '@/shared/components/Typography';
@@ -95,9 +91,6 @@ export function ProjectHero({ visual, fallbackSrc, title }: ProjectHeroProps) {
           as="figcaption"
           className="border-t border-surface px-4 py-3 leading-relaxed text-muted-foreground"
         >
-          <span className="mb-1 block font-mono text-[11px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground">
-            Source: {visual.sourceLabel}
-          </span>
           {visual.caption}
         </Typography>
       </figure>
@@ -139,8 +132,7 @@ export function ProjectHero({ visual, fallbackSrc, title }: ProjectHeroProps) {
       />
       <span
         aria-hidden="true"
-        className="relative z-10 select-none font-black leading-none tracking-tighter text-foreground/[0.06]"
-        style={{ fontSize: 'clamp(3.5rem, 14vw, 9rem)' }}
+        className="relative z-10 select-none font-medium leading-none tracking-tighter text-foreground/[0.06]"
       >
         {title}
       </span>
@@ -163,13 +155,13 @@ function NextProjectCard({
         <Typography
           variant="caption"
           as="span"
-          className="text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle-foreground"
+          className="text-base font-medium uppercase tracking-[0.12em] text-subtle-foreground"
         >
           Next project
         </Typography>
         <span
           aria-hidden="true"
-          className="text-xl text-muted-foreground transition-transform duration-200 group-hover:translate-x-1"
+          className="text-base text-muted-foreground transition-transform duration-200 group-hover:translate-x-1"
         >
           →
         </span>
@@ -177,14 +169,14 @@ function NextProjectCard({
       <Typography
         variant="caption"
         as="span"
-        className="text-[11px] uppercase tracking-[0.1em] text-subtle-foreground"
+        className="text-base uppercase tracking-[0.1em] text-subtle-foreground"
       >
         {category}
       </Typography>
       <Typography
         variant="h2"
         as="span"
-        className="mt-2 block font-semibold text-foreground"
+        className="mt-2 block font-medium text-foreground"
       >
         {title}
       </Typography>
@@ -215,15 +207,15 @@ export default async function ProjectPage({
     <main
       id="main-content"
       tabIndex={-1}
-      className="bg-surface px-5 pb-24 pt-12 sm:px-8 md:px-12 md:pb-32 md:pt-20"
+      className="bg-surface px-5 pb-24 pt-28 sm:px-8 md:px-12 md:pb-32 md:pt-32"
     >
-      <article className="mx-auto max-w-6xl">
+      <article className="mx-auto max-w-4xl">
         <FadeIn as="header" className="mb-10 md:mb-12">
           <div className="mb-12 flex items-center justify-between border-b border-surface pb-6">
             <Link
-              href="/#work"
+              href="/projects"
               prefetch={false}
-              className="group flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.15em] text-foreground transition-colors hover:text-muted-foreground"
+              className="group flex items-center gap-2 text-base font-medium uppercase tracking-[0.15em] text-foreground transition-colors hover:text-muted-foreground"
             >
               <span
                 aria-hidden="true"
@@ -231,16 +223,8 @@ export default async function ProjectPage({
               >
                 ←
               </span>
-              Back to selected work
+              Back to projects
             </Link>
-            <Typography
-              variant="caption"
-              as="span"
-              className="font-mono text-[11px] text-foreground/20"
-              aria-hidden="true"
-            >
-              /{project.slug}
-            </Typography>
           </div>
 
           <div className="max-w-[720px]">
@@ -252,7 +236,7 @@ export default async function ProjectPage({
               <Typography
                 variant="caption"
                 as="p"
-                className="text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle-foreground"
+                className="text-base font-medium uppercase tracking-[0.12em] text-subtle-foreground"
               >
                 {project.category}
               </Typography>
@@ -261,8 +245,7 @@ export default async function ProjectPage({
             <Typography
               variant="display"
               as="h1"
-              className="mb-4 font-black leading-[1.02] tracking-tight"
-              style={{ fontSize: 'clamp(2.2rem, 7vw, 3.75rem)' }}
+              className="mb-4 font-medium leading-[1.02] tracking-tight"
             >
               {project.title}
             </Typography>
@@ -285,38 +268,44 @@ export default async function ProjectPage({
           />
         </FadeIn>
 
-        <ProjectEvidenceLinks
-          evidence={project.caseStudy.evidence}
-          links={project.links}
-        />
-
-        <div className="project-case-study-layout">
-          <FadeIn
-            delay={150}
-            as="aside"
-            aria-label="Project snapshot"
-            className="project-case-study-rail min-w-0"
-          >
-            <ProjectMetaStrip
-              roleScope={project.caseStudy.roleScope}
-              client={project.client}
-              completedAt={project.completedAt}
-              technologies={project.technologies}
-            />
-            <ProjectSectionNav />
-          </FadeIn>
-
-          <div className="project-case-study-story min-w-0">
-            <ProjectNarrativeSections
-              problem={project.caseStudy.problem}
-              solution={project.caseStudy.solution}
-              decisions={project.caseStudy.decisions}
-              impact={project.caseStudy.impact}
-              learnings={project.caseStudy.learnings}
-              visuals={project.caseStudy.visuals}
-            />
-          </div>
+        <div className="mb-14 flex flex-wrap gap-6" aria-label="Project links">
+          {[
+            { label: 'Visit website', url: project.links.liveUrl },
+            { label: 'View code', url: project.links.githubUrl },
+          ].filter(link => isRenderableExternalUrl(link.url)).map(link => (
+            <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="portfolio-link">
+              {link.label} <span aria-hidden="true">↗</span><NewTabNotice />
+            </a>
+          ))}
         </div>
+
+        <section aria-labelledby="contribution-heading" className="mb-14 space-y-5">
+          <h2 id="contribution-heading" className="h2">My contribution</h2>
+          <p>{project.caseStudy.roleScope.role}</p>
+          <ul className="list-disc space-y-3 pl-5 text-muted-foreground">
+            {project.caseStudy.roleScope.ownership.map(item => <li key={item}>{item}</li>)}
+          </ul>
+        </section>
+
+        {project.caseStudy.visuals.filter(visual => visual.kind === 'supporting').map(visual => (
+          <div key={visual.src} className="mb-14">
+            <ProjectHero visual={{ ...visual, kind: 'hero' }} fallbackSrc="" title={project.title} />
+          </div>
+        ))}
+
+        <section aria-labelledby="outcome-heading" className="mb-14 space-y-5">
+          <h2 id="outcome-heading" className="h2">Outcome</h2>
+          {project.caseStudy.impact.filter(item => item.kind === 'product').map(item => (
+            <p key={item.label} className="text-muted-foreground">{item.context}</p>
+          ))}
+        </section>
+
+        <section aria-labelledby="stack-heading" className="mb-16 space-y-5">
+          <h2 id="stack-heading" className="h2">Stack</h2>
+          <ul className="flex flex-wrap gap-2" aria-label="Technology stack">
+            {project.technologies.map(technology => <li className="stack-chip" key={technology}>{technology}</li>)}
+          </ul>
+        </section>
 
         {nextProject ? (
           <FadeIn

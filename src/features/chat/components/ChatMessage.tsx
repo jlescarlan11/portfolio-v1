@@ -6,10 +6,10 @@ import type { Components } from 'react-markdown';
 import { NewTabNotice } from '@/shared/components/NewTabNotice';
 
 const markdownComponents: Components = {
-  p: ({ children }) => <p className="mb-2 text-[13px] leading-relaxed last:mb-0">{children}</p>,
-  strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
-  ul: ({ children }) => <ul className="mb-2 ml-4 list-disc space-y-1 text-[13px] last:mb-0">{children}</ul>,
-  ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal space-y-1 text-[13px] last:mb-0">{children}</ol>,
+  p: ({ children }) => <p className="mb-2 text-base leading-relaxed last:mb-0">{children}</p>,
+  strong: ({ children }) => <strong className="font-medium text-foreground">{children}</strong>,
+  ul: ({ children }) => <ul className="mb-2 ml-4 list-disc space-y-1 text-base last:mb-0">{children}</ul>,
+  ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal space-y-1 text-base last:mb-0">{children}</ol>,
   li: ({ children }) => <li>{children}</li>,
   a: ({ href, children }) => (
     <a href={href} target="_blank" rel="noopener noreferrer" className="text-foreground underline decoration-foreground/30 underline-offset-2 transition-colors hover:decoration-foreground/70">
@@ -18,11 +18,11 @@ const markdownComponents: Components = {
     </a>
   ),
   code: ({ children }) => (
-    <code className="bg-surface-tint px-1 py-0.5 font-mono text-xs text-foreground">{children}</code>
+    <code className="bg-surface-tint px-1 py-0.5 font-sans text-base text-foreground">{children}</code>
   ),
   img: ({ alt }) =>
     alt ? (
-      <span className="text-[13px] italic text-subtle-foreground">{alt}</span>
+      <span className="text-base italic text-subtle-foreground">{alt}</span>
     ) : null,
 };
 
@@ -38,19 +38,19 @@ export const ChatMessage = memo(function ChatMessage({ role, content, isThinking
   const isUser = role === 'user';
   return (
     <div className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-      <span className={`flex h-6 w-6 shrink-0 items-center justify-center border font-mono text-[9px] uppercase tracking-widest ${
+      <span className={`flex h-6 w-6 shrink-0 items-center justify-center border font-sans text-base uppercase tracking-widest ${
         isUser
           ? 'border-foreground/20 bg-foreground/10 text-foreground/70'
           : 'border-foreground/15 bg-foreground/[0.06] text-subtle-foreground'
       }`}>
         {isUser ? 'You' : 'AI'}
       </span>
-      <div className={`max-w-[85%] text-sm leading-relaxed ${
-        isUser ? 'bg-surface-tint px-3 py-2 font-mono text-[12px] text-foreground' : 'text-muted-foreground'
+      <div className={`max-w-[85%] text-base leading-relaxed ${
+        isUser ? 'bg-surface-tint px-3 py-2 font-sans text-base text-foreground' : 'text-muted-foreground'
       }`}>
         {isThinking ? (
           <span className="flex items-center gap-2" aria-label="Thinking">
-            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-subtle-foreground animate-pulse">thinking</span>
+            <span className="font-sans text-base uppercase tracking-[0.12em] text-subtle-foreground animate-pulse">thinking</span>
             {THINKING_DELAYS.map((delay, i) => (
               <span key={i} className="h-1 w-1 animate-pulse rounded-full bg-current opacity-30" style={{ animationDelay: `${delay}ms` }} />
             ))}

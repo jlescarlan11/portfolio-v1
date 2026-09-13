@@ -25,229 +25,25 @@ afterEach(() => {
 });
 
 describe('ProjectPage', () => {
-  it.each(projects)(
-    'renders the structured case-study content for $slug',
-    async project => {
-      const page = await ProjectPage({
-        params: Promise.resolve({ slug: project.slug })
-      });
-
-      render(page);
-
-      expect(screen.getByText(project.caseStudy.summary)).toBeVisible();
-      expect(screen.getByText(project.caseStudy.roleScope.role)).toBeVisible();
-      expect(screen.getByText(project.caseStudy.problem.audience)).toBeVisible();
-      expect(screen.getByText(project.caseStudy.problem.challenge)).toBeVisible();
-      expect(screen.getByText(project.caseStudy.problem.stakes)).toBeVisible();
-      expect(screen.getByText(project.caseStudy.solution.summary)).toBeVisible();
-
-      for (const ownership of project.caseStudy.roleScope.ownership) {
-        expect(screen.getByText(ownership)).toBeVisible();
-      }
-      for (const step of project.caseStudy.solution.workflow) {
-        expect(screen.getByText(step)).toBeVisible();
-      }
-      for (const outcome of project.caseStudy.impact) {
-        expect(screen.getByText(outcome.value)).toBeVisible();
-        expect(screen.getByText(outcome.label)).toBeVisible();
-        expect(screen.getByText(outcome.context)).toBeVisible();
-      }
-      for (const decision of project.caseStudy.decisions) {
-        expect(screen.getByText(decision.title)).toBeVisible();
-        expect(screen.getByText(decision.constraint)).toBeVisible();
-        expect(screen.getByText(decision.decision)).toBeVisible();
-        expect(screen.getByText(decision.rationale)).toBeVisible();
-      }
-      for (const learning of [
-        ...project.caseStudy.learnings.lessons,
-        ...project.caseStudy.learnings.improvements,
-        ...project.caseStudy.learnings.unvalidated
-      ]) {
-        expect(screen.getByText(learning)).toBeVisible();
-      }
-      for (const technology of project.technologies) {
-        expect(screen.getByText(technology)).toBeVisible();
-      }
-      for (const visual of project.caseStudy.visuals) {
-        expect(screen.getByRole('img', { name: visual.alt })).toBeVisible();
-        expect(screen.getByText(visual.caption)).toBeVisible();
-        expect(
-          screen.getAllByText(`Source: ${visual.sourceLabel}`).length
-        ).toBeGreaterThanOrEqual(1);
-      }
-
-      const evidenceRegion = screen.getByRole('region', {
-        name: 'Public evidence'
-      });
-      for (const evidence of project.caseStudy.evidence) {
-        const label = evidence.kind === 'live-product'
-          ? 'Live product'
-          : 'Public repository';
-        expect(
-          within(evidenceRegion).getByRole('link', {
-            name: new RegExp(`^${label} \\(opens in new tab\\)`)
-          })
-        ).toBeVisible();
-        expect(within(evidenceRegion).getByText(evidence.description)).toBeVisible();
-      }
-    },
-    10_000
-  );
-
-  it('preserves the skip-link target and top portfolio return link', async () => {
-    const page = await ProjectPage({
-      params: Promise.resolve({ slug: 'rent-n-roll' })
-    });
-
-    render(page);
-
+  it.each(projects)('shows a concise project story for $slug', async project => {
+    render(await ProjectPage({ params: Promise.resolve({ slug: project.slug }) }));
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content');
-    expect(screen.getByRole('main')).toHaveAttribute('tabindex', '-1');
-    const backLinks = screen.getAllByRole('link', {
-      name: /Back to selected work/
-    });
-    expect(backLinks).toHaveLength(1);
-    expect(backLinks[0]).toHaveAttribute('href', '/#work');
-  });
-
-  it('exposes the required case-study section names in order and removes legacy headings', async () => {
-    const page = await ProjectPage({
-      params: Promise.resolve({ slug: 'rent-n-roll' })
-    });
-
-    render(page);
-
-    const headings = [
-      'Problem',
-      'Solution',
-      'Engineering Decisions',
-      'Outcomes',
-      'Learnings and Next Steps'
-    ].map(name => screen.getByRole('heading', { level: 2, name }));
-
-    for (let index = 0; index < headings.length - 1; index += 1) {
-      expect(
-        headings[index].compareDocumentPosition(headings[index + 1]) &
-          Node.DOCUMENT_POSITION_FOLLOWING
-      ).toBeTruthy();
-    }
-
-    for (const legacyHeading of ['Overview', 'Impact', 'Highlights', 'Gallery']) {
-      expect(
-        screen.queryByRole('heading', { name: legacyHeading })
-      ).not.toBeInTheDocument();
-    }
-  });
-
-  it('keeps product outcomes separate from implementation statistics', async () => {
-    const page = await ProjectPage({
-      params: Promise.resolve({ slug: 'pricecraft' })
-    });
-
-    render(page);
-
-    const productGroup = screen
-      .getByRole('heading', { name: 'Product and delivery' })
-      .closest('div');
-    const implementationGroup = screen
-      .getByRole('heading', { name: 'Implementation evidence' })
-      .closest('div');
-    expect(productGroup).not.toBeNull();
-    expect(implementationGroup).not.toBeNull();
-    expect(within(productGroup!).getByText('Receipt to catalog')).toBeVisible();
-    expect(within(productGroup!).queryByText('300+ tests')).not.toBeInTheDocument();
-    expect(
-      within(implementationGroup!).getByText('300+ tests')
-    ).toBeVisible();
-  });
-
-  it('renders one hero visual and associates supporting visuals with their narrative section', async () => {
-    const rent = projects.find(project => project.slug === 'rent-n-roll');
-    if (!rent) throw new Error('Rent N Roll fixture is missing');
-
-    const page = await ProjectPage({
-      params: Promise.resolve({ slug: rent.slug })
-    });
-
-    render(page);
-
-    const hero = rent.caseStudy.visuals.find(visual => visual.kind === 'hero');
-    const supporting = rent.caseStudy.visuals.find(
-      visual => visual.kind === 'supporting'
-    );
-    if (!hero || !supporting) throw new Error('Expected visual fixtures');
-
-    expect(screen.getAllByRole('img', { name: hero.alt })).toHaveLength(1);
-    const solution = screen.getByRole('region', { name: 'Solution' });
-    expect(
-      within(solution).getByRole('img', { name: supporting.alt })
-    ).toBeVisible();
-    expect(within(solution).getByText(supporting.caption)).toBeVisible();
-  });
-
-  it('announces external destinations and renders each one exactly once', async () => {
-    const page = await ProjectPage({
-      params: Promise.resolve({ slug: 'pricecraft' })
-    });
-
-    render(page);
-
-    expect(
-      screen.getAllByRole('link', {
-        name: /^Live product \(opens in new tab\)/
-      })
-    ).toHaveLength(1);
-    expect(
-      screen.getAllByRole('link', {
-        name: /^Public repository \(opens in new tab\)/
-      })
-    ).toHaveLength(1);
-    for (const link of screen.getAllByRole('link', {
-      name: /opens in new tab/
-    })) {
+    expect(screen.getByText(project.caseStudy.summary)).toBeVisible();
+    expect(screen.getByText(project.caseStudy.roleScope.role)).toBeVisible();
+    for (const item of project.caseStudy.roleScope.ownership) expect(screen.getByText(item)).toBeVisible();
+    for (const item of project.caseStudy.impact.filter(item => item.kind === 'product')) expect(screen.getByText(item.context)).toBeVisible();
+    for (const visual of project.caseStudy.visuals) expect(screen.getByRole('img', { name: visual.alt })).toBeVisible();
+    for (const technology of project.technologies) expect(screen.getByText(technology)).toBeVisible();
+    expect(screen.queryByRole('navigation', { name: 'Case study sections' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Engineering Decisions' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Back to projects/ })).toHaveAttribute('href', '/projects');
+    for (const [label, url] of [['Visit website', project.links.liveUrl], ['View code', project.links.githubUrl]]) {
+      if (!url) continue;
+      const link = screen.getByRole('link', { name: new RegExp(label!) });
+      expect(link).toHaveAttribute('href', url);
       expect(link).toHaveAttribute('target', '_blank');
       expect(link).toHaveAttribute('rel', 'noopener noreferrer');
     }
-  });
-
-  it('renders one in-flow snapshot before the narrative with functional section anchors', async () => {
-    const page = await ProjectPage({
-      params: Promise.resolve({ slug: 'rent-n-roll' })
-    });
-
-    render(page);
-
-    const snapshot = screen.getByRole('complementary', {
-      name: 'Project snapshot'
-    });
-    const problem = screen.getByRole('region', { name: 'Problem' });
-    expect(
-      snapshot.compareDocumentPosition(problem) &
-        Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
-
-    const navigation = screen.getByRole('navigation', {
-      name: 'Case study sections'
-    });
-    const expectedLinks = [
-      ['Problem', '#problem'],
-      ['Solution', '#solution'],
-      ['Engineering Decisions', '#decisions'],
-      ['Outcomes', '#outcomes'],
-      ['Learnings', '#learnings']
-    ];
-    for (const [name, href] of expectedLinks) {
-      expect(within(navigation).getByRole('link', { name })).toHaveAttribute(
-        'href',
-        href
-      );
-      expect(document.querySelectorAll(href)).toHaveLength(1);
-    }
-    expect(
-      within(navigation)
-        .getAllByRole('link')
-        .filter(link => link.hasAttribute('aria-current'))
-    ).toHaveLength(1);
   });
 
   it.each([

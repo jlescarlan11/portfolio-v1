@@ -27,17 +27,17 @@ interface ProjectGridProps {
   ariaLabel?: string;
 }
 
-function LiveStatus({ title }: { title: string }) {
+function ProjectStatus({ title, status }: { title: string; status: string }) {
   return (
     <span
-      aria-label={`${title} has a live product`}
+      aria-label={`${title}: ${status}`}
       className="absolute left-3 top-3 inline-flex items-center gap-1.5 border border-black/10 bg-white/90 px-2 py-1 text-black backdrop-blur-sm"
     >
       <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
         <span className="absolute inline-flex h-full w-full motion-safe:animate-ping bg-black opacity-20" />
         <span className="relative inline-flex h-1.5 w-1.5 bg-black/70" />
       </span>
-      <span className="caption uppercase tracking-[0.14em]">Live</span>
+      <span className="text-base font-normal uppercase tracking-[0.14em]">{status}</span>
     </span>
   );
 }
@@ -71,7 +71,7 @@ function ProjectCard({ project, ctaLabel, imageSizes }: ProjectCardProps) {
     <Link
       href={`/projects/${slug}`}
       aria-label={`${ctaLabel}: ${title}`}
-      className="group block h-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground"
+      className="group block h-full rounded-xl overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground"
     >
       <article
         aria-labelledby={titleId}
@@ -93,7 +93,7 @@ function ProjectCard({ project, ctaLabel, imageSizes }: ProjectCardProps) {
             } transition-transform duration-500 motion-safe:group-hover:scale-[1.02] motion-reduce:transition-none`}
           />
           {isRenderableExternalUrl(links.liveUrl) ? (
-            <LiveStatus title={title} />
+            <ProjectStatus title={title} status={caseStudy.roleScope.status ?? "Public preview"} />
           ) : null}
         </div>
 
@@ -115,7 +115,7 @@ function ProjectCard({ project, ctaLabel, imageSizes }: ProjectCardProps) {
             </ul>
             <time
               dateTime={completedAt}
-              className="caption shrink-0 whitespace-nowrap font-mono tabular-nums text-subtle-foreground/70"
+              className="caption shrink-0 whitespace-nowrap font-sans tabular-nums text-subtle-foreground/70"
             >
               {formatMonthYear(completedAt, 'short')}
             </time>
@@ -148,7 +148,7 @@ function ProjectCard({ project, ctaLabel, imageSizes }: ProjectCardProps) {
               {visibleTechnologies.map(technology => (
                 <li key={technology}>
                   <span
-                    className={`caption whitespace-nowrap border px-2 py-0.5 font-mono ${SURFACE.hairline} text-subtle-foreground`}
+                    className={`caption whitespace-nowrap border px-2 py-0.5 font-sans ${SURFACE.hairline} text-subtle-foreground`}
                   >
                     {technology}
                   </span>
@@ -157,7 +157,7 @@ function ProjectCard({ project, ctaLabel, imageSizes }: ProjectCardProps) {
               {hiddenTechnologyCount > 0 ? (
                 <li>
                   <span
-                    className={`caption whitespace-nowrap border px-2 py-0.5 font-mono ${SURFACE.hairline} text-subtle-foreground`}
+                    className={`caption whitespace-nowrap border px-2 py-0.5 font-sans ${SURFACE.hairline} text-subtle-foreground`}
                   >
                     +{hiddenTechnologyCount}
                   </span>
@@ -193,7 +193,7 @@ export function ProjectGrid({
   const gridColumns =
     layout === 'homepage'
       ? 'grid-cols-1 md:grid-cols-3'
-      : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+      : 'grid-cols-1';
   const imageSizes =
     layout === 'homepage'
       ? '(max-width: 767px) calc(100vw - 3rem), (max-width: 1280px) 33vw, 320px'
@@ -203,7 +203,7 @@ export function ProjectGrid({
     <ul
       aria-label={ariaLabel}
       data-layout={layout}
-      className={`grid gap-px bg-surface-strong ${gridColumns} ${className}`}
+      className={`grid gap-8 ${gridColumns} ${className}`}
     >
       {projects.map((project, index) => (
         <FadeIn

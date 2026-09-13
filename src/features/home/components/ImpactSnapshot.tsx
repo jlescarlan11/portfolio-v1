@@ -38,7 +38,7 @@ export default function ImpactSnapshot({
               key={item.metric}
               className="flex min-w-0 flex-col bg-surface px-0 py-5 sm:px-5 sm:first:pl-0 sm:last:pr-0"
             >
-              <Typography variant="h4" as="dt" className="font-semibold">
+              <Typography variant="h4" as="dt" className="font-medium">
                 {item.metric}
               </Typography>
               <Typography

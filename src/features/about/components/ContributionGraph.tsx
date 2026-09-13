@@ -1,11 +1,4 @@
-// src/features/about/components/ContributionGraph.tsx
-//
-// SERVER COMPONENT — reads validated GitHub GraphQL data.
-// Revalidates every 24h through the Next.js data cache.
-//
-// Setup:
-//   GITHUB_TOKEN=ghp_xxxxx          (Settings → Developer settings → Tokens → read:user scope)
-//   NEXT_PUBLIC_GITHUB_USERNAME=jlescarlan11
+// Server component: validated GraphQL data, or GitHub’s public calendar. Cached for 24h.
 
 import { Typography } from '@/shared/components/Typography';
 import { getGitHubContributionData } from '../github-contributions';
@@ -27,8 +20,6 @@ const levelOpacity: Record<0 | 1 | 2 | 3 | 4, string> = {
   4: 'bg-foreground/90'
 };
 
-// Full 52 weeks = 1 year
-const WEEKS_TO_SHOW = 52;
 const monthFormatter = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   timeZone: 'UTC'
@@ -52,9 +43,9 @@ export default async function ContributionGraph({
   username = process.env.NEXT_PUBLIC_GITHUB_USERNAME ?? 'jlescarlan11'
 }: ContributionGraphProps) {
   const data = await getGitHubContributionData(username);
-  if (!data) return null;
+  if (!data) return <p className="text-muted-foreground">Activity is unavailable right now. <a className="underline underline-offset-4" href={`https://github.com/${username}`} target="_blank" rel="noopener noreferrer">View activity on GitHub</a>.</p>;
 
-  const weeks = data.weeks.slice(-WEEKS_TO_SHOW);
+  const weeks = data.weeks;
 
   // Month label positions — enforce minimum 4-week gap to prevent overlap
   const monthLabels: { index: number; label: string }[] = [];
@@ -78,14 +69,14 @@ export default async function ContributionGraph({
         <Typography
           variant="caption"
           as="p"
-          className="text-[10px] font-semibold uppercase tracking-[0.1em] text-subtle-foreground"
+          className="text-base font-medium uppercase tracking-[0.1em] text-subtle-foreground"
         >
           GITHUB CONTRIBUTIONS
         </Typography>
         <Typography
           variant="caption"
           as="p"
-          className="font-mono text-[11px] tabular-nums text-subtle-foreground"
+          className="font-sans text-base tabular-nums text-subtle-foreground"
         >
           {data.totalContributions.toLocaleString()} contributions · last year
         </Typography>
@@ -93,7 +84,7 @@ export default async function ContributionGraph({
 
       {/* Scrollable graph — full width, larger cells */}
       <ScrollableContainer>
-        <div style={{ minWidth: `${WEEKS_TO_SHOW * 15}px` }}>
+        <div style={{ minWidth: `${weeks.length * 15}px` }}>
 
           {/* Month labels — width must equal cell(13) + gap(2) = 15px */}
           <div className="mb-1.5 flex" aria-hidden="true">
@@ -103,7 +94,7 @@ export default async function ContributionGraph({
                 <div
                   key={i}
                   style={{ width: '15px', flexShrink: 0 }}
-                  className="text-[9px] text-foreground/50"
+                  className="text-base text-foreground/50"
                 >
                   {label ? label.label : ''}
                 </div>
@@ -134,7 +125,7 @@ export default async function ContributionGraph({
                       key={day.date}
                       title={`${day.contributionCount} contribution${day.contributionCount !== 1 ? 's' : ''} on ${dayFormatter.format(new Date(day.date))}`}
                       style={{ gridRowStart: day.weekday + 1 }}
-                      className={`h-[13px] w-[13px] flex-shrink-0 transition-opacity duration-150 hover:opacity-60 ${levelOpacity[level]}`}
+                      className={`h-[13px] w-[13px] rounded-full flex-shrink-0 transition-opacity duration-150 hover:opacity-60 ${levelOpacity[level]}`}
                     />
                   );
                 })}
@@ -144,11 +135,11 @@ export default async function ContributionGraph({
 
           {/* Legend */}
           <div className="mt-3 flex items-center justify-end gap-1.5" aria-hidden="true">
-            <span className="text-[9px] text-foreground/50 mr-0.5">Less</span>
+            <span className="text-base text-foreground/50 mr-0.5">Less</span>
             {([0, 1, 2, 3, 4] as const).map((level) => (
-              <div key={level} className={`h-[13px] w-[13px] ${levelOpacity[level]}`} />
+              <div key={level} className={`h-[13px] w-[13px] rounded-full ${levelOpacity[level]}`} />
             ))}
-            <span className="text-[9px] text-foreground/50 ml-0.5">More</span>
+            <span className="text-base text-foreground/50 ml-0.5">More</span>
           </div>
         </div>
       </ScrollableContainer>
