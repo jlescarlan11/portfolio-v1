@@ -11,7 +11,9 @@ describe('Experience disclosure', () => {
   it('links homepage previews to dedicated detail pages', () => {
     render(<ExperienceSection content={aboutContent} />);
     expect(screen.getByText('Bachelor of Science in Computer Science')).toBeVisible();
+    expect(screen.queryByText('Completed')).not.toBeInTheDocument();
     expect(screen.queryByText('Bayoa Analytics')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 3, name: 'Main stack' })).toBeVisible();
     expect(screen.getByRole('link', { name: 'Full history' })).toHaveAttribute('href', '/experience');
     expect(screen.getByRole('link', { name: 'View all' })).toHaveAttribute('href', '/stack');
     expect(screen.getByRole('link', { name: 'All certifications' })).toHaveAttribute('href', '/certifications');
@@ -26,6 +28,7 @@ describe('Experience disclosure', () => {
   });
   it('shows every technology on the stack page', () => {
     render(<StackPage />);
+    expect(screen.getByRole('heading', { level: 1, name: 'Stack' })).toBeVisible();
     for (const category of aboutContent.techCategories) for (const item of category.items) expect(screen.getAllByText(item.label).length).toBeGreaterThan(0);
     expect(screen.getByRole('link', { name: 'Back to home' })).toHaveAttribute('href', '/#experience');
   });

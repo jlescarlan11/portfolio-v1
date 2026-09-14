@@ -160,3 +160,57 @@ Production build (including lint and type checks) passes.
 - Homepage links now open /experience, /stack and /certifications instead of expanding content in place. Shared server-rendered components preserve all roles, education, technologies, credentials and verification URLs.
 - Added page titles, canonical URLs, sitemap entries and return links to the relevant homepage section.
 - Production build and six targeted tests passed. Browser clicks verified all three destinations and their Back to home links; history renders seven entries and certifications renders three credentials.
+
+---
+
+# Portfolio refinement QA — September 14, 2026
+
+## Comparison target
+
+- Source visual truth:
+  - `/var/folders/mh/rxmkm5jd2s1d952s608rwwy40000gn/T/codex-clipboard-65f4e4a3-c2d1-4235-a91e-63b08ea8911d.png`
+  - `/var/folders/mh/rxmkm5jd2s1d952s608rwwy40000gn/T/codex-clipboard-f8274e65-6074-4271-b156-574e08f5fca5.png`
+  - `/var/folders/mh/rxmkm5jd2s1d952s608rwwy40000gn/T/codex-clipboard-2d6ad296-dfe1-4a96-b23e-1892ad267a45.png`
+- Implementation screenshots:
+  - `/tmp/portfolio-design-qa-hero.png`
+  - `/tmp/portfolio-design-qa-experience.png`
+  - `/tmp/portfolio-design-qa-github.png`
+  - `/tmp/portfolio-design-qa-mobile.png`
+- Desktop viewport: 1440 x 900 CSS px, light theme.
+- Mobile viewport: 390 x 844 CSS px, responsive check.
+- Source pixels: 2940 x 1912, 2940 x 1912, and 2276 x 786. The source includes browser and OS chrome, so comparisons used page-content regions.
+- Implementation pixels: 1440 x 900 desktop and 390 x 844 mobile. The browser reported devicePixelRatio 2; its screenshot surface normalized files to CSS-pixel dimensions.
+- State: homepage at the About, Experience, and GitHub Activity anchors. Light theme matched the source; dark-theme mobile was also checked.
+
+## Full-view and focused comparison evidence
+
+- Existing Poppins typography, monochrome tokens, navigation, content order, and imagery remain consistent.
+- Hero comparison: the portrait is now 400 x 400 CSS px in the 1040px desktop container and 280px wide on mobile. Its asset, crop, grayscale treatment, transparency, and right alignment remain intact.
+- Experience comparison: the completed role shows only its date range. The homepage preview reads `MAIN STACK`, while the dedicated `/stack` page retains `Stack`.
+- GitHub comparison: the graph is 795px wide inside a 1040px scroller. Measured left and right spaces are both 122.5px; narrow viewports retain horizontal overflow.
+- Mobile comparison: the 280px portrait fits the single-column composition without clipping.
+
+## Required fidelity surfaces
+
+- Fonts and typography: unchanged; hierarchy, size, weight, tracking, wrapping, and line height remain consistent.
+- Spacing and layout rhythm: passed. Portrait scale and graph alignment improve balance without changing the section rhythm.
+- Colors and visual tokens: unchanged and checked in light and dark themes.
+- Image quality and asset fidelity: the existing portrait asset and treatment are preserved; no generated or replacement asset was introduced.
+- Copy and content: passed. `Completed` is removed, the homepage label is `Main stack`, and `/stack` remains `Stack`.
+
+## Findings
+
+- No actionable P0, P1, or P2 mismatches remain for the requested refinements.
+
+## Comparison history
+
+- Initial implementation comparison found no P0/P1/P2 issues, so no correction loop was required.
+
+## Verification
+
+- Browser check found no console errors.
+- Changed-component tests: 17 passed.
+- TypeScript and ESLint passed.
+- Full suite: all 403 tests passed with the repository's documented `NODE_OPTIONS=--no-experimental-webstorage` compatibility setting.
+
+final result: passed

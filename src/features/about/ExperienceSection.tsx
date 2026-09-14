@@ -41,7 +41,7 @@ export function ExperienceHistory({ content, full = false }: { content: AboutCon
     })),
   ].sort((a, b) => b.startDate.localeCompare(a.startDate));
   return <div>{entries.slice(0, full ? undefined : 3).map(item => <article key={item.id} className="experience-row">
-    <p className="text-muted-foreground">{date(item.startDate)} – {item.isCurrent ? 'Present' : date(item.endDate!)}{item.id.includes('pharmacy') && <span className="block">Completed</span>}</p>
+    <p className="text-muted-foreground">{date(item.startDate)} – {item.isCurrent ? 'Present' : date(item.endDate!)}</p>
     <h3 className="font-normal">{item.title}</h3>
     <p className="text-muted-foreground experience-company">{item.organization}</p>
     {full && <ul className="experience-details list-disc space-y-3 pl-5 text-muted-foreground">{item.details.map(text => <li key={text}>{text}</li>)}</ul>}
@@ -69,7 +69,7 @@ export default function ExperienceSection({ content }: { content: AboutContent }
     <div className="section-heading"><h2 id="experience-heading" className="h2">Experience</h2><Link className="portfolio-link" href="/experience">Full history<FiArrowRight aria-hidden="true" /></Link></div>
     <ExperienceHistory content={content} />
     <div className="mt-10">
-      <div className="section-heading subsection-heading"><h3 className="text-muted-foreground uppercase">Stack</h3><Link className="portfolio-link" href="/stack">View all<FiArrowRight aria-hidden="true" /></Link></div>
+      <div className="section-heading subsection-heading"><h3 className="text-muted-foreground uppercase">Main stack</h3><Link className="portfolio-link" href="/stack">View all<FiArrowRight aria-hidden="true" /></Link></div>
       <ul className="flex flex-wrap gap-2">{featuredStack.map(item => <li className="stack-chip" key={item}>{item}</li>)}</ul>
     </div>
     <div className="mt-10" id="certifications">

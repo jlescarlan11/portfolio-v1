@@ -216,7 +216,7 @@ body {
 .portfolio-section { margin-top: 8rem; }
 .portfolio-hero { position: relative; display: grid; grid-template-columns: 1.1fr 1fr; align-items: center; gap: 2rem; padding-top: 8rem; }
 .portfolio-hero > #home { position: absolute; top: 0; }
-.hero-portrait { align-self: end; width: 100%; }
+.hero-portrait { align-self: end; justify-self: end; width: min(100%, 400px); }
 .hero-portrait > div { background: transparent; }
 .hero-portrait img { width: 100%; object-fit: contain; }
 .section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1.5rem; margin-bottom: 2rem; }
@@ -253,7 +253,7 @@ body > footer, main + footer { margin-top: 8rem; }
 .project-case-study-story section { scroll-margin-top: 7rem; }
 @media (max-width: 760px) {
   .portfolio-hero { grid-template-columns: 1fr; gap: 2rem; padding-top: 7rem; }
-  .hero-portrait { order: -1; max-width: 320px; justify-self: center; }
+  .hero-portrait { order: -1; width: min(100%, 280px); justify-self: center; }
   .portfolio-section { margin-top: 5rem; }
   .experience-row { grid-template-columns: 1fr; gap: .35rem; }
   .experience-company { text-align: left; }

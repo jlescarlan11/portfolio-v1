@@ -84,7 +84,7 @@ export default async function ContributionGraph({
 
       {/* Scrollable graph — full width, larger cells */}
       <ScrollableContainer>
-        <div style={{ minWidth: `${weeks.length * 15}px` }}>
+        <div className="mx-auto w-max" style={{ minWidth: `${weeks.length * 15}px` }}>
 
           {/* Month labels — width must equal cell(13) + gap(2) = 15px */}
           <div className="mb-1.5 flex" aria-hidden="true">

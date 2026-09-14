@@ -67,4 +67,10 @@ describe('ContributionGraph', () => {
       screen.getByTitle('2 contributions on Aug 1, 2026')
     ).toBeInTheDocument();
   });
+
+  it('centers a contribution grid that is narrower than its container', async () => {
+    render(await ContributionGraph({ username: 'jlescarlan11' }));
+
+    expect(screen.getByRole('img').parentElement).toHaveClass('mx-auto', 'w-max');
+  });
 });
