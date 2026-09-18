@@ -26,7 +26,7 @@ vi.mock('@/features/home/components/FooterSection', () => ({
   default: () => <footer>Footer</footer>
 }));
 vi.mock('@/features/home/components/HeroSection', () => ({
-  default: () => <section id="home">Home<div id="contact">Email me</div></section>
+  default: () => <section id="home">Home</section>
 }));
 vi.mock('@/features/home/components/ImpactSnapshot', () => ({
   default: () => <section>Impact</section>
@@ -74,7 +74,8 @@ describe('HomePage', () => {
     const main = screen.getByRole('main');
     expect(main).not.toHaveAttribute('inert');
     expect(main).not.toHaveAttribute('aria-hidden');
-    expect(document.getElementById('contact')).toHaveTextContent('Email me');
+    expect(document.getElementById('contact')).toHaveTextContent('Contact');
+    expect(document.querySelectorAll('#contact')).toHaveLength(1);
     expect(screen.queryByText('Preparing portfolio')).not.toBeInTheDocument();
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });

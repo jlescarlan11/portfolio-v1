@@ -63,6 +63,7 @@ Create a `.env.local` file in the root directory:
 ```env
 NEXT_PUBLIC_SITE_URL=https://johnlesterescarlan.pro
 NEXT_PUBLIC_CONTACT_EMAIL=your-email@example.com
+NEXT_PUBLIC_BOOKING_URL=https://calendly.com/your-handle/intro-call
 GROQ_API_KEY=your-server-only-groq-key
 # Optional; Groq is the default.
 HOSTED_CHAT_PROVIDER=groq

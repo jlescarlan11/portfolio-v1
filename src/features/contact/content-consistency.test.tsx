@@ -46,4 +46,26 @@ describe('contact identity consistency', () => {
       expect(contactContent.email).toBe(expectedEmail);
     }
   );
+
+  it.each([
+    [undefined, null],
+    ['', null],
+    ['http://calendly.com/john/intro-call', null],
+    ['https://localhost/intro-call', null],
+    ['https://user:secret@calendly.com/john/intro-call', null],
+    [
+      ' https://calendly.com/john/intro-call ',
+      'https://calendly.com/john/intro-call'
+    ]
+  ])(
+    'normalizes configured booking URL %j to %j',
+    async (configuredUrl, expectedUrl) => {
+      vi.stubEnv('NEXT_PUBLIC_BOOKING_URL', configuredUrl);
+      vi.resetModules();
+
+      const { contactContent } = await import('./content');
+
+      expect(contactContent.booking.url).toBe(expectedUrl);
+    }
+  );
 });

@@ -9,6 +9,8 @@ import { projects } from '@/features/projects/data';
 import ProjectDeck from '@/features/projects/components/ProjectDeck';
 import NavigationBar from '@/shared/components/NavigationBar';
 import { siteConfig } from '@/shared/site/config';
+import ContactSection from '@/features/contact/ContactSection';
+import { contactContent } from '@/features/contact/content';
 
 export default function HomePage(): React.JSX.Element {
   return <>
@@ -25,6 +27,7 @@ export default function HomePage(): React.JSX.Element {
         <div className="section-heading"><h2 className="h2" id="github-heading">GitHub Activity</h2><a className="portfolio-link" href="https://github.com/jlescarlan11" target="_blank" rel="noopener noreferrer">@jlescarlan11 ↗</a></div>
         <Suspense fallback={<p className="text-muted-foreground">Loading GitHub activity…</p>}><ContributionGraph username="jlescarlan11" /></Suspense>
       </section>
+      <ContactSection content={contactContent} />
     </main>
     <FooterSection links={siteConfig.navigation.footer} copyrightName={siteConfig.footer.copyrightName} />
   </>;

@@ -28,9 +28,44 @@ describe('ContactSection', () => {
   it('states only the approved inquiry scope and response commitment', () => {
     const { container } = render(<ContactSection content={contactContent} />);
 
-    expect(screen.getByText('Freelance and contract inquiries')).toBeVisible();
+    expect(
+      screen.getByText('Employment, freelance, and contract inquiries')
+    ).toBeVisible();
     expect(screen.getByText(/reply within 48 hours/i)).toBeVisible();
     expect(container.innerHTML).not.toMatch(/animate-ping|available now|timezone/i);
+  });
+
+  it('links to a configured introductory call in a new tab', () => {
+    const content = {
+      ...contactContent,
+      booking: {
+        ...contactContent.booking,
+        url: 'https://calendly.com/john/intro-call'
+      }
+    };
+
+    render(<ContactSection content={content} />);
+
+    expect(
+      screen.getByRole('link', {
+        name: `${content.booking.label} ${content.booking.duration} (opens in new tab)`
+      })
+    ).toMatchObject({
+      href: content.booking.url,
+      target: '_blank',
+      rel: 'noopener noreferrer'
+    });
+  });
+
+  it('keeps email available when scheduling is not configured', () => {
+    render(<ContactSection content={contactContent} />);
+
+    expect(
+      screen.queryByRole('link', { name: /schedule an introductory call/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: contactContent.primaryCtaLabel })
+    ).toHaveAttribute('href', `mailto:${contactContent.email}`);
   });
 
   it('announces that the resume opens in a new tab', () => {
