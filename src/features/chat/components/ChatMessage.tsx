@@ -38,15 +38,15 @@ export const ChatMessage = memo(function ChatMessage({ role, content, isThinking
   const isUser = role === 'user';
   return (
     <div className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-      <span className={`flex h-6 w-6 shrink-0 items-center justify-center border font-sans text-base uppercase tracking-widest ${
+      <span className={`flex h-7 min-w-7 shrink-0 items-center justify-center rounded-md border px-1.5 font-sans text-[0.625rem] font-medium uppercase tracking-[0.12em] ${
         isUser
           ? 'border-foreground/20 bg-foreground/10 text-foreground/70'
           : 'border-foreground/15 bg-foreground/[0.06] text-subtle-foreground'
       }`}>
         {isUser ? 'You' : 'AI'}
       </span>
-      <div className={`max-w-[85%] text-base leading-relaxed ${
-        isUser ? 'bg-surface-tint px-3 py-2 font-sans text-base text-foreground' : 'text-muted-foreground'
+      <div className={`max-w-[82%] text-base leading-relaxed ${
+        isUser ? 'rounded-xl border border-surface bg-surface-tint px-3 py-2 font-sans text-base text-foreground' : 'pt-0.5 text-muted-foreground'
       }`}>
         {isThinking ? (
           <span className="flex items-center gap-2" aria-label="Thinking">

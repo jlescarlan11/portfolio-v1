@@ -1,6 +1,11 @@
 'use client';
 
 import React, { useEffect, useRef, useState, FormEvent } from 'react';
+import {
+  RiCheckboxBlankCircleFill,
+  RiCloseLine,
+  RiSendPlaneLine
+} from 'react-icons/ri';
 import { useOnlineChat } from '../hooks/useOnlineChat';
 import { ChatMessage } from './ChatMessage';
 import { CHAT_WINDOW_ID } from './chat-window-contract';
@@ -114,44 +119,52 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
       aria-modal="true"
       aria-labelledby={CHAT_WINDOW_TITLE_ID}
       onKeyDown={handleDialogKeyDown}
-      className="relative flex h-[min(520px,calc(100dvh-7rem))] w-[calc(100vw-3rem)] max-w-80 flex-col overflow-hidden border border-surface bg-background shadow-2xl sm:w-96 sm:max-w-none"
+      className="relative flex h-[min(560px,calc(100dvh-7rem))] w-[calc(100vw-3rem)] max-w-none flex-col overflow-hidden rounded-2xl border border-surface-strong bg-background shadow-[0_16px_50px_rgba(0,0,0,0.16)] sm:w-96"
     >
-      {/* corner brackets */}
-      <span className="pointer-events-none absolute left-2 top-2 z-10 h-4 w-4 border-l border-t border-foreground/20" aria-hidden="true" />
-      <span className="pointer-events-none absolute bottom-2 right-2 z-10 h-4 w-4 border-b border-r border-foreground/20" aria-hidden="true" />
-
       {/* Header */}
-      <div className="relative z-10 flex items-center justify-between border-b border-surface px-4 py-3">
+      <div className="relative z-10 flex min-h-24 items-center justify-between border-b border-surface px-5 py-4">
         <div>
+          <p className="mb-1 font-sans text-base uppercase tracking-[0.14em] text-subtle-foreground">
+            AI portfolio guide
+          </p>
           <p
             id={CHAT_WINDOW_TITLE_ID}
             className="font-sans text-base font-medium tracking-tight text-foreground"
           >
             John&apos;s AI Assistant
           </p>
-          <p className="mt-0.5 font-sans text-base uppercase tracking-[0.12em]">
+          <p className="mt-1 font-sans text-base uppercase tracking-[0.12em]">
             {isStreaming ? (
-              <span className="text-subtle-foreground">● Answering</span>
+              <span className="inline-flex items-center gap-2 text-subtle-foreground">
+                <RiCheckboxBlankCircleFill className="size-2" aria-hidden="true" />
+                Answering
+              </span>
             ) : error ? (
-              <span className="text-subtle-foreground">● Attention</span>
+              <span className="inline-flex items-center gap-2 text-subtle-foreground">
+                <RiCheckboxBlankCircleFill className="size-2" aria-hidden="true" />
+                Attention
+              </span>
             ) : (
-              <span className="text-subtle-foreground">● Ready</span>
+              <span className="inline-flex items-center gap-2 text-subtle-foreground">
+                <RiCheckboxBlankCircleFill className="size-2" aria-hidden="true" />
+                Ready
+              </span>
             )}
           </p>
         </div>
         <button
           onClick={handleClose}
           aria-label="Close chat"
-          className="inline-flex size-11 shrink-0 items-center justify-center font-sans text-base text-subtle-foreground transition-colors hover:text-foreground"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl text-subtle-foreground transition-colors hover:bg-surface-tint hover:text-foreground"
         >
-          ✕
+          <RiCloseLine className="size-5" aria-hidden="true" />
         </button>
       </div>
 
       {/* Body */}
       <div className="relative z-10 flex flex-1 flex-col overflow-hidden">
         <div
-          className="no-scrollbar flex flex-1 flex-col gap-4 overflow-y-auto p-4"
+          className="no-scrollbar flex flex-1 flex-col gap-5 overflow-y-auto p-5"
           aria-live="polite"
           aria-busy={isStreaming}
         >
@@ -173,7 +186,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
         {error && (
           <div
             role="alert"
-            className="flex items-center justify-between gap-3 border-t border-surface px-4 py-2"
+            className="mx-5 mb-3 flex items-center justify-between gap-3 rounded-xl border border-surface px-4 py-2"
           >
             <p className="font-sans text-base leading-relaxed text-subtle-foreground">
               {error.message}
@@ -192,7 +205,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
         )}
         <form
           onSubmit={handleSubmit}
-          className="flex items-center gap-3 border-t border-surface px-4 py-3"
+          className="mx-5 mb-5 flex min-h-14 items-center overflow-hidden rounded-xl border border-surface-strong bg-background pl-4 transition-colors focus-within:border-foreground"
         >
           <input
             ref={inputRef}
@@ -203,15 +216,15 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
             placeholder="Ask about a project..."
             disabled={isStreaming || retryBlocked}
             maxLength={2000}
-            className="min-w-0 flex-1 bg-transparent font-sans text-base text-foreground placeholder:text-foreground/40 focus:outline-none disabled:opacity-40"
+            className="chat-input min-w-0 flex-1 bg-transparent py-3 font-sans text-base text-foreground placeholder:text-foreground/40 disabled:opacity-40"
           />
           <button
             type="submit"
             aria-label="Send message"
             disabled={isStreaming || retryBlocked || !input.trim()}
-            className="inline-flex size-11 shrink-0 items-center justify-center font-sans text-base text-subtle-foreground transition-colors hover:text-foreground disabled:opacity-30"
+            className="inline-flex size-11 shrink-0 items-center justify-center border-l border-surface text-subtle-foreground transition-colors hover:bg-foreground hover:text-background disabled:bg-transparent disabled:text-subtle-foreground disabled:opacity-30"
           >
-            →
+            <RiSendPlaneLine className="size-5" aria-hidden="true" />
           </button>
         </form>
       </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { RiRobot2Line } from 'react-icons/ri';
+import { RiCloseLine, RiFocus3Line, RiRobot2Line } from 'react-icons/ri';
 import { ChatWindow } from './ChatWindow';
 import { CHAT_WINDOW_ID } from './chat-window-contract';
 
@@ -84,16 +84,16 @@ export function ChatBubble() {
         </div>
       )}
       {!isOpen && labelVisible && (
-        <div className="hidden items-center gap-1.5 border border-surface bg-background/90 py-1.5 pl-3 pr-1.5 backdrop-blur-md lg:flex">
-          <span className="font-sans text-base uppercase tracking-[0.15em] text-subtle-foreground">
+        <div className="hidden h-11 items-center rounded-xl border border-surface bg-background lg:flex">
+          <span className="px-4 font-sans text-base uppercase tracking-[0.15em] text-subtle-foreground">
             Ask about John&apos;s work
           </span>
           <button
             onClick={() => setLabelVisible(false)}
             aria-label="Dismiss"
-            className="inline-flex size-6 items-center justify-center font-sans text-base leading-none text-subtle-foreground/50 transition-colors hover:text-foreground"
+            className="mr-2 inline-flex size-6 items-center justify-center rounded-md text-subtle-foreground/60 transition-colors hover:bg-surface-tint hover:text-foreground"
           >
-            ✕
+            <RiCloseLine className="size-5" aria-hidden="true" />
           </button>
         </div>
       )}
@@ -104,11 +104,10 @@ export function ChatBubble() {
           aria-label="Open AI chat"
           aria-controls={CHAT_WINDOW_ID}
           aria-expanded="false"
-          className="relative flex h-11 w-11 items-center justify-center border border-surface bg-background/90 backdrop-blur-md transition-colors duration-300 hover:border-foreground/40 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+          className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-surface bg-background transition-colors duration-300 hover:border-foreground/50 hover:bg-surface-tint focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
         >
-          <span className="absolute left-[3px] top-[3px] h-2.5 w-2.5 border-l border-t border-foreground/30" aria-hidden="true" />
-          <span className="absolute bottom-[3px] right-[3px] h-2.5 w-2.5 border-b border-r border-foreground/30" aria-hidden="true" />
-          <RiRobot2Line className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <RiFocus3Line className="absolute size-8 text-foreground/25" aria-hidden="true" />
+          <RiRobot2Line className="relative size-4 text-muted-foreground" aria-hidden="true" />
         </button>
       )}
     </div>

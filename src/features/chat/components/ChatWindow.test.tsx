@@ -143,9 +143,8 @@ describe('ChatWindow', () => {
     const dialog = getByRole('dialog', { name: "John's AI Assistant" });
 
     expect(dialog).toHaveClass('w-[calc(100vw-3rem)]');
-    expect(dialog).toHaveClass('max-w-80');
+    expect(dialog).toHaveClass('max-w-none');
     expect(dialog).toHaveClass('sm:w-96');
-    expect(dialog).toHaveClass('sm:max-w-none');
   });
 
   it('gives compact dialog controls a 44px pointer target', () => {

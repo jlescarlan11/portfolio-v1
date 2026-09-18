@@ -49,7 +49,7 @@ export function CopyEmailButton({
         disabled={status === 'copying'}
         aria-label={`Copy email address ${email}`}
         title="Copy email address"
-        className="select-all font-sans text-base text-subtle-foreground/60 underline decoration-transparent underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
+        className="select-all font-sans text-base text-foreground underline decoration-transparent underline-offset-4 transition-colors hover:text-muted-foreground hover:decoration-muted-foreground"
       >
         {email}
       </button>

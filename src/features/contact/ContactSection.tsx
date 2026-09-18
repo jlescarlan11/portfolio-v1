@@ -4,6 +4,7 @@ import { Typography } from '@/shared/components/Typography';
 import { FadeIn } from '@/shared/components/FadeIn';
 import { NewTabNotice } from '@/shared/components/NewTabNotice';
 import { TYPOGRAPHY_STYLES } from '@/shared/styles/shared';
+import { RiArrowRightLine, RiExternalLinkLine } from 'react-icons/ri';
 import { CopyEmailButton } from './CopyEmailButton';
 
 interface ContactSectionProps {
@@ -20,13 +21,15 @@ export default function ContactSection({
       eyebrow={content.eyebrow}
       title={content.title}
       intro={content.intro}
+      className="contact-redesign"
+      contentClassName="contact-redesign__content"
     >
       <FadeIn
         delay={100}
-        className="pt-2"
+        className="contact-redesign__actions"
       >
         {/* ── Inquiry scope; intentionally not a current-availability signal ── */}
-        <div className="mb-8">
+        <div className="mb-9">
           <Typography
             variant="caption"
             as="span"
@@ -37,11 +40,11 @@ export default function ContactSection({
         </div>
 
         {/* ── Primary CTA — full-width on mobile, auto on desktop ── */}
-        <div className="mb-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <div className="mb-7">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-3">
             <a
               href={`mailto:${content.email}`}
-              className="group inline-flex min-h-11 w-full items-center justify-between border border-foreground px-6 py-4 transition-all duration-200 hover:bg-foreground hover:text-background sm:w-auto sm:min-w-64 sm:justify-start sm:gap-4"
+              className="group inline-flex min-h-16 w-full items-center justify-between rounded-xl border border-foreground px-6 py-5 transition-colors duration-200 hover:bg-foreground hover:text-background sm:h-[92px] sm:w-64 sm:shrink-0 sm:py-0"
             >
               <Typography
                 variant="label"
@@ -50,12 +53,10 @@ export default function ContactSection({
               >
                 {content.primaryCtaLabel}
               </Typography>
-              <span
+              <RiArrowRightLine
                 aria-hidden="true"
-                className="font-light opacity-50 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100"
-              >
-                →
-              </span>
+                className="size-5 opacity-45 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100"
+              />
             </a>
 
             {content.booking.url ? (
@@ -63,7 +64,7 @@ export default function ContactSection({
                 href={content.booking.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex min-h-11 w-full items-center justify-between border border-surface-divider px-6 py-4 transition-colors duration-200 hover:border-foreground sm:w-auto sm:min-w-72 sm:justify-start sm:gap-4"
+                className="group inline-flex min-h-16 w-full items-center justify-between rounded-xl border border-surface-strong px-6 py-5 transition-colors duration-200 hover:border-foreground sm:h-[92px] sm:w-[312px] sm:shrink-0 sm:py-0"
               >
                 <span className="flex flex-col gap-0.5">
                   <Typography variant="label" as="span" className="font-medium">
@@ -73,9 +74,10 @@ export default function ContactSection({
                     {content.booking.duration}
                   </Typography>
                 </span>
-                <span aria-hidden="true" className="opacity-50 transition-all duration-200 group-hover:translate-x-1 group-hover:opacity-100">
-                  ↗
-                </span>
+                <RiExternalLinkLine
+                  aria-hidden="true"
+                  className="size-5 opacity-45 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
+                />
                 <NewTabNotice />
               </a>
             ) : null}
@@ -96,10 +98,13 @@ export default function ContactSection({
             href={content.resumeHref}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${TYPOGRAPHY_STYLES.linkSecondary} inline-flex items-center gap-1.5`}
+            className={`${TYPOGRAPHY_STYLES.linkSecondary} group inline-flex items-center gap-1.5`}
           >
             {content.resumeLabel}
-            <span aria-hidden="true" className="opacity-50">↗</span>
+            <RiExternalLinkLine
+              aria-hidden="true"
+              className="size-5 opacity-50 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+            />
             <NewTabNotice />
           </a>
         </div>
