@@ -66,14 +66,9 @@ export default function ContactSection({
                 rel="noopener noreferrer"
                 className="group inline-flex min-h-16 w-full items-center justify-between rounded-xl border border-surface-strong px-6 py-5 transition-colors duration-200 hover:border-foreground sm:h-[92px] sm:w-[312px] sm:shrink-0 sm:py-0"
               >
-                <span className="flex flex-col gap-0.5">
-                  <Typography variant="label" as="span" className="font-medium">
-                    {content.booking.label}
-                  </Typography>
-                  <Typography variant="caption" as="span" className="text-subtle-foreground">
-                    {content.booking.duration}
-                  </Typography>
-                </span>
+                <Typography variant="label" as="span" className="font-medium">
+                  {content.booking.label}
+                </Typography>
                 <RiExternalLinkLine
                   aria-hidden="true"
                   className="size-5 opacity-45 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"

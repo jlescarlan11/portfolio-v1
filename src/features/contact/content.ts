@@ -3,7 +3,6 @@ import { isRenderableExternalUrl } from '@/shared/lib/project';
 export interface BookingDetails {
   url: string | null;
   label: string;
-  duration: string;
 }
 
 export interface ContactContent {
@@ -52,7 +51,6 @@ export const contactContent: ContactContent = {
   resumeHref: '/John_Lester_Escarlan_Resume.pdf',
   booking: {
     url: resolveBookingUrl(process.env.NEXT_PUBLIC_BOOKING_URL),
-    label: 'Schedule an introductory call',
-    duration: '20 minutes'
+    label: 'Schedule an introductory call'
   }
 };

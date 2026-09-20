@@ -48,7 +48,7 @@ describe('ContactSection', () => {
 
     expect(
       screen.getByRole('link', {
-        name: `${content.booking.label} ${content.booking.duration} (opens in new tab)`
+        name: `${content.booking.label} (opens in new tab)`
       })
     ).toMatchObject({
       href: content.booking.url,
