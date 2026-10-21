@@ -55,6 +55,40 @@ describe('startHostedChat', () => {
     vi.clearAllMocks();
   });
 
+  it.each([
+    'How can I contact John?',
+    'How do I reach John?',
+    "What's John's email address?",
+    'Can I contact you?',
+    'contact details'
+  ])('answers %s directly even after an overview', async content => {
+    const stream = await startHostedChat({
+      messages: [
+        { role: 'user', content: 'Tell me about John.' },
+        { role: 'assistant', content: 'John is a software engineer.' },
+        { role: 'user', content }
+      ],
+      signal: new AbortController().signal,
+      systemPrompt: TEST_SYSTEM_PROMPT
+    });
+    expect(await stream.iterator.next()).toEqual({
+      value: 'Email John at jlescarlan11@gmail.com or connect on [LinkedIn](https://www.linkedin.com/in/john-lester-escarlan/).',
+      done: false
+    });
+    expect(await stream.iterator.next()).toEqual({ done: true, value: undefined });
+    expect(await stream.getCompletion()).toEqual({ finishReason: 'stop' });
+    expect(mocks.streamText).not.toHaveBeenCalled();
+  });
+
+  it('keeps broader questions mentioning contact on the normal assistant path', () => {
+    startHostedChat({
+      messages: [{ role: 'user', content: 'Tell me about John and how to contact him.' }],
+      signal: new AbortController().signal,
+      systemPrompt: TEST_SYSTEM_PROMPT
+    });
+    expect(mocks.streamText).toHaveBeenCalledOnce();
+  });
+
   it('owns provider selection, model, prompt, output budget, timeout, and abort signal on the server', async () => {
     const signal = new AbortController().signal;
     const messages = [{ role: 'user' as const, content: 'Tell me about John.' }];

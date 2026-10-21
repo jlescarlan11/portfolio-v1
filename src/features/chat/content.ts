@@ -3,6 +3,19 @@ import { aboutContent } from '@/features/about/content';
 import { contactContent } from '@/features/contact/content';
 import { projects } from '@/features/projects/data';
 
+export const CHAT_CONTACT_ANSWER = `Email John at ${contactContent.email} or connect on [LinkedIn](https://www.linkedin.com/in/john-lester-escarlan/).`;
+
+// Match only standalone contact requests; mixed questions still use the model.
+export function getDirectContactAnswer(message: string): string | undefined {
+  const normalized = message.trim().toLowerCase().replace(/’/g, "'")
+    .replace(/[?.!]+$/, '').replace(/\s+/g, ' ');
+  const isContactQuestion =
+    /^(?:how (?:can|do) i|can i) (?:contact|reach|get in touch with) (?:john|him|you)$/.test(normalized) ||
+    /^(?:what is|what's) (?:john's|his|your) (?:email(?: address)?|contact (?:details|information))$/.test(normalized) ||
+    /^(?:john's |his |your )?(?:email(?: address)?|contact (?:details|information))$/.test(normalized);
+  return isContactQuestion ? CHAT_CONTACT_ANSWER : undefined;
+}
+
 export function buildSystemPrompt(): string {
   const skills = aboutContent.techCategories
     .map(cat => `${cat.category}: ${cat.items.map(i => i.label).join(', ')}`)

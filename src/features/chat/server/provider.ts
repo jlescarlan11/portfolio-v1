@@ -1,4 +1,5 @@
 import { streamText, type ModelMessage } from 'ai';
+import { getDirectContactAnswer } from '../content';
 import {
   HOSTED_CHAT_REASONING,
   MAX_OUTPUT_TOKENS,
@@ -12,6 +13,17 @@ export const startHostedChat: StartHostedChat = ({
   signal,
   systemPrompt
 }): HostedChatStream => {
+  const latestMessage = messages.at(-1);
+  const contactAnswer = latestMessage?.role === 'user'
+    ? getDirectContactAnswer(latestMessage.content)
+    : undefined;
+  if (contactAnswer) {
+    return {
+      iterator: (async function* () { yield contactAnswer; })(),
+      getCompletion: async () => ({ finishReason: 'stop' })
+    };
+  }
+
   const environment = process.env;
   const hostedProvider = resolveHostedChatProvider(environment);
   const model = hostedProvider.createModel(environment);
