@@ -29,11 +29,14 @@ describe('buildSystemPrompt', () => {
     const prompt = buildSystemPrompt();
 
     expect(prompt).toContain('role: Project and Technical Lead');
+    expect(prompt).toContain('I started in mathematics');
+    expect(prompt).toContain('51 passing tests');
+    expect(prompt).toContain('University of the Philippines Cebu');
     expect(prompt).toContain('300+ tests — Pricing changes checked');
     expect(prompt).toContain('7 workflows — Jobs split by responsibility');
     expect(prompt).toContain('Validated; disabled by default');
     expect(prompt).toContain(
-      '**Case studies:** Rent N Roll, HEALTH, PriceCraft, Regex2NFA, Job Pipeline, PACU'
+      '**Project stories:** PACU, PriceCraft, HEALTH'
     );
   });
 

@@ -31,7 +31,10 @@ describe('ProjectPage', () => {
     expect(screen.getByText(project.caseStudy.summary)).toBeVisible();
     expect(screen.getByText(project.caseStudy.roleScope.role)).toBeVisible();
     for (const item of project.caseStudy.roleScope.ownership) expect(screen.getByText(item)).toBeVisible();
-    for (const item of project.caseStudy.impact.filter(item => item.kind === 'product')) expect(screen.getByText(item.context)).toBeVisible();
+    expect(screen.getByText(project.caseStudy.problem.challenge)).toBeVisible();
+    for (const item of project.caseStudy.decisions) expect(screen.getByText(item.decision)).toBeVisible();
+    for (const lesson of project.caseStudy.learnings.lessons) expect(screen.getByText(lesson)).toBeVisible();
+    for (const item of project.caseStudy.impact) expect(screen.getByText(item.context)).toBeVisible();
     for (const visual of project.caseStudy.visuals) expect(screen.getByRole('img', { name: visual.alt })).toBeVisible();
     for (const technology of project.technologies) expect(screen.getByText(technology)).toBeVisible();
     expect(screen.queryByRole('navigation', { name: 'Case study sections' })).not.toBeInTheDocument();

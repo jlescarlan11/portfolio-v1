@@ -4,8 +4,8 @@ export const projectsSectionContent: ProjectsSectionContent = {
   eyebrow: 'Selected Work',
   title: 'A pharmacy learning platform, rental marketplace, civic health app, pricing tool, automata workspace, and job-search pipeline.',
   intro:
-    'Open a case study to see the user problem, what I owned, the decisions behind the build, and the proof available from the repository.',
-  ctaLabel: 'Read case study',
+    'Read the story behind each user problem: what I owned, the decisions I made, and the proof available from the work.',
+  ctaLabel: 'Read the story',
 };
 
 export const projects: ProjectRecord[] = [
@@ -15,7 +15,6 @@ export const projects: ProjectRecord[] = [
     category: 'Marketplace / Booking and Payments',
     listing: {
       capabilities: ['Web Development', 'Marketplace'],
-      homepageRank: 1,
       thumbnail: {
         src: '/project/rent-n-roll.jpg',
         alt:
@@ -156,7 +155,7 @@ export const projects: ProjectRecord[] = [
     category: 'Civic Health / Offline Mobile App',
     listing: {
       capabilities: ['Mobile App'],
-      homepageRank: 2,
+      homepageRank: 3,
       thumbnail: {
         src: '/project/health-safety-check.png',
         alt:
@@ -175,7 +174,7 @@ export const projects: ProjectRecord[] = [
     },
     caseStudy: {
       summary:
-        'A civic health app that helps residents decide whether to seek emergency help, find a nearby facility, or continue to a lower-acuity next step—even with unreliable connectivity.',
+        'With HEALTH, I led a five-person hackathon team building symptom assessment, facility discovery, and offline records for Naga City residents. We reached the top 15 of more than 200 teams.',
       evidence: [
         {
           kind: 'public-repository',
@@ -216,8 +215,8 @@ export const projects: ProjectRecord[] = [
       },
       learnings: {
         lessons: [
-          'In a health product, AI is a conditional helper—not the first or final authority for urgent safety.',
-          '“Works offline” is only credible when the exact records available without a connection are named.'
+          'I learned to give urgent inputs a predictable path before considering AI assistance.',
+          'I learned to define offline support in terms of the exact records available without a connection.'
         ],
         improvements: [
           'Bring clinicians and residents into structured review and field testing before treating the guidance as production care infrastructure.'
@@ -288,7 +287,7 @@ export const projects: ProjectRecord[] = [
     category: 'Pricing PWA / Small Business',
     listing: {
       capabilities: ['Web Development', 'PWA'],
-      homepageRank: 3,
+      homepageRank: 2,
       thumbnail: {
         src: '/project/pricecraft-results.png',
         alt:
@@ -308,7 +307,7 @@ export const projects: ProjectRecord[] = [
     },
     caseStudy: {
       summary:
-        'A pricing tool for small food businesses that answers a recurring question: after ingredients, labor, and overhead change, what should this product sell for?',
+        'I built PriceCraft around a practical question for small food businesses: after ingredients, labor, and overhead change, what should this product sell for?',
       evidence: [
         {
           kind: 'live-product',
@@ -355,8 +354,8 @@ export const projects: ProjectRecord[] = [
       },
       learnings: {
         lessons: [
-          'Receipt OCR is most useful as a draft that reduces typing; it should not silently rewrite the costs behind a selling price.',
-          'A calculator earns trust faster when it works before account creation and explains the cost behind its recommendation.'
+          'I learned to treat receipt OCR as a draft that reduces typing, with user confirmation before it changes the costs behind a selling price.',
+          'Building offline guest workflows pushed me to make the calculator useful before account creation and explain the cost behind its recommendation.'
         ],
         improvements: [
           'Test receipt extraction across more layouts and let users review several detected price changes in one pass.'
@@ -746,6 +745,7 @@ export const projects: ProjectRecord[] = [
     category: 'Pharmacy Education / Web Platform',
     listing: {
       capabilities: ['WordPress', 'Airtable', 'Web Development'],
+      homepageRank: 1,
       thumbnail: {
         src: '/project/pacu-logo.png',
         alt:
@@ -755,7 +755,7 @@ export const projects: ProjectRecord[] = [
       }
     },
     description:
-      'The Pharmacy & Acute Care University web platform combines a WordPress content and marketing site, Airtable-supported operations, and custom full-stack learning experiences for pharmacy professionals.',
+      'My contract work on a pharmacy learning platform: learning-progress fixes, certificate achievement records, and development-to-production content promotion.',
     logo: '/project/pacu-logo.png',
     technologies: ['WordPress', 'Airtable', 'React', 'TypeScript', 'Node.js', 'PostgreSQL'],
     completedAt: '2026-08',
@@ -765,7 +765,7 @@ export const projects: ProjectRecord[] = [
     },
     caseStudy: {
       summary:
-        'A pharmacy education platform that brings public course discovery, operational content, and custom learning tools together for clinicians preparing for practice and board certification.',
+        'At Pharmacy & Acute Care University, I worked on the details learners depend on: progress that adds up, certificates that stay recorded, and content that moves safely into production.',
       evidence: [
         {
           kind: 'live-product',
@@ -779,15 +779,15 @@ export const projects: ProjectRecord[] = [
         status: 'Live client platform; contract completed',
         duration: 'February–August 2026',
         ownership: [
-          'Built and maintained WordPress pages, Airtable-supported operational workflows, and custom React, TypeScript, Node.js, and PostgreSQL features across the platform.',
-          'Delivered admin workflows, personalized study programs, eBook and reader access, review reminders, subscription access, production fixes, tests, and rollout support.'
+          'I worked with the PACU product team on learner and administrator workflows across custom React, TypeScript, Node.js, and PostgreSQL features, alongside WordPress and Airtable-supported operations.',
+          'My work connected production debugging with feature delivery: repairing learning progress, recording certificate achievements, promoting content, and correcting enrollment-based access decisions.'
         ]
       },
       problem: {
         audience:
           'Pharmacy professionals who need one place to discover courses, stay current with clinical literature, and prepare for board certification.',
         challenge:
-          'The learner journey crosses a public WordPress site, Airtable-supported operations, and custom application features, so content, account access, and study tools must stay aligned across different systems.',
+          'Learners could see completion above 100%, miss required readings, or find FastTrack status out of sync. I also needed to keep certificate achievements consistent and give administrators a safer way to promote content.',
         stakes:
           'When course information, subscription entitlements, or operational records disagree, learners can lose access and administrators can be blocked from supporting them.',
         constraints: [
@@ -798,7 +798,7 @@ export const projects: ProjectRecord[] = [
       },
       solution: {
         summary:
-          'PACU uses each layer for the work it handles best: WordPress for public content, Airtable for flexible operations, and custom builds for specialized learning and administration.',
+          'I worked across the interface, APIs, and database to align learning progress, record certificate achievements consistently, and make content promotion reviewable and reversible.',
         workflow: [
           'Publish course, board-prep, literature, pricing, and resource information through the public WordPress experience.',
           'Support content and operational records in Airtable where the team needs fast, structured updates.',
@@ -808,8 +808,8 @@ export const projects: ProjectRecord[] = [
       },
       learnings: {
         lessons: [
-          'A content-heavy education business benefits from a CMS, while specialized learner and administrator workflows still need purpose-built application code.',
-          'Mixed-platform delivery works best when ownership of content, operational records, and subscription state is explicit.'
+          'This work reinforced that a correct interface depends on consistent checks and records beneath it; fixing one screen is not enough when several paths calculate progress.',
+          'I learned to make recovery part of content-promotion tooling through snapshots, transactions, rollback, and integrity checks.'
         ],
         improvements: [
           'Continue strengthening cross-system regression coverage and operational documentation as learning products and subscription paths evolve.'
@@ -819,6 +819,9 @@ export const projects: ProjectRecord[] = [
         ]
       },
       impact: [
+        { kind: 'implementation', value: '5 code paths', label: 'Consistent completion checks', context: 'I unified completion checks across five code paths to address progress above 100%, missing required readings, and FastTrack status mismatches.' },
+        { kind: 'implementation', value: '51 passing tests', label: 'Certificate records verified', context: 'The certificate achievement change was validated with 51 passing tests, including authorization coverage.' },
+        { kind: 'product', value: 'Content promotion', label: 'Recovery built into the workflow', context: 'I delivered development-to-production content-promotion tooling with completeness checks, snapshots, transactional writes, rollback, and post-write integrity verification.' },
         {
           kind: 'product',
           value: '3 delivery layers',
@@ -835,26 +838,11 @@ export const projects: ProjectRecord[] = [
         }
       ],
       decisions: [
-        {
-          title: 'Use fit-for-purpose platform layers',
-          constraint:
-            'Marketing content, flexible operational records, and specialized learning workflows have different editing, validation, and release needs.',
-          decision:
-            'Keep public publishing in WordPress, support adaptable operations with Airtable, and build product-specific behavior in the custom application stack.',
-          rationale:
-            'Let the PACU team update routine content and records quickly without forcing complex learner and entitlement logic into a general-purpose CMS.'
-        },
-        {
-          title: 'Treat access as application state',
-          constraint:
-            'A visible purchase or account record does not guarantee that the learner has the correct study, reader, or subscription access.',
-          decision:
-            'Trace entitlement rules through the interface, API, and database, then repair mismatches at the layer that owns the state.',
-          rationale:
-            'Restore blocked learner and administrator workflows without masking the underlying data or access issue.'
-        }
+        { title: 'Enforce certificate uniqueness in the database', constraint: 'Repeated writes must not create duplicate certificate achievements.', decision: 'I combined idempotent writes with database uniqueness constraints, migration and backfill support, and authorization coverage.', rationale: 'The database enforces the same rule even when a write is retried.', validation: 'The change was validated with 51 passing tests.' },
+        { title: 'Make content promotion recoverable', constraint: 'Content needs to move from development to production with its identifiers and relationships intact.', decision: 'I added completeness checks and snapshots before transactional writes, then rollback support and post-write integrity verification.', rationale: 'The tooling checks what is being promoted and provides a recovery path when a change needs to be undone.' }
       ],
       highlights: [
+        'I unified learning-progress completion checks across five code paths and implemented certificate achievement records validated with 51 passing tests.',
         'Built and maintained WordPress pages, Airtable-supported operations, and custom React, TypeScript, Node.js, and PostgreSQL features.',
         'Delivered personalized study programs, eBook and reader access, review reminders, subscription entitlements, and admin workflows.',
         'Diagnosed production issues across interfaces, APIs, database schemas, content assets, and access rules, then supported tested rollouts.'

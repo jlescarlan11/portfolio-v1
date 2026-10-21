@@ -84,15 +84,15 @@ describe('ProjectsSection', () => {
       />
     );
 
-    const rentLink = screen.getByRole('link', {
-      name: `${projectsSectionContent.ctaLabel}: Rent N Roll`
+    const priceLink = screen.getByRole('link', {
+      name: `${projectsSectionContent.ctaLabel}: PriceCraft`
     });
-    expect(within(rentLink).getByText('Next.js')).toBeVisible();
-    expect(within(rentLink).getByText('TypeScript')).toBeVisible();
-    expect(within(rentLink).getByText('+6')).toBeVisible();
+    expect(within(priceLink).getByText('React')).toBeVisible();
+    expect(within(priceLink).getByText('TypeScript')).toBeVisible();
+    expect(within(priceLink).getByText('+7')).toBeVisible();
     expect(
       screen.queryByRole('link', { name: /Live site for/i })
     ).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Rent N Roll: Pre-launch')).toBeVisible();
+    expect(screen.getByLabelText('PriceCraft: Live')).toBeVisible();
   });
 });

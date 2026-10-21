@@ -88,6 +88,8 @@ export default function ContactSection({
             aria-hidden="true"
           />
 
+          <a href="https://github.com/jlescarlan11" target="_blank" rel="noopener noreferrer" className="portfolio-link">GitHub<RiExternalLinkLine aria-hidden="true" /><NewTabNotice /></a>
+          <a href="https://www.linkedin.com/in/john-lester-escarlan/" target="_blank" rel="noopener noreferrer" className="portfolio-link">LinkedIn<RiExternalLinkLine aria-hidden="true" /><NewTabNotice /></a>
           {/* Resume link */}
           <a
             href={content.resumeHref}

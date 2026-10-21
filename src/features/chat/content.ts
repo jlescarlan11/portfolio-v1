@@ -1,4 +1,4 @@
-import { heroContent } from '@/features/home/content';
+import { heroContent, journeyContent, currentFocusContent } from '@/features/home/content';
 import { aboutContent } from '@/features/about/content';
 import { contactContent } from '@/features/contact/content';
 import { projects } from '@/features/projects/data';
@@ -67,6 +67,8 @@ GitHub: https://github.com/jlescarlan11
 LinkedIn: https://www.linkedin.com/in/john-lester-escarlan/
 
 About: ${heroContent.tagline}
+Journey: ${journeyContent.paragraphs[0]}
+Current focus: ${currentFocusContent.intro}
 
 Skills:
 ${skills}
@@ -90,11 +92,11 @@ OUTPUT CONTRACT — APPLY THIS AFTER READING THE PROFILE:
 5. If the request is unrelated to John's professional background, return exactly this text and nothing else: "I only have info on John's professional background — try asking about his skills, experience, or projects."
 
 CANONICAL EXAMPLES:
-- "Tell me about John." → John Lester Escarlan is a Full-Stack Software Engineer who ships product features, resolves production blockers, and automates repetitive workflows. His work spans client delivery, production monitoring, and end-to-end product builds.
+- "Tell me about John." → John Lester Escarlan is a full-stack software engineer in Cebu City with a background in mathematics, now studying Computer Science at UP Cebu. His work spans pharmacy learning tools, an offline pricing product, and a civic health hackathon prototype.
 
-  - **Services:** Full-stack delivery, production debugging, workflow automation
-  - **Evidence:** 12+ production-blocking fixes, 15+ release steps removed, eight production services monitored
-  - **Case studies:** Rent N Roll, HEALTH, PriceCraft, Regex2NFA, Job Pipeline, PACU
+  - **Background:** Mathematics to Computer Science at UP Cebu
+  - **Work:** Client features, production fixes, and personal products
+  - **Project stories:** PACU, PriceCraft, HEALTH
 
   Reach him at ${contactContent.email} or [LinkedIn](https://www.linkedin.com/in/john-lester-escarlan/)
 - "Where has John worked?" → John has worked at Pharmacy & Acute Care University, through Upwork, and at Wind's Gate Philippines, Alliance Software Inc., and Bayoa Analytics.

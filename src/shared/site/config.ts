@@ -65,10 +65,10 @@ export function resolveSiteUrl(value?: string): string {
 
 export const siteConfig = {
   seo: {
-    siteTitle: 'John Lester Escarlan | Full-Stack Engineer for Product Teams',
+    siteTitle: 'John Lester Escarlan | Full-Stack Software Engineer',
     titleTemplateName: 'John Lester Escarlan',
     description:
-      'Full-stack engineer delivering marketplace, offline-first, and AI-assisted systems, with 12+ production-blocking fixes and 15+ release steps removed.',
+      'I’m John, a full-stack software engineer in Cebu City with a background in mathematics. Explore my journey, client work, personal projects, and what I’m learning.',
     siteName: 'John Lester Escarlan',
     siteUrl: resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
     locale: 'en_US',
@@ -82,13 +82,15 @@ export const siteConfig = {
   navigation: {
     header: [
       { name: 'About', href: '/#about' },
+      { name: 'Work', href: '/#work' },
       { name: 'Experience', href: '/#experience' },
-      { name: 'Projects', href: '/#work' }
+      { name: 'Contact', href: '/#contact' }
     ] satisfies NavItem[],
     footer: [
       { name: 'About', href: '/#about' },
+      { name: 'Work', href: '/#work' },
       { name: 'Experience', href: '/#experience' },
-      { name: 'Projects', href: '/#work' }
+      { name: 'Contact', href: '/#contact' }
     ] satisfies NavItem[]
   },
   footer: {

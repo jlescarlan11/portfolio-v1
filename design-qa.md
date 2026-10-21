@@ -1,58 +1,54 @@
-**Design QA**
-
-- Source visual truth: `/var/folders/mh/rxmkm5jd2s1d952s608rwwy40000gn/T/codex-clipboard-7f7ce1dc-c7e2-4056-bcda-351df584bba1.png` (focused contact-control crop), with the earlier full-page redesign reference retained as composition context
-- Implementation screenshots: `qa-contact-desktop.png`, `qa-chat-desktop.png`, `qa-contact-mobile.png`, `qa-chat-mobile.png`
-- Desktop viewport: 1470 × 956 CSS px at device scale factor 1
-- Mobile viewport: 390 × 844 CSS px at device scale factor 1
-- Source pixels: 1204 × 460 focused crop; implementation was inspected at native 1470 × 956 CSS px and with a focused control comparison
-- Implementation pixels: 1470 × 956 desktop and 390 × 844 mobile
-- State: light theme, contact section at its top scroll position; chatbot checked closed and open
-
-**Full-view comparison evidence**
-
-The focused source crop and the refreshed desktop implementation were opened together. The requested content change is present without shifting the contact container, two CTA proportions, secondary links, footer boundary, launcher label, or bottom-right assistant trigger. The implementation screenshot contains the development-only Next.js indicator at bottom left; it is not included in production.
-
-**Focused region comparison evidence**
-
-- Contact controls: the 256 × 92 px primary CTA, 312 × 92 px booking CTA, 12 px inter-card gap, 12 px corner radius, vertically centered booking label, icon placement, and secondary-action baseline were checked at native CSS scale. “20 minutes” is absent visually and from the accessible link name.
-- Chat launcher: the bordered uppercase label, dismiss control, 44 × 44 launcher, and icon treatment were checked against the reference.
-- Open chatbot: no open-state source was supplied, so it was checked for consistency with the updated system: rounded monochrome surfaces, Poppins typography, hairline borders, restrained status treatment, and matching iconography. The outer panel uses a 16 px radius and nested controls use 12 px.
-- Mobile: contact controls stack at full width and the modal uses equal 24 px side gutters without horizontal overflow.
-
-**Findings**
-
-- No actionable P0, P1, or P2 differences remain.
-- Typography: Poppins family, 400/500 optical hierarchy, uppercase tracking, wrapping, and line height match the existing redesign system.
-- Spacing and layout: desktop alignment and section/footer rhythm match the normalized source; mobile stacking remains readable and touch-safe.
-- Colors and tokens: the implementation uses the existing foreground/background and surface-border tokens in light and dark themes.
-- Image and icon fidelity: no raster assets are required in this section. All arrows, external-link marks, close/send controls, focus frame, status dot, and robot mark use the installed Remix Icon set.
-- Copy and content: “20 minutes” was removed from the booking CTA and its content model as requested. All other contact and chat copy remains unchanged.
-
-**Comparison history**
-
-1. Initial pass found the booking label wrapping on desktop and an extra inner focus outline in the chatbot input. Desktop CTA padding was tightened and the input now relies on the containing focus border.
-2. Mobile pass found asymmetric modal gutters caused by the old 320 px maximum width. The cap was removed so the dialog uses the intended `100vw - 3rem` width with equal gutters.
-3. Post-fix desktop and mobile captures show no remaining P0/P1/P2 issues. Browser console errors: none.
-4. User follow-up identified the remaining square corners. Contact cards and chatbot surfaces were updated to a consistent 12/16 px radius system, then recaptured on desktop and mobile with no overflow or clipping.
-5. User follow-up removed the redundant “20 minutes” line. The booking label was vertically centered, desktop and mobile evidence was recaptured, and the accessible link name was verified without the duration.
-
-**Primary interactions tested**
-
-- Open chat from the launcher.
-- Focus and enter text in the chat input.
-- Close the modal with Escape and restore the launcher.
-- Confirm background content becomes inert while the dialog is open through the component test suite.
-
-**Implementation checklist**
-
-- [x] Match contact composition and CTA proportions.
-- [x] Carry the redesign language into closed and open chatbot states.
-- [x] Preserve keyboard focus, modal semantics, retry, streaming, and reduced-motion behavior.
-- [x] Verify desktop and mobile layouts in the browser.
-- [x] Check browser console errors.
-
-**Follow-up polish**
-
-- None required for the supplied reference.
+# Portfolio implementation verification — 21 October 2026
 
 final result: passed
+
+This is the visual/composition result. Live AI answers remain unverified because the local environment lacks the existing provider credential, `GROQ_API_KEY`; the request returns a configuration-related 503 and the UI exposes its retry state.
+
+## Visual evidence
+
+- Approved source: `/Users/johnlesterescarlan/.codex/generated_images/01a15e18-c8d8-7241-bf92-94f0c66a26d0/exec-ddb0f538-521a-4251-a4f5-588c3595b490.png`.
+- Evidence directory: `/Users/johnlesterescarlan/.codex/visualizations/2026/10/21/01a15e18-c8d8-7241-bf92-94f0c66a26d0/portfolio-qa/`.
+- Final desktop: `homepage-desktop.jpg`; 1470 × 4275 pixels, 1470 × 656 CSS viewport, light theme, PACU selected, page at top, contact animation revealed before capture.
+- Mobile: `homepage-mobile.jpg`; 390 × 5587 pixels, 390 × 844 CSS viewport, light theme, PACU selected.
+- Additional narrow/mobile and project evidence: `/tmp/portfolio-qa/home-320.jpg`, `/tmp/portfolio-qa/pricecraft-mobile.jpg`, `/tmp/portfolio-qa/health-mobile.jpg`, `/tmp/portfolio-qa/assistant-unavailable.jpg`.
+- Source bitmap: 778 × 2021 pixels. Source was generated for a desktop composition, not a precise CSS specification. Both full-page captures were proportionally normalized to 700px-wide columns in `comparison-full.jpg`; no content was stretched or reconstructed.
+- Focused hero comparison: `comparison-hero.jpg`. Desktop and source hero crops are shown together. The live implementation keeps the repository's actual 16px body / 24px heading scale and 1040px content width, which take precedence over approximate generated typography and margins.
+- Invalid intermediate comparisons made during viewport switching were discarded and overwritten. The final desktop capture came from a fresh normal desktop tab after confirming 1470px layout width and scrollY=0.
+
+## Findings and comparison history
+
+No actionable P0/P1/P2 visual findings remain.
+
+1. Hero actions: the new contact action left the resume alone on a wrapped line. Fixed by grouping primary actions on one row and existing social/resume links on the next. Post-fix evidence: `hero-desktop.jpg` and `comparison-hero.jpg`.
+2. Timeline density: contribution paragraphs were confined to the middle column. Fixed by placing each summary across the existing detail columns beneath the date/title/organization row. Confirmed in the final full-page comparison.
+3. Narrow navigation: at 320px the four-link pill measured about 351px and clipped. At <=380px, reduced only navigation text to 14px and tightened horizontal spacing. Post-fix browser measurements: nav left 8.3px, right 311.7px, document width 320px; no page overflow. Body remains 16px and section headings 24px. This is an intentional responsive exception, not a new visual identity.
+4. Initial full-page capture omitted off-screen fade-in contact actions. Revealed contact by navigating to it, returned to the top, confirmed computed opacity=1 and captured again. Final evidence includes the actions.
+
+## Required fidelity surfaces
+
+- Typography: original Poppins, weights, body/heading scale, readable line height and focus treatment retained. Narrow navigation exception described above. No serif/display redesign.
+- Spacing/layout: existing container, section gaps, rounded buttons, layered deck, thin timeline dividers, and floating pill retained. Journey uses two columns on desktop and one on mobile. The complete verified project copy and real project imagery make the deck taller than the generated approximation; this is intentional content fidelity.
+- Colors/tokens: original black/white theme variables and muted gray retained; light/dark toggle works. Removed the global grayscale rule so project images keep their source colors; the portrait retains its own monochrome treatment.
+- Image fidelity: existing dithered portrait and PACU, PriceCraft, HEALTH assets used directly. PACU uses the real wordmark rather than generated text. No fabricated project screens or replacement portrait.
+- Copy: supplied introduction and personal narrative retained. Verified the new PACU facts, studies, dates, and HEALTH result against the latest repository PDF. Removed visitor-facing “case study” wording. Prototype, personal product, and client work are distinguished. Generic generated work descriptions were replaced with repository-backed contributions.
+- Interactions/accessibility: actual anchor destinations, keyboard skip link, visible focus, deck selectors and selected states, modal Escape/focus return, contact links, email copy success, resume PDF, and mobile wrapping checked. Existing reduced-motion CSS and component behavior covered by automated tests.
+
+## Verification
+
+- 26 project checks passed.
+- 412 Vitest UI/server tests passed across 47 files; focused final checks also passed (43 tests).
+- TypeScript passed.
+- Final optimized Next.js build passed, including framework lint/type checks and all static pages.
+- HTTP 200 for homepage, project archive, all six project stories, experience, stack, certifications, and resume (`application/pdf`). Resume also opened successfully through the homepage link in Chrome.
+- Chrome extension connection used the verified John lester profile associated with the requested account. Checked desktop, 390px mobile, and 320px narrow mobile layouts.
+- Project selectors switched to all three destinations. PriceCraft and HEALTH stories inspected on mobile; PACU on desktop. Archive retains all six projects.
+- Assistant greeting/profile updated. Modal, submit, error/retry rendering, Escape dismissal, and launcher focus restoration checked. Live answers blocked by absent local provider credentials, not replaced with mock output.
+- Console: Grammarly adds body attributes before hydration and triggers a development hydration warning in this profile. A 503 from the missing assistant credential is expected. No unrelated application exception found in the subsequent project-route checks.
+- Codex static review found no actionable P0/P1/P2 defects. Its minor navigation type-scale note is addressed by the documented 320px responsive adaptation.
+
+## Delivery limits
+
+- Local preview only; staging and production behavior not verified.
+- No commits, pushes, or deployments performed.
+- Existing untracked `video-production/` left untouched.
+- Remaining setup: supply `GROQ_API_KEY` locally and rerun a real assistant conversation to verify generated answers.

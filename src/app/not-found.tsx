@@ -27,7 +27,7 @@ export default function NotFound(): React.JSX.Element {
         <p
           className="body-lg mt-5"
         >
-          The project link may have changed, but the portfolio and case studies
+          The project link may have changed, but the portfolio and project stories
           are still available.
         </p>
         <div className="mt-8 flex flex-wrap gap-4">

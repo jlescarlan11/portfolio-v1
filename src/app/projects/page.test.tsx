@@ -22,7 +22,7 @@ describe('ProjectsPage', () => {
     expect(
       screen.getByRole('heading', { level: 1, name: 'All projects' })
     ).toBeVisible();
-    expect(screen.getByText(`${projects.length} case studies`)).toBeVisible();
+    expect(screen.getByText(`${projects.length} project stories`)).toBeVisible();
 
     const list = screen.getByRole('list', { name: 'All projects' });
     expect(list).toHaveAttribute('data-layout', 'archive');

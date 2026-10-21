@@ -45,7 +45,7 @@ describe('ProjectSectionNav', () => {
     render(<SectionFixtures />);
 
     expect(
-      screen.getByRole('navigation', { name: 'Case study sections' })
+      screen.getByRole('navigation', { name: 'Project story sections' })
     ).toHaveClass('project-section-nav');
     for (const [id, label] of sectionNames) {
       expect(screen.getByRole('link', { name: label })).toHaveAttribute(

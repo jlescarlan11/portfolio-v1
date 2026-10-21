@@ -41,12 +41,12 @@ export function resolveBookingUrl(value: string | undefined): string | null {
 
 export const contactContent: ContactContent = {
   eyebrow: 'Contact',
-  title: 'Interested in working together?',
+  title: 'Let’s connect.',
   intro:
-    'Send the role, project, or problem you have in mind. I will reply within 48 hours, or you can choose a time for a short introductory call.',
+    'Have a role, project, or problem in mind? I’d like to hear about it. Send me an email, or choose a time for an introductory call.',
   prompt: 'Employment, freelance, and contract inquiries',
   email: resolveContactEmail(process.env.NEXT_PUBLIC_CONTACT_EMAIL),
-  primaryCtaLabel: 'Discuss a project',
+  primaryCtaLabel: 'Email John',
   resumeLabel: 'View résumé',
   resumeHref: '/John_Lester_Escarlan_Resume.pdf',
   booking: {

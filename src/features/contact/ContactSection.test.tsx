@@ -31,7 +31,7 @@ describe('ContactSection', () => {
     expect(
       screen.getByText('Employment, freelance, and contract inquiries')
     ).toBeVisible();
-    expect(screen.getByText(/reply within 48 hours/i)).toBeVisible();
+    expect(screen.getByText(/Have a role, project, or problem in mind/)).toBeVisible();
     expect(container.innerHTML).not.toMatch(/animate-ping|available now|timezone/i);
   });
 

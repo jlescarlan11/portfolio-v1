@@ -10,6 +10,7 @@ export interface PortfolioExperienceItem {
   endDate?: string | null;
   isCurrent?: boolean;
   responsibilities: string[];
+  summary: string;
 }
 
 export interface PortfolioEducationItem {
@@ -53,9 +54,9 @@ export interface AboutContent {
 
 export const aboutContent: AboutContent = {
   eyebrow: 'About',
-  title: 'Product delivery shaped by production operations.',
+  title: 'From mathematics to building software.',
   intro:
-    'My work spans client delivery and production monitoring. I turn requirements into explicit system states, keep trade-offs visible, document the handoff, and verify changes with tests and rollout checks.',
+    'I started in mathematics and now study Computer Science at the University of the Philippines Cebu. Along the way, I’ve built client features, worked on a pharmacy learning platform, and helped monitor production services.',
   skillsHeading: 'Core stack',
   skillsIntro: 'The tools most relevant to the product, reliability, and automation work I take on.',
   credentialsHeading: 'Certificates',
@@ -108,7 +109,7 @@ export const aboutContent: AboutContent = {
     {
       id: 'edu-up-cs',
       degree: 'Bachelor of Science in Computer Science',
-      school: 'University of the Philippines',
+      school: 'University of the Philippines Cebu',
       achievements: [
         'University Scholar (consistent academic honor)',
         'Semi-Finalist, 1st Naga City Mayoral Hackathon'
@@ -120,7 +121,7 @@ export const aboutContent: AboutContent = {
     {
       id: 'edu-up-math',
       degree: 'Bachelor of Science in Mathematics',
-      school: 'University of the Philippines',
+      school: 'University of the Philippines Cebu',
       achievements: [
         'College Scholar (consistent academic honor)',
         'DOST Junior Level Science Scholarship (JLSS) Awardee'
@@ -133,6 +134,7 @@ export const aboutContent: AboutContent = {
   experience: [
     {
       id: 'exp-wg-monitoring-engineer',
+      summary: 'Monitoring eight production services has given me practice recognizing incidents, escalating them, and documenting recovery steps.',
       title: 'Software Monitoring Engineer',
       company: "Wind's Gate Philippines — Cebu City",
       startDate: '2025-06',
@@ -145,6 +147,7 @@ export const aboutContent: AboutContent = {
     },
     {
       id: 'exp-freelance-software-engineer',
+      summary: 'Freelance work has meant taking client features and production fixes through delivery, then making releases and handoffs easier.',
       title: 'Freelance Software Engineer',
       company: 'Upwork — Remote',
       startDate: '2025-01',
@@ -158,18 +161,21 @@ export const aboutContent: AboutContent = {
     },
     {
       id: 'exp-pharmacy-acute-care-software-engineer',
+      summary: 'At PACU, I contributed across learner and administrator workflows, from diagnosing issues to implementation, review, and testing.',
       title: 'Software Engineer (Contract)',
       company: 'Pharmacy & Acute Care University — Remote',
       startDate: '2026-02',
       endDate: '2026-08',
       responsibilities: [
-        'Build and maintain full-stack features for an online learning platform, including admin workflows, personalized study programs, eBook and reader access, review reminders, and subscription-based access.',
-        'Diagnose production issues involving React and TypeScript interfaces, Node.js APIs, PostgreSQL schemas and migrations, content assets, and entitlement rules; implement targeted fixes that restore blocked learner and administrator workflows.',
-        'Contribute to technical design, code review, automated testing, rollout planning, and reliability improvements across frontend and backend systems.'
+        'Fixed learning-progress defects on an online learning platform and unified completion checks across five code paths.',
+        'Implemented certificate achievement records with idempotent writes, database uniqueness constraints, migration and backfill support, and authorization coverage; validated with 51 passing tests.',
+        'Built development-to-production content-promotion tooling with completeness checks, snapshots, transactional writes, rollback, and post-write integrity verification.',
+        'Corrected enrollment-scoped exam lookups and course-group mapping so entitlement rules used the correct learning records.'
       ]
     },
     {
       id: 'exp-asi-software-engineer-intern',
+      summary: 'I worked across C# and ASP.NET MVC applications, learning through code reviews and pair programming with senior engineers.',
       title: 'Software Engineer Intern',
       company: 'Alliance Software Inc. — Cebu City',
       startDate: '2025-06',
@@ -181,6 +187,7 @@ export const aboutContent: AboutContent = {
     },
     {
       id: 'exp-bayoa-full-stack-intern',
+      summary: 'I worked across React interfaces and Node.js APIs, contributing reusable components and database improvements.',
       title: 'Full-Stack Developer Intern',
       company: 'Bayoa Analytics — Remote',
       startDate: '2024-09',

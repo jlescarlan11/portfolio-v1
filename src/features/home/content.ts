@@ -39,14 +39,14 @@ export const heroContent: HeroContent = {
   name: 'John Lester Escarlan',
   role: 'Full-Stack Software Engineer',
   tagline:
-    'I help product teams ship full-stack features, fix production bottlenecks, and replace fragile manual workflows with tested automation.',
+    'I’m John, a developer with a background in mathematics. I like figuring things out and turning ideas into useful software.',
   primaryCta: {
-    label: 'Discuss a project',
-    href: '#contact'
+    label: 'Explore my work',
+    href: '#work'
   },
   secondaryCta: {
-    label: 'Review case studies',
-    href: '#work'
+    label: 'Get in touch',
+    href: '#contact'
   },
 
   profileImage: {
@@ -94,4 +94,18 @@ export const impactSnapshotContent: ImpactSnapshotContent = {
       context: 'Automated more than 15 manual release steps.'
     }
   ]
+};
+
+export const journeyContent = {
+  title: 'How I got here',
+  paragraphs: [
+    'I started in mathematics because I liked working through problems and understanding why things work. That curiosity eventually led me to computer science, where I could take an idea, build it, and see someone use it.',
+    'What keeps me interested is the mix of problem-solving and making things. I enjoy getting a stubborn feature to work, making an interface easier to use, and learning whatever the next challenge calls for.'
+  ],
+  transition: 'Those interests have taken different forms in my work: supporting learners, making pricing clearer, and building with a team.'
+};
+
+export const currentFocusContent = {
+  title: 'What comes next',
+  intro: 'I’m continuing my Computer Science studies at UP Cebu, and looking for opportunities to contribute, take ownership, and learn alongside others. I’m open to engineering roles and freelance projects.'
 };

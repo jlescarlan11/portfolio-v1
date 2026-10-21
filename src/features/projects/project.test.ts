@@ -84,7 +84,7 @@ test('project source order and homepage selection remain stable', () => {
   assert.equal(projects[0].title, 'Rent N Roll');
   assert.deepEqual(
     getHomepageProjects().map(project => project.slug),
-    ['rent-n-roll', 'health', 'pricecraft']
+    ['pacu', 'pricecraft', 'health']
   );
 });
 
@@ -191,9 +191,9 @@ test('case-study openings describe concrete user problems', () => {
     pacu: [
       'pharmacy professionals',
       'courses',
-      'WordPress',
-      'Airtable',
-      'subscription entitlements'
+      'progress',
+      'certificate',
+      'content'
     ]
   };
 
@@ -740,7 +740,7 @@ test('each short description stays aligned with visible case-study positioning',
     pricecraft: ['pricing', 'PWA', 'receipt'],
     regex2nfa: ['interactive', 'regular expressions', 'Thompson'],
     'job-pipeline': ['seven', 'n8n', 'manual'],
-    pacu: ['pharmacy', 'WordPress', 'Airtable', 'custom']
+    pacu: ['pharmacy', 'learning-progress', 'certificate', 'content']
   };
 
   for (const project of projects) {
@@ -778,7 +778,7 @@ test('project outcomes distinguish delivered value from implementation evidence'
     pricecraft: ['300+ tests'],
     regex2nfa: ['4 routes'],
     'job-pipeline': ['147 tests'],
-    pacu: []
+    pacu: ['5 code paths', '51 passing tests']
   };
 
   for (const project of projects) {

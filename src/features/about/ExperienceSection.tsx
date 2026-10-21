@@ -64,17 +64,19 @@ export function CertificateCards({ content }: { content: AboutContent }): React.
 }
 
 export default function ExperienceSection({ content }: { content: AboutContent }): React.JSX.Element {
-  const featuredStack = ['TypeScript', 'React', 'Next.js', 'Node.js', 'PostgreSQL', 'Docker'];
+  const order = ['exp-pharmacy-acute-care-software-engineer', 'exp-freelance-software-engineer', 'exp-wg-monitoring-engineer', 'exp-asi-software-engineer-intern', 'exp-bayoa-full-stack-intern'];
+  const entries = order.flatMap(id => content.experience.filter(item => item.id === id));
   return <section id="experience" className="portfolio-container portfolio-section" aria-labelledby="experience-heading">
-    <div className="section-heading"><h2 id="experience-heading" className="h2">Experience</h2><Link className="portfolio-link" href="/experience">Full history<FiArrowRight aria-hidden="true" /></Link></div>
-    <ExperienceHistory content={content} />
-    <div className="mt-10">
-      <div className="section-heading subsection-heading"><h3 className="text-muted-foreground uppercase">Main stack</h3><Link className="portfolio-link" href="/stack">View all<FiArrowRight aria-hidden="true" /></Link></div>
-      <ul className="flex flex-wrap gap-2">{featuredStack.map(item => <li className="stack-chip" key={item}>{item}</li>)}</ul>
-    </div>
-    <div className="mt-10" id="certifications">
-      <div className="section-heading subsection-heading"><h3 className="text-muted-foreground uppercase">Certifications</h3><Link className="portfolio-link" href="/certifications">All certifications<FiArrowRight aria-hidden="true" /></Link></div>
-      <CertificateCards content={content} />
+    <div className="section-heading"><h2 id="experience-heading" className="h2">Where I’ve grown</h2><Link className="portfolio-link" href="/experience">Full history<FiArrowRight aria-hidden="true" /></Link></div>
+    <div>{entries.map(item => <article key={item.id} className="experience-row">
+      <p className="text-muted-foreground"><time dateTime={item.startDate}>{date(item.startDate)}</time> – {item.isCurrent ? 'Present' : <time dateTime={item.endDate!}>{date(item.endDate!)}</time>}</p>
+      <h3 className="font-medium">{item.title}</h3>
+      <p className="text-muted-foreground experience-company">{item.company.split(' — ')[0]}</p>
+      <p className="experience-details text-muted-foreground">{item.summary}</p>
+    </article>)}</div>
+    <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+      <Link className="portfolio-link" href="/stack">Tools I use<FiArrowRight aria-hidden="true" /></Link>
+      <span id="certifications"><Link className="portfolio-link" href="/certifications">Certifications<FiArrowRight aria-hidden="true" /></Link></span>
     </div>
   </section>;
 }

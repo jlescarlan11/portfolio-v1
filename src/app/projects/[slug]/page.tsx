@@ -279,12 +279,31 @@ export default async function ProjectPage({
           ))}
         </div>
 
+        <section aria-labelledby="problem-heading" className="mb-14 space-y-5">
+          <h2 id="problem-heading" className="h2">The problem</h2>
+          <p className="text-muted-foreground">{project.caseStudy.problem.challenge}</p>
+          <p className="text-muted-foreground">{project.caseStudy.problem.stakes}</p>
+        </section>
+
         <section aria-labelledby="contribution-heading" className="mb-14 space-y-5">
           <h2 id="contribution-heading" className="h2">My contribution</h2>
           <p>{project.caseStudy.roleScope.role}</p>
-          <ul className="list-disc space-y-3 pl-5 text-muted-foreground">
-            {project.caseStudy.roleScope.ownership.map(item => <li key={item}>{item}</li>)}
-          </ul>
+          <p className="text-muted-foreground">{[project.caseStudy.roleScope.team, project.caseStudy.roleScope.duration, project.caseStudy.roleScope.status].filter(Boolean).join(' · ')}</p>
+          <div className="space-y-4 text-muted-foreground">
+            {project.caseStudy.roleScope.ownership.map(item => <p key={item}>{item}</p>)}
+          </div>
+        </section>
+
+        <section aria-labelledby="decision-heading" className="mb-14 space-y-6">
+          <h2 id="decision-heading" className="h2">The choices behind the work</h2>
+          <p className="text-muted-foreground">{project.caseStudy.solution.summary}</p>
+          {project.caseStudy.decisions.map(decision => <div key={decision.title} className="space-y-3 border-t border-surface pt-5">
+            <h3 className="font-medium">{decision.title}</h3>
+            <p className="text-muted-foreground">{decision.constraint}</p>
+            <p>{decision.decision}</p>
+            <p className="text-muted-foreground">{decision.rationale}</p>
+            {decision.tradeoff && <p className="text-muted-foreground">{decision.tradeoff}</p>}
+          </div>)}
         </section>
 
         {project.caseStudy.visuals.filter(visual => visual.kind === 'supporting').map(visual => (
@@ -295,9 +314,17 @@ export default async function ProjectPage({
 
         <section aria-labelledby="outcome-heading" className="mb-14 space-y-5">
           <h2 id="outcome-heading" className="h2">Outcome</h2>
-          {project.caseStudy.impact.filter(item => item.kind === 'product').map(item => (
+          {project.caseStudy.impact.map(item => (
             <p key={item.label} className="text-muted-foreground">{item.context}</p>
           ))}
+        </section>
+
+        <section aria-labelledby="learnings-heading" className="mb-14 space-y-5">
+          <h2 id="learnings-heading" className="h2">What I learned</h2>
+          {project.caseStudy.learnings.lessons.map(lesson => <p key={lesson} className="text-muted-foreground">{lesson}</p>)}
+          <h3 className="font-medium">What comes next</h3>
+          {project.caseStudy.learnings.improvements.map(item => <p key={item} className="text-muted-foreground">{item}</p>)}
+          {project.caseStudy.learnings.unvalidated.map(item => <p key={item} className="text-muted-foreground">{item}</p>)}
         </section>
 
         <section aria-labelledby="stack-heading" className="mb-16 space-y-5">

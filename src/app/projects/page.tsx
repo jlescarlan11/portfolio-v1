@@ -8,7 +8,7 @@ import { siteConfig } from '@/shared/site/config';
 
 const pageTitle = 'All Projects';
 const pageDescription =
-  'Browse John Lester Escarlan’s complete collection of product, client, visualization, and automation case studies.';
+  'Browse John Lester Escarlan’s complete collection of project stories, from client work to personal products and prototypes.';
 const pageUrl = `${siteConfig.seo.siteUrl}/projects`;
 
 export const metadata: Metadata = {
@@ -43,7 +43,7 @@ const previews: Record<string, string> = {
   pricecraft: 'Recipe costing and selling prices for small food businesses.',
   regex2nfa: 'Turn regular expressions into interactive, animated automata.',
   'job-pipeline': 'An automated workflow for tracking job opportunities.',
-  pacu: 'Learning and subscription tools for pharmacy professionals.',
+  pacu: 'Client work on learning progress, certificate records, and content promotion.',
 };
 
 export default function ProjectsPage(): React.JSX.Element {
@@ -56,9 +56,9 @@ export default function ProjectsPage(): React.JSX.Element {
           </Link>
           <div className="flex flex-wrap items-baseline justify-between gap-3">
             <Typography variant="h1" as="h1">All projects</Typography>
-            <span className="text-muted-foreground">{projects.length} case studies</span>
+            <span className="text-muted-foreground">{projects.length} project stories</span>
           </div>
-          <p className="mt-4 text-muted-foreground">A selection of products, client work, and experiments.</p>
+          <p className="mt-4 text-muted-foreground">The problems I worked through, the choices I made, and what each project taught me.</p>
         </FadeIn>
 
         <ul aria-label="All projects" data-layout="archive" className="grid grid-cols-1 gap-16 md:gap-20">

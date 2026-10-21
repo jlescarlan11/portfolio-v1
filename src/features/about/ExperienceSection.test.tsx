@@ -10,13 +10,13 @@ afterEach(cleanup);
 describe('Experience disclosure', () => {
   it('links homepage previews to dedicated detail pages', () => {
     render(<ExperienceSection content={aboutContent} />);
-    expect(screen.getByText('Bachelor of Science in Computer Science')).toBeVisible();
+    expect(screen.queryByText('Bachelor of Science in Computer Science')).not.toBeInTheDocument();
     expect(screen.queryByText('Completed')).not.toBeInTheDocument();
-    expect(screen.queryByText('Bayoa Analytics')).not.toBeInTheDocument();
-    expect(screen.getByRole('heading', { level: 3, name: 'Main stack' })).toBeVisible();
+    expect(screen.getByText('Bayoa Analytics')).toBeVisible();
+    expect(screen.getByText('Upwork')).toBeVisible();
     expect(screen.getByRole('link', { name: 'Full history' })).toHaveAttribute('href', '/experience');
-    expect(screen.getByRole('link', { name: 'View all' })).toHaveAttribute('href', '/stack');
-    expect(screen.getByRole('link', { name: 'All certifications' })).toHaveAttribute('href', '/certifications');
+    expect(screen.getByRole('link', { name: 'Tools I use' })).toHaveAttribute('href', '/stack');
+    expect(screen.getByRole('link', { name: 'Certifications' })).toHaveAttribute('href', '/certifications');
   });
   it('preserves all employment and education on the history page', () => {
     render(<HistoryPage />);
@@ -36,11 +36,5 @@ describe('Experience disclosure', () => {
     render(<CertificatesPage />);
     expect(screen.getAllByRole('link', { name: /Verify|View certificate/ })).toHaveLength(aboutContent.certifications.length);
     expect(screen.getByRole('link', { name: 'Back to home' })).toHaveAttribute('href', '/#certifications');
-  });
-  it('keeps all actual certificate links without displaying their dates', () => {
-    render(<ExperienceSection content={aboutContent} />);
-    expect(screen.getByRole('link', { name: 'View certificate' })).toHaveAttribute('href', aboutContent.certifications[0].url);
-    expect(screen.getAllByRole('link', { name: 'Verify' })).toHaveLength(2);
-    expect(screen.queryByText('April 2026')).not.toBeInTheDocument();
   });
 });

@@ -61,10 +61,11 @@ describe('HeroSection', () => {
     const { container } = render(<HeroSection {...heroContent} />);
 
     expect(container.querySelector('#about')).toBeInTheDocument();
-    expect(screen.getByText(/I study Computer Science/)).toBeVisible();
+    expect(screen.getByText(heroContent.tagline)).toBeVisible();
     expect(
       screen.getByRole('link', { name: heroContent.primaryCta.label })
-    ).toHaveAttribute('href', '#contact');
+    ).toHaveAttribute('href', '#work');
+    expect(screen.getByRole('link', { name: 'Get in touch' })).toHaveAttribute('href', '#contact');
     expect(screen.getByRole('link', { name: 'Résumé' })).toHaveAttribute('href', '/John_Lester_Escarlan_Resume.pdf');
     expect(screen.getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', 'https://github.com/jlescarlan11');
     expect(screen.queryByRole('button', { name: /copy email/i })).not.toBeInTheDocument();
