@@ -25,9 +25,18 @@ if (!baseUrl) {
         return (
           sentenceCount(introduction) === 2 &&
           (answer.match(/^\s*[-*]\s+/gm)?.length ?? 0) === 3 &&
+          answer.trim().split(/\s+/).length <= 80 &&
           /jlescarlan11@gmail\.com|linkedin\.com\/in\/john-lester-escarlan/i.test(answer)
         );
       }
+    },
+    {
+      id: 'Q10',
+      prompt: 'What is John studying now, and where?',
+      validate: answer => isShortAnswer(answer) &&
+        sentenceCount(answer) === 1 && /Computer Science/.test(answer) &&
+        /University of the Philippines Cebu/.test(answer) &&
+        !/graduated|completed|gmail|linkedin/i.test(answer)
     },
     {
       id: 'Q2',

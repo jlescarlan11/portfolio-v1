@@ -5,6 +5,14 @@ import { projects } from '@/features/projects/data';
 
 export const CHAT_CONTACT_ANSWER = `Email John at ${contactContent.email} or connect on [LinkedIn](https://www.linkedin.com/in/john-lester-escarlan/).`;
 
+export const CHAT_OVERVIEW_ANSWER = `John Lester Escarlan is a full-stack software engineer in Cebu City with a mathematics background. He now studies Computer Science at UP Cebu.
+
+- **Work:** Client features and production fixes
+- **Project stories:** PACU, PriceCraft, HEALTH
+- **Focus:** Engineering roles and freelance work
+
+Reach him at ${contactContent.email} or [LinkedIn](https://www.linkedin.com/in/john-lester-escarlan/)`;
+
 // Match only standalone contact requests; mixed questions still use the model.
 export function getDirectContactAnswer(message: string): string | undefined {
   const normalized = message.trim().toLowerCase().replace(/’/g, "'")
@@ -105,13 +113,7 @@ OUTPUT CONTRACT — APPLY THIS AFTER READING THE PROFILE:
 5. If the request is unrelated to John's professional background, return exactly this text and nothing else: "I only have info on John's professional background — try asking about his skills, experience, or projects."
 
 CANONICAL EXAMPLES:
-- "Tell me about John." → John Lester Escarlan is a full-stack software engineer in Cebu City with a background in mathematics, now studying Computer Science at UP Cebu. His work spans pharmacy learning tools, an offline pricing product, and a civic health hackathon prototype.
-
-  - **Background:** Mathematics to Computer Science at UP Cebu
-  - **Work:** Client features, production fixes, and personal products
-  - **Project stories:** PACU, PriceCraft, HEALTH
-
-  Reach him at ${contactContent.email} or [LinkedIn](https://www.linkedin.com/in/john-lester-escarlan/)
+- "Tell me about John." → ${CHAT_OVERVIEW_ANSWER}
 - "Where has John worked?" → John has worked at Pharmacy & Acute Care University, through Upwork, and at Wind's Gate Philippines, Alliance Software Inc., and Bayoa Analytics.
 - "Write me a recipe for pancakes." → I only have info on John's professional background — try asking about his skills, experience, or projects.
 `;

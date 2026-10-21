@@ -127,7 +127,7 @@ describe('startHostedChat', () => {
 
   it('owns provider selection, model, prompt, output budget, timeout, and abort signal on the server', async () => {
     const signal = new AbortController().signal;
-    const messages = [{ role: 'user' as const, content: 'Tell me about John.' }];
+    const messages = [{ role: 'user' as const, content: "What are John's strongest frontend skills?" }];
     const stream = await startHostedChat({
       messages,
       signal,
