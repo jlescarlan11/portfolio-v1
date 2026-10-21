@@ -11,6 +11,9 @@ if (!baseUrl) {
     const count = sentenceCount(value);
     return count >= 1 && count <= 2;
   };
+  const isShortAnswer = value =>
+    hasOneOrTwoSentences(value) && !/[\r\n]/.test(value) &&
+    value.trim().split(/\s+/).length <= 45;
 
   const cases = [
     {
@@ -37,14 +40,18 @@ if (!baseUrl) {
       id: 'Q3',
       prompt: 'Where has John worked?',
       validate: answer =>
-        hasOneOrTwoSentences(answer) &&
-        /upwork|wind'?s gate|bayoa|alliance software/i.test(answer)
+        isShortAnswer(answer) &&
+        ['Upwork', "Wind's Gate", 'Bayoa', 'Alliance Software', 'Pharmacy & Acute Care University']
+          .every(company => answer.includes(company)) &&
+        !/full[\s-]*time|part[\s-]*time/i.test(answer)
     },
     {
       id: 'Q4',
       prompt: 'Which projects show mobile development experience?',
       validate: answer =>
-        hasOneOrTwoSentences(answer) && /health|react native|mobile/i.test(answer)
+        isShortAnswer(answer) && /health/i.test(answer) &&
+        /react native/i.test(answer) && /expo/i.test(answer) &&
+        !/rent\s*n\s*roll/i.test(answer)
     },
     {
       id: 'Q5',
@@ -52,6 +59,20 @@ if (!baseUrl) {
       validate: answer =>
         hasOneOrTwoSentences(answer) &&
         /jlescarlan11@gmail\.com|linkedin\.com\/in\/john-lester-escarlan/i.test(answer)
+    },
+    {
+      id: 'Q8',
+      prompt: 'What is PriceCraft?',
+      validate: answer => isShortAnswer(answer) &&
+        /pricing|selling prices/i.test(answer) && /food businesses/i.test(answer) &&
+        !/typescript|supabase|tesseract|vitest|tailwind/i.test(answer)
+    },
+    {
+      id: 'Q9',
+      prompt: 'Has Rent N Roll launched, and how many customers does it have?',
+      validate: answer => isShortAnswer(answer) && /pre[\s-]*launch/i.test(answer) &&
+        /not (?:been )?verified|unverified|unknown/i.test(answer) &&
+        !/no customers|zero customers|0 customers/i.test(answer)
     },
     {
       id: 'Q6',

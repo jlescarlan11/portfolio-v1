@@ -1,5 +1,5 @@
 import { streamText, type ModelMessage } from 'ai';
-import { getDirectContactAnswer } from '../content';
+import { getDirectPortfolioAnswer } from './direct-answers';
 import {
   HOSTED_CHAT_REASONING,
   MAX_OUTPUT_TOKENS,
@@ -14,12 +14,12 @@ export const startHostedChat: StartHostedChat = ({
   systemPrompt
 }): HostedChatStream => {
   const latestMessage = messages.at(-1);
-  const contactAnswer = latestMessage?.role === 'user'
-    ? getDirectContactAnswer(latestMessage.content)
+  const directAnswer = latestMessage?.role === 'user'
+    ? getDirectPortfolioAnswer(latestMessage.content)
     : undefined;
-  if (contactAnswer) {
+  if (directAnswer) {
     return {
-      iterator: (async function* () { yield contactAnswer; })(),
+      iterator: (async function* () { yield directAnswer; })(),
       getCompletion: async () => ({ finishReason: 'stop' })
     };
   }

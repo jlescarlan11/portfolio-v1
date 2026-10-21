@@ -89,6 +89,42 @@ describe('startHostedChat', () => {
     expect(mocks.streamText).toHaveBeenCalledOnce();
   });
 
+  it.each([
+    ['Where has John worked?', "John has worked at Wind's Gate Philippines, Upwork, Pharmacy & Acute Care University, Alliance Software Inc., and Bayoa Analytics."],
+    ['Which projects show mobile development experience?', 'HEALTH demonstrates mobile development with React Native and Expo, including offline care records stored on-device.'],
+    ['What is PriceCraft?', 'PriceCraft is a live, offline-capable pricing app that helps small food businesses turn ingredient, labor, and overhead costs into selling prices.'],
+    ['Has Rent N Roll launched, and how many customers does it have?', 'Rent N Roll is pre-launch; customer numbers and adoption have not been verified.'],
+    [" WHERE HAS JOHN WORKED?! ", "John has worked at Wind's Gate Philippines, Upwork, Pharmacy & Acute Care University, Alliance Software Inc., and Bayoa Analytics."]
+  ])('returns a concise, grounded answer to %s after an overview', async (content, answer) => {
+    const stream = await startHostedChat({
+      messages: [
+        { role: 'user', content: 'Tell me about John.' },
+        { role: 'assistant', content: 'John is a software engineer.' },
+        { role: 'user', content }
+      ],
+      signal: new AbortController().signal,
+      systemPrompt: TEST_SYSTEM_PROMPT
+    });
+    expect(await stream.iterator.next()).toEqual({ value: answer, done: false });
+    expect(await stream.iterator.next()).toEqual({ value: undefined, done: true });
+    expect(await stream.getCompletion()).toEqual({ finishReason: 'stop' });
+    expect(mocks.streamText).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    'What technologies does PriceCraft use?',
+    'How does HEALTH handle emergencies?',
+    'Tell me about John and where he worked.',
+    'What payments does Rent N Roll support?'
+  ])('keeps more detailed questions on the model path: %s', content => {
+    startHostedChat({
+      messages: [{ role: 'user', content }],
+      signal: new AbortController().signal,
+      systemPrompt: TEST_SYSTEM_PROMPT
+    });
+    expect(mocks.streamText).toHaveBeenCalledOnce();
+  });
+
   it('owns provider selection, model, prompt, output budget, timeout, and abort signal on the server', async () => {
     const signal = new AbortController().signal;
     const messages = [{ role: 'user' as const, content: 'Tell me about John.' }];
