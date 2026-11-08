@@ -31,8 +31,8 @@ describe('Personal portfolio journey', () => {
   it('lets visitors open every featured story without relying on the rotated cards', () => {
     render(<HomePage />);
     expect(screen.getByRole('radio', { name: 'PACU' })).toBeChecked();
-    expect(screen.getByRole('link', { name: /HEALTH.*Health-track semifinalist/ }))
-      .toHaveAttribute('href', '/projects/health');
+    const work = screen.getByRole('region', { name: 'Selected work' });
+    expect(within(work).queryByRole('link', { name: /Health-track semifinalist/ })).not.toBeInTheDocument();
     for (const [title, slug] of [['PACU', 'pacu'], ['PriceCraft', 'pricecraft'], ['HEALTH', 'health']]) {
       const option = screen.getByRole('radio', { name: title });
       option.focus();

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { FiArrowRight } from 'react-icons/fi';
 import type { ProjectRecord } from '../types';
 
-import { healthHackathonResult, projectStories } from '../stories';
+import { projectStories } from '../stories';
 
 type ProjectPreview = Pick<ProjectRecord, 'slug' | 'title' | 'description'> & {
   listing: Pick<ProjectRecord['listing'], 'thumbnail'>;
@@ -40,21 +40,13 @@ export default function ProjectDeck({ projects }: { projects: ProjectPreview[] }
   }
   const right = projects.length > 1 ? projects[(activeIndex + 1) % projects.length] : undefined;
   const left = projects.length > 2 ? projects[(activeIndex + projects.length - 1) % projects.length] : undefined;
-  const includesHealth = projects.some(project => project.slug === 'health');
   if (!featured) return null;
 
   return (
     <section id="work" className="portfolio-container portfolio-section project-showcase" aria-labelledby="projects-heading">
       <span id="projects" />
       <div className="section-heading">
-        <div>
-          <h2 id="projects-heading" className="h2">Selected work</h2>
-          {includesHealth && (
-            <Link href="/projects/health" className="portfolio-link mt-2 text-muted-foreground">
-              <span>HEALTH · {healthHackathonResult}</span><FiArrowRight aria-hidden="true" className="shrink-0" />
-            </Link>
-          )}
-        </div>
+        <h2 id="projects-heading" className="h2">Selected work</h2>
         <Link href="/projects" className="portfolio-link">All projects<FiArrowRight aria-hidden="true" /></Link>
       </div>
       <fieldset className="project-selectors">
