@@ -15,6 +15,7 @@ export interface HeroContent {
   name: string;
   role: string;
   tagline: string;
+  recognition: HeroCta;
   primaryCta: HeroCta;
   secondaryCta: HeroCta;
   profileImage: {
@@ -40,6 +41,10 @@ export const heroContent: HeroContent = {
   role: 'Full-Stack Software Engineer',
   tagline:
     'I build web apps and like getting the details right, from what you see on screen to what happens when you hit submit.',
+  recognition: {
+    label: 'My HEALTH team was a hackathon semifinalist, placing in the top 15 of 200+ teams.',
+    href: '/projects/health'
+  },
   primaryCta: {
     label: 'See my work',
     href: '#work'

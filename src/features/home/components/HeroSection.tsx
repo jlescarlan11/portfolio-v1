@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { FiArrowDown, FiArrowUpRight } from 'react-icons/fi';
 import type { HeroContent } from '@/features/home/content';
 import ProfileImage from './ProfileImage';
@@ -6,6 +7,7 @@ import ProfileImage from './ProfileImage';
 export default function HeroSection({
   role,
   tagline,
+  recognition,
   secondaryCta,
   primaryCta,
   profileImage,
@@ -18,6 +20,11 @@ export default function HeroSection({
         <h1 id="hero-heading" className="h1">Hi, I’m John.</h1>
         <p className="mt-2 font-medium">{role}</p>
         <p className="mt-5 max-w-lg text-muted-foreground leading-7">{tagline}</p>
+        <p className="mt-3 max-w-lg leading-7">
+          <Link href={recognition.href} className="underline underline-offset-4">
+            {recognition.label}
+          </Link>
+        </p>
         <p className="mt-4 text-muted-foreground">Cebu City, Philippines</p>
         <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-4">
           <a href={primaryCta.href} className="portfolio-button">

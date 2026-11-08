@@ -63,6 +63,8 @@ describe('HeroSection', () => {
     expect(container.querySelector('#about')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Hi, I’m John.' })).toBeVisible();
     expect(screen.getByText(heroContent.tagline)).toBeVisible();
+    expect(screen.getByRole('link', { name: /My HEALTH team was a hackathon semifinalist.*top 15 of 200\+ teams/i }))
+      .toHaveAttribute('href', '/projects/health');
     expect(
       screen.getByRole('link', { name: 'See my work' })
     ).toHaveAttribute('href', '#work');
