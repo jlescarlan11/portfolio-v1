@@ -1,13 +1,12 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { RiCloseLine, RiFocus3Line, RiRobot2Line } from 'react-icons/ri';
+import { RiFocus3Line, RiRobot2Line } from 'react-icons/ri';
 import { ChatWindow } from './ChatWindow';
 import { CHAT_WINDOW_ID } from './chat-window-contract';
 
 export function ChatBubble() {
   const [isOpen, setIsOpen] = useState(false);
-  const [labelVisible, setLabelVisible] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
   const restoreLauncherFocusRef = useRef(false);
@@ -81,20 +80,6 @@ export function ChatBubble() {
       {isOpen && (
         <div data-testid="chat-window-wrapper">
           <ChatWindow onClose={closeChat} />
-        </div>
-      )}
-      {!isOpen && labelVisible && (
-        <div className="hidden h-11 items-center rounded-xl border border-surface bg-background lg:flex">
-          <span className="px-4 font-sans text-base uppercase tracking-[0.15em] text-subtle-foreground">
-            Ask about John&apos;s work
-          </span>
-          <button
-            onClick={() => setLabelVisible(false)}
-            aria-label="Dismiss"
-            className="mr-2 inline-flex size-6 items-center justify-center rounded-md text-subtle-foreground/60 transition-colors hover:bg-surface-tint hover:text-foreground"
-          >
-            <RiCloseLine className="size-5" aria-hidden="true" />
-          </button>
         </div>
       )}
       {!isOpen && (

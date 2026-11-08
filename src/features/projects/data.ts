@@ -1,4 +1,5 @@
 import type { ProjectRecord, ProjectsSectionContent } from './types';
+import { healthHackathonResult } from './stories.ts';
 
 export const projectsSectionContent: ProjectsSectionContent = {
   eyebrow: 'Selected Work',
@@ -33,12 +34,13 @@ export const projects: ProjectRecord[] = [
     },
     caseStudy: {
       summary:
-        'A pre-launch marketplace that gives camera owners and renters one booking to follow from available dates and verification through payment, handoff, and return.',
+        'I built this pre-launch camera rental marketplace on my own. I used PayMongo events to keep each booking up to date when a payment or deposit changed.',
       evidence: [
         {
           kind: 'live-product',
+          linkLabel: 'Browse the marketplace',
           description:
-            'Public pre-launch marketplace surfaces demonstrate listing and discovery behavior, not adoption, transaction volume, or launch status.'
+            'See the public browse and listing pages, including equipment details, prices, deposits, and availability.'
         }
       ],
       roleScope: {
@@ -46,8 +48,8 @@ export const projects: ProjectRecord[] = [
         team: 'Solo project',
         status: 'Pre-launch',
         ownership: [
-          'Built the owner and renter journeys across equipment listings, discovery, booking, identity verification, digital contracts, handoff confirmation, and PayMongo payments.',
-          'Replaced 24 untyped database queries with typed Supabase RPC patterns and generated types before launch.'
+          'I built the listing, booking, identity verification, and digital contract flows, including how renters and owners confirm handoff and return.',
+          'I also rebuilt the database calls that those steps depend on.'
         ]
       },
       problem: {
@@ -56,7 +58,7 @@ export const projects: ProjectRecord[] = [
         challenge:
           'Both people need to know what gear is available, who has been verified, what has been signed and paid, and whether the equipment is ready for handoff or return.',
         stakes:
-          'If any of those details disagree, the owner and renter can act on different booking information or lose sight of the next required step.',
+          'If the owner and renter see different information, one can show up for a handoff the other isn’t ready for.',
         constraints: [
           'The marketplace is still pre-launch, so the build proves feature coverage—not adoption or live rental volume.',
           'PayMongo confirms payment and deposit changes asynchronously through webhook events.',
@@ -65,7 +67,7 @@ export const projects: ProjectRecord[] = [
       },
       solution: {
         summary:
-          'One booking connects the listing, renter, required checks, money movement, and physical exchange so each side can see what happens next.',
+          'I kept the required checks, payment status, and handoff on the same booking so both people could see what came next.',
         workflow: [
           'Owners publish equipment with photos, daily pricing, deposit details, and available dates.',
           'Renters choose available gear, complete the supported identity verification and contract steps, and request the booking.',
@@ -74,14 +76,13 @@ export const projects: ProjectRecord[] = [
       },
       learnings: {
         lessons: [
-          'The difficult part of rental software is not the listing page; it is keeping two people aligned through every commitment and handoff.',
-          'A payment button shows intent, but the PayMongo event must confirm whether money actually moved.'
+          'I learned to design around what each person needs to know before the next handoff.'
         ],
         improvements: [
-          'Run the complete booking, payment, handoff, return, and exception paths with launch users before adding more marketplace scope.'
+          'Before launch, I’d walk owners and renters through a full rental, including what happens when a payment fails or plans change.'
         ],
         unvalidated: [
-          'Because the marketplace is pre-launch, there is no verified rental volume, user adoption, or live payment history yet.'
+          'I haven’t verified the flow with real rentals or live payments.'
         ]
       },
       impact: [
@@ -90,36 +91,36 @@ export const projects: ProjectRecord[] = [
           value: '24 queries',
           label: 'Safer database changes',
           context:
-            'Moved 24 untyped database queries to typed Supabase RPC patterns so mismatched application and database assumptions can be caught earlier.'
+            'The generated types let TypeScript catch mismatched database fields while I’m editing the application.'
         },
         {
           kind: 'product',
           value: 'Full lifecycle',
           label: 'One booking, end to end',
           context:
-            'Connected listings and availability to verification, contracts, PayMongo payments and deposits, handoff confirmation, and return.'
+            'The build covers the rental from discovery to return.'
         }
       ],
       decisions: [
         {
-          title: 'Fix ambiguous database calls before launch',
+          title: 'Type the booking queries',
           constraint:
-            'Twenty-four untyped database queries made it easy for application code and stored data to disagree.',
+            'A change to a database field could leave the booking code expecting the old shape.',
           decision:
-            'Move every identified query behind typed Supabase RPC patterns backed by generated types.',
+            'I moved the queries to typed Supabase RPC calls backed by generated types.',
           rationale:
-            'Make booking-data changes reviewable and catch mismatched fields before they reach an owner or renter.',
+            'I wanted errors in the database contract to show up before someone tried to make a booking.',
           validation:
-            'All 24 identified queries were migrated to the typed pattern.'
+            'I migrated all 24 untyped database queries I identified.'
         },
         {
           title: 'Let PayMongo confirm money movement',
           constraint:
-            'The interface can start a payment, but it cannot prove that PayMongo completed it.',
+            'Starting checkout doesn’t tell the app whether the payment went through.',
           decision:
-            'Integrate payment and deposit handling through PayMongo webhooks.',
+            'I updated the booking when PayMongo sent a webhook for a payment or deposit.',
           rationale:
-            'Update the booking from provider-confirmed events instead of assuming a successful button click.'
+            'That way, both sides see a status backed by the provider’s confirmation.'
         }
       ],
       highlights: [
@@ -133,7 +134,7 @@ export const projects: ProjectRecord[] = [
           alt:
             'Rent N Roll browse page showing DSLR, mirrorless, camcorder, and action-camera categories.',
           caption:
-            'The marketplace starts with category-led discovery so renters can narrow the equipment they want to browse.',
+            'Renters can start by choosing a camera category.',
           sourceLabel: 'Live product'
         },
         {
@@ -143,7 +144,7 @@ export const projects: ProjectRecord[] = [
           alt:
             'Rent N Roll equipment detail page with product photos, daily price, deposit amount, booking notice, and availability calendar.',
           caption:
-            'The listing view keeps product media, price, deposit information, booking constraints, and availability in one decision point.',
+            'A listing puts the daily rate and deposit next to the availability calendar.',
           sourceLabel: 'Live product'
         }
       ]
@@ -174,12 +175,13 @@ export const projects: ProjectRecord[] = [
     },
     caseStudy: {
       summary:
-        'With HEALTH, I led a five-person hackathon team building symptom assessment, facility discovery, and offline records for Naga City residents. We reached the top 15 of more than 200 teams.',
+        'I led the team building a health navigation prototype for Naga City residents. I designed the symptom flow to check for emergencies before calling Gemini.',
       evidence: [
         {
           kind: 'public-repository',
+          linkLabel: 'View archived source',
           description:
-            'The archived public repository documents the safety-first mobile flow, offline record boundaries, and implementation stack.'
+            'The repository shows the symptom checks and which records the prototype stores offline.'
         }
       ],
       roleScope: {
@@ -187,17 +189,17 @@ export const projects: ProjectRecord[] = [
         team: 'Five-person hackathon team',
         status: 'Hackathon semi-finalist; repository archived',
         ownership: [
-          'Led a five-person team delivering symptom assessment, nearby-facility discovery, medication records, and YAKAP enrollment guidance.',
-          'Designed the handoff between deterministic safety checks, Gemini-assisted triage, SQLite-backed offline records, and the Node.js, Prisma, and PostgreSQL backend.'
+          'I led the team across symptom assessment, nearby facility search, medication records, and YAKAP enrollment guidance.',
+          'I designed how the mobile app exchanged records with the backend and what it could keep on the device.'
         ]
       },
       problem: {
         audience:
           'Naga City residents deciding whether symptoms call for emergency help, a nearby facility, or a lower-acuity next step.',
         challenge:
-          'A symptom tool needs to react predictably to immediate danger while still making supported assessments, medications, and facility information useful when connectivity drops.',
+          'A resident in immediate danger needs emergency help. They may also need to look up a medication or facility when connectivity drops.',
         stakes:
-          'An urgent case should never wait for a generative answer, and losing locally needed information during an outage would undermine the app when guidance matters most.',
+          'Neither task should depend on whether an AI service or a network connection is available.',
         constraints: [
           'The product was built by a five-person team within a hackathon timeline.',
           'Offline support covers defined assessment, medication, and facility records—not every care scenario.',
@@ -206,7 +208,7 @@ export const projects: ProjectRecord[] = [
       },
       solution: {
         summary:
-          'The app handles immediate safety first, uses Gemini only for eligible lower-risk inputs, and keeps a defined set of care information on the device.',
+          'I separated the emergency path, the assisted symptom check, and the records someone might need offline.',
         workflow: [
           'Residents answer an immediate-danger and mental-health check before any AI request can run.',
           'Inputs that clear that check can receive Gemini-assisted triage and guidance toward local facilities.',
@@ -215,14 +217,14 @@ export const projects: ProjectRecord[] = [
       },
       learnings: {
         lessons: [
-          'I learned to give urgent inputs a predictable path before considering AI assistance.',
-          'I learned to define offline support in terms of the exact records available without a connection.'
+          'I learned to work out what the app should do in an emergency before deciding where AI might help.',
+          'I’d also define exactly what someone can open offline before promising offline access.'
         ],
         improvements: [
-          'Bring clinicians and residents into structured review and field testing before treating the guidance as production care infrastructure.'
+          'I’d ask clinicians and residents to review the guidance and try it under real conditions before using it in a care setting.'
         ],
         unvalidated: [
-          'The hackathon placement demonstrates team delivery, not clinical effectiveness, resident adoption, or production reliability.'
+          'We didn’t measure clinical effectiveness or resident adoption.'
         ]
       },
       impact: [
@@ -230,37 +232,36 @@ export const projects: ProjectRecord[] = [
           kind: 'product',
           value: 'Top 15 / 200+',
           label: 'Hackathon result',
+          showInLead: true,
           context:
-            'The five-person team reached the semi-finals, placing in the top 15 of 200+ teams at the 1st Naga City Mayoral Hackathon.'
+            `${healthHackathonResult} at the 1st Naga City Mayoral Hackathon`
         },
         {
           kind: 'product',
           value: 'Offline records',
           label: 'Care data kept on-device',
           context:
-            'Assessments, medication records, and facility data remain available locally, with synchronization when connectivity returns.'
+            'The prototype kept selected records readable even with no connection.'
         }
       ],
       decisions: [
         {
           title: 'Route danger signals before calling Gemini',
           constraint:
-            'Emergency and mental-health inputs cannot depend on model availability or model-generated wording.',
+            'Emergency and mental-health inputs needed a reliable response even if Gemini was unavailable.',
           decision:
-            'Run deterministic emergency and mental-health checks before eligible requests reach Gemini.',
+            'I put deterministic checks in front of the Gemini call. A flagged response sends the resident to emergency or crisis guidance.',
           rationale:
-            'Give urgent inputs a predictable response path before assisted triage is considered.',
-          tradeoff:
-            'Only inputs that clear the deterministic checks are eligible for Gemini-assisted triage.'
+            'The response for those inputs stays the same each time.'
         },
         {
           title: 'Keep a defined record set on the device',
           constraint:
-            'Residents may need assessment, medication, and facility information without reliable connectivity.',
+            'We had to choose which information was useful enough to keep on the device.',
           decision:
-            'Persist those records in SQLite and synchronize them with the backend when connectivity returns.',
+            'I used SQLite for selected assessments, medication records, and facility data, with synchronization when connectivity returns.',
           rationale:
-            'Keep the supported care information readable during an outage without overstating universal offline coverage.'
+            'That kept the supported records accessible during a network outage.'
         }
       ],
       highlights: [
@@ -275,7 +276,7 @@ export const projects: ProjectRecord[] = [
           alt:
             'HEALTH safety check warning residents to contact emergency services when someone is in immediate danger.',
           caption:
-            'The symptom flow begins with a deterministic safety check so immediate-danger guidance appears before any assisted triage.',
+            'The first screen asks about immediate danger and tells residents when to contact emergency services.',
           sourceLabel: 'Public repository'
         }
       ]
@@ -307,17 +308,17 @@ export const projects: ProjectRecord[] = [
     },
     caseStudy: {
       summary:
-        'I built PriceCraft around a practical question for small food businesses: after ingredients, labor, and overhead change, what should this product sell for?',
+        'I built PriceCraft so small food businesses can turn ingredient, labor, and overhead costs into a selling price. The calculator works offline, and guests can bring their saved work into an account later.',
       evidence: [
         {
           kind: 'live-product',
-          description:
-            'The public PWA demonstrates the current pricing workflow, offline-capable shell, and reviewed receipt-cost entry points.'
+          linkLabel: 'Try the calculator',
+          description: 'Enter recipe costs and compare prices without signing in.'
         },
         {
           kind: 'public-repository',
-          description:
-            'The public repository contains the pricing, persistence, migration, Row-Level Security, and automated-test implementation.'
+          linkLabel: 'View source',
+          description: 'See the pricing logic, guest-data migration, and tests.'
         }
       ],
       roleScope: {
@@ -325,17 +326,17 @@ export const projects: ProjectRecord[] = [
         team: 'Solo project',
         status: 'Live',
         ownership: [
-          'Built the calculator across ingredient, labor, overhead, markup, profit-margin, break-even, and per-unit profit calculations.',
-          'Added shared recipe costs, product variants, a personal ingredient catalog, receipt OCR with user confirmation, offline use, and Supabase synchronization.'
+          'I built the price and break-even calculations, then added support for variants that share a base recipe.',
+          'I also built the ingredient catalog and the receipt review step that feeds it.'
         ]
       },
       problem: {
         audience:
           'Small food businesses that need to price products repeatedly as ingredient costs change.',
         challenge:
-          'A price is easy to calculate once; keeping it current is harder when spreadsheets repeat ingredient costs and related products duplicate the same base recipe.',
+          'When several products share a base recipe, copying ingredient costs between spreadsheets makes price changes easy to miss.',
         stakes:
-          'Missing a shared cost can make real margins look healthier than they are, while required sign-in or connectivity can block a quick pricing check.',
+          'One missed cost can make real margins look higher than they are. A quick price check also needs to work without an account.',
         constraints: [
           'The calculator must remain useful before sign-in and during connectivity loss.',
           'Related product variants need one source for shared recipe costs.',
@@ -344,7 +345,7 @@ export const projects: ProjectRecord[] = [
       },
       solution: {
         summary:
-          'PriceCraft keeps the recipe, selling-price options, and future cost updates together so a business can recalculate instead of rebuilding its math.',
+          'I wanted someone to update an ingredient price once and see what it did to the products that use it.',
         workflow: [
           'The business records ingredients, labor, overhead, and shared recipe costs, then compares markup and profit-margin prices with break-even and profit figures.',
           'Product variants reuse one base recipe and add only the costs that differ.',
@@ -354,14 +355,13 @@ export const projects: ProjectRecord[] = [
       },
       learnings: {
         lessons: [
-          'I learned to treat receipt OCR as a draft that reduces typing, with user confirmation before it changes the costs behind a selling price.',
-          'Building offline guest workflows pushed me to make the calculator useful before account creation and explain the cost behind its recommendation.'
+          'I learned to give people the quickest way to check a suggestion before it affects their prices.'
         ],
         improvements: [
-          'Test receipt extraction across more layouts and let users review several detected price changes in one pass.'
+          'I’d test more receipt layouts and make it easier to review several suggested price changes together.'
         ],
         unvalidated: [
-          'User adoption, pricing time saved, and business-margin improvement have not been measured.'
+          'I haven’t measured how much time the tool saves or whether it improves margins.'
         ]
       },
       impact: [
@@ -370,59 +370,59 @@ export const projects: ProjectRecord[] = [
           value: '2 strategies',
           label: 'Two ways to set a price',
           context:
-            'Calculates selling prices with both markup and profit-margin strategies across ingredient, labor, and overhead costs.'
+            'The results compare markup and target profit margin, alongside break-even price and profit per unit.'
         },
         {
           kind: 'product',
           value: 'Offline-capable',
           label: 'Works before sign-in',
           context:
-            'Lets a guest calculate and save locally without a connection, then migrate and synchronize data after signing in.'
+            'Businesses can keep a local copy or use account sync when they need it.'
         },
         {
           kind: 'implementation',
           value: '300+ tests',
           label: 'Pricing changes checked',
           context:
-            'Covers pricing logic, persistence, migration, catalog, and interface behavior with more than 300 unit and integration tests.'
+            'More than 300 unit and integration tests cover pricing, saved data, guest migration, catalog changes, and the interface.'
         },
         {
           kind: 'product',
           value: 'Receipt to catalog',
           label: 'Cost capture',
           context:
-            'Turns user-reviewed receipt lines into new catalog ingredients or updated price-history records.'
+            'Confirmed receipt lines can become new catalog ingredients or update price history.'
         }
       ],
       decisions: [
         {
           title: 'Share one base recipe across variants',
           constraint:
-            'Related products needed to share a base recipe without duplicating shared ingredient costs.',
+            'A base recipe can contribute a different share of its cost to each variant.',
           decision:
-            'Model reusable base recipes and allocate shared costs across product variants.',
+            'I made the base recipe reusable and added the costs that differ for each product variant.',
           rationale:
-            'Update shared costs once while keeping each variant’s added costs and resulting margin visible.'
+            'Each variant’s margin stays visible when an ingredient price changes.'
         },
         {
           title: 'Treat receipt OCR as a draft',
           constraint:
-            'Receipt text is noisy and cannot safely update ingredient costs without review.',
+            'Receipt OCR can misread a number or attach a price to the wrong item.',
           decision:
-            'Preprocess captured images, extract candidate lines through the available OCR path, and require editable confirmation before catalog or price-history writes.',
+            'I turned extracted lines into suggestions the user can correct before saving anything to the catalog.',
           rationale:
-            'Reduce re-entry work without letting uncertain text silently alter a selling-price calculation.',
+            'A misread receipt can’t quietly change a selling price.',
           tradeoff:
-            'The user remains responsible for checking names, quantities, units, and prices before saving.'
+            'The review step shows the suggested name, quantity, unit, and price together.'
         },
         {
           title: 'Let the calculator work before sign-in',
           constraint:
-            'The calculator needed to remain useful before sign-in and during connectivity loss.',
+            'People needed to keep working if the connection dropped or they didn’t have an account.',
           decision:
-            'Support local guest changes, optional Supabase authentication and synchronization, and guest-data migration.',
+            'I saved guest changes on the device and added optional Supabase sync, including migration when a guest signs in.',
           rationale:
-            'Make the core calculation immediately useful, then offer cloud sync when the user wants it.'
+            'Signing in lets people pick up the work they already started.'
         }
       ],
       highlights: [
@@ -438,7 +438,7 @@ export const projects: ProjectRecord[] = [
           alt:
             'PriceCraft results screen for chocolate chip cookies showing recommended price, break-even price, margin, profit, and cost breakdown.',
           caption:
-            'The results view keeps the recommended selling price beside break-even, margin, per-unit profit, batch profit, and the underlying cost breakdown.',
+            'A cookie recipe’s results show the suggested price, break-even point, margins, and costs side by side.',
           sourceLabel: 'Live product'
         }
       ]
@@ -469,35 +469,35 @@ export const projects: ProjectRecord[] = [
     },
     caseStudy: {
       summary:
-        'A full-canvas learning tool that turns regular-expression syntax into a visible state machine and shows exactly how an input moves through it.',
+        'I redesigned the workspace around the state machine graph so students could follow an input as it moved through the states. I kept our team’s existing parser and simulator.',
       evidence: [
         {
           kind: 'live-product',
-          description:
-            'The deployed workspace demonstrates expression entry, Thompson NFA construction, graph interaction, simulation, export, and responsive behavior.'
+          linkLabel: 'Try the simulator',
+          description: 'Enter a(b|c)*d, then animate abd to see why it’s accepted.'
         },
         {
           kind: 'public-repository',
-          description:
-            'The public repository contains the parser, construction logic, simulation state, responsive interface, and build configuration.'
+          linkLabel: 'View source',
+          description: 'See the workspace code alongside the parser and simulation logic.'
         }
       ],
       roleScope: {
         role: 'Frontend Engineer and Product Designer',
-        team: 'Four-person academic project',
+        team: 'Four-person class project',
         status: 'Live',
         ownership: [
-          'Redesigned the tool around a dominant NFA canvas with progressive-disclosure controls for expressions, guidance, graph utilities, and simulation.',
-          'Preserved regex parsing, Thompson construction, epsilon closure, input simulation, graph manipulation, PNG export, and URL-persisted expressions while simplifying the interface.'
+          'I designed and built the graph-first layout, expression drawer, and simulation controls.',
+          'I kept Thompson construction, epsilon closure, graph manipulation, PNG export, and expressions that can be shared by URL working through the redesign.'
         ]
       },
       problem: {
         audience:
           'Students learning how regular expressions become nondeterministic finite automata and how those machines process strings.',
         challenge:
-          'A correct conversion result is not enough when the state structure, epsilon transitions, and active simulation path remain difficult to follow.',
+          'Students learning regular expressions need to see the state structure, which transitions consume input, and which states are active.',
         stakes:
-          'If construction and execution are hidden behind controls or dense panels, the learner sees an answer without building intuition for why it is correct.',
+          'A correct answer on its own doesn’t help with building intuition for why a string matches.',
         constraints: [
           'The graph must remain readable and interactive across desktop and mobile layouts.',
           'Start, accept, active, epsilon, and symbol transitions need distinct non-color cues.',
@@ -506,7 +506,7 @@ export const projects: ProjectRecord[] = [
       },
       solution: {
         summary:
-          'The interface treats the NFA as the primary artifact, keeps the active expression centered, and reveals authoring, guidance, export, and simulation controls only when needed.',
+          'I kept the expression at the top of the screen and gave the graph the rest of the space.',
         workflow: [
           'Choose an example or enter a custom regular expression from the expression drawer, then generate its Thompson NFA.',
           'Pan the full-canvas graph, distinguish start and accept rings, follow dashed epsilon edges, and recenter or export the result.',
@@ -515,14 +515,14 @@ export const projects: ProjectRecord[] = [
       },
       learnings: {
         lessons: [
-          'For educational visualization, progressive disclosure works only when the core artifact and current state remain continuously visible.',
-          'A near-monochrome graph can preserve semantic clarity through rings, dashes, labels, and motion instead of relying on color alone.'
+          'I learned that students need to see the graph and the current state together, even when they’re working with the controls.',
+          'Rings, dashes, and labels helped me distinguish state and transition types without relying on color.'
         ],
         improvements: [
-          'Add optional construction-step playback so learners can inspect how each regex operator contributes fragments to the final NFA.'
+          'I’d add playback for the construction itself so students can see what each operator adds to the graph.'
         ],
         unvalidated: [
-          'The redesign has not yet been evaluated in a structured classroom study or measured against learning outcomes.'
+          'I haven’t tested the redesign in a classroom study.'
         ]
       },
       impact: [
@@ -531,36 +531,36 @@ export const projects: ProjectRecord[] = [
           value: 'Full canvas',
           label: 'Graph stays primary',
           context:
-            'Expression, guide, graph utility, and simulation controls float or open on demand without permanently reducing the visualization area.'
+            'Students can open the expression drawer or run the simulator without leaving the graph.'
         },
         {
           kind: 'implementation',
           value: '4 routes',
           label: 'One coherent system',
           context:
-            'Workspace, fullscreen graph, unified guide, and legacy About redirect share one responsive visual language and URL-persisted expression state.'
+            'The project includes the workspace, a fullscreen graph, a guide, and a redirect from the old About page.'
         }
       ],
       decisions: [
         {
-          title: 'Make the graph the workspace, not a card',
+          title: 'Give the graph the full window',
           constraint:
-            'Persistent side panels and toolbars competed with the automaton for limited screen space.',
+            'Side panels and toolbars left too little room for the graph, especially on small screens.',
           decision:
-            'Use a full-viewport graph with floating expression, information, recenter, export, and simulation controls.',
+            'I moved the tools into floating controls and drawers.',
           rationale:
-            'Keep the machine visible while controls appear only at the moment they are useful.',
+            'That made more room to follow long paths and branching transitions.',
           tradeoff:
-            'Some secondary actions require opening a drawer instead of remaining permanently visible.'
+            'Editing the expression takes an extra click to open its drawer.'
         },
         {
-          title: 'Animate one clear simulation path',
+          title: 'Make it easy to run a string',
           constraint:
-            'A full transport console added controls before a learner understood the basic run state.',
+            'The playback controls made the first run harder to start.',
           decision:
-            'Lead with one Animate action, a speed multiplier, and a live input tape that resolves to Accepted or Rejected.',
+            'I put one Animate button beside the input and left the speed control close by.',
           rationale:
-            'Make the primary learning loop obvious while keeping simulation feedback close to the graph.'
+            'Students can follow each character in the input while the graph shows which states are active.'
         }
       ],
       highlights: [
@@ -575,7 +575,7 @@ export const projects: ProjectRecord[] = [
           alt:
             'Regex2NFA workspace showing a Thompson NFA graph, centered expression, floating utilities, and input simulation dock.',
           caption:
-            'The full-canvas workspace keeps the automaton dominant while expression, graph, and simulation controls remain close at hand.',
+            'Dashed edges mark transitions that don’t consume an input character.',
           sourceLabel: 'Live product'
         }
       ]
@@ -605,12 +605,12 @@ export const projects: ProjectRecord[] = [
     },
     caseStudy: {
       summary:
-        'A job-search assistant that reduces the repetitive work around finding, comparing, drafting for, and tracking roles without applying on the candidate’s behalf.',
+        'I built and tested this n8n job search pipeline locally. I made overlapping runs recognize the same listing and kept application drafts for manual review.',
       evidence: [
         {
           kind: 'public-repository',
-          description:
-            'The public repository exposes the versioned policies, generated workflow inventory, deterministic tests, and manual-review boundary.'
+          linkLabel: 'View workflows and tests',
+          description: 'The repository includes n8n exports and tests. Live integrations are disabled by default.'
         }
       ],
       roleScope: {
@@ -618,17 +618,17 @@ export const projects: ProjectRecord[] = [
         team: 'Solo project',
         status: 'Validated; disabled by default',
         ownership: [
-          'Designed seven independently scheduled n8n workflows for discovery, drafting, Slack alerts, manual review, archival, analytics, and recommendations.',
-          'Built the pipeline from versioned configuration, an 89-field canonical job record, additive Google Sheet migration, and 147 deterministic tests.'
+          'I split the work into seven n8n workflows, from finding roles and sending Slack alerts to archiving outcomes and producing recommendations.',
+          'I defined an 89-field job record and wrote a migration that could add fields to the Google Sheet without replacing existing rows.'
         ]
       },
       problem: {
         audience:
           'A job candidate reviewing OnlineJobs.ph at scale who still wants to judge fit and submit every application personally.',
         challenge:
-          'Finding new listings, removing duplicates, checking fit, drafting from real experience, and tracking outcomes consumes time before an application is even sent.',
+          'Before applying, a candidate has to find new roles, keep removing duplicates, and work out which jobs fit their experience.',
         stakes:
-          'A retry can surface the same role twice, a fluent draft can claim unsupported experience, and an automated sender can take away the candidate’s final judgment.',
+          'A retry can surface the same role twice, and a draft can claim unsupported experience. The candidate needs final judgment on what goes out.',
         constraints: [
           'The seven n8n workflows run independently and must handle retries, moved rows, unfinished work, and older records.',
           'Drafts and scoring must stay grounded in one versioned candidate profile and policy set.',
@@ -637,7 +637,7 @@ export const projects: ProjectRecord[] = [
       },
       solution: {
         summary:
-          'The pipeline prepares a smaller, better-supported review queue; the candidate decides what is true, worth pursuing, and ready to send.',
+          'I set up a queue for OnlineJobs.ph listings, with fit scores and a draft for the candidate to check.',
         workflow: [
           'Twenty-two evidence-linked searches find listings and compare them with active and archived history using a canonical job identity.',
           'Qualification and opportunity scores prioritize roles before Groq prepares experience-grounded application material and Slack alerts.',
@@ -646,14 +646,14 @@ export const projects: ProjectRecord[] = [
       },
       learnings: {
         lessons: [
-          'The safest way to maintain exported automation is to generate it from checked-in rules instead of editing seven copies by hand.',
-          'A durable listing identity matters more than row position when schedules overlap, retries happen, and records move to an archive.'
+          'I learned to keep rules in one place so a change to the candidate profile doesn’t have to be repeated across workflows.',
+          'I also learned to treat a spreadsheet row number as temporary: someone can move the row while a run is still processing it.'
         ],
         improvements: [
-          'Enable external services one at a time, inspect real listing, Sheet, model, and alert behavior, then increase the schedule frequency.'
+          'I’d verify the external services one by one before turning on scheduled runs.'
         ],
         unvalidated: [
-          'The 147 deterministic tests prove checked-in behavior, not better application conversion or reliable live provider performance.'
+          'I haven’t measured how the pipeline performs with live services or whether it improves application outcomes.'
         ]
       },
       impact: [
@@ -662,63 +662,63 @@ export const projects: ProjectRecord[] = [
           value: '7 workflows',
           label: 'Jobs split by responsibility',
           context:
-            'Separates discovery, generation, Slack alerts, manual review, archival, analytics, and recommendations into independently scheduled n8n workflows.'
+            'The workflow exports include their own schedules, so discovery and later steps can run independently.'
         },
         {
           kind: 'product',
           value: '22 queries',
           label: 'Repeatable search coverage',
           context:
-            'Runs a versioned search catalog while reconciling active and archived records around one canonical job identity.'
+            'The search catalog has 22 queries, with a record of why each was included.'
         },
         {
           kind: 'implementation',
           value: '147 tests',
           label: 'Checked without live actions',
           context:
-            'Covers profile and policy contracts, discovery, ranking, generation, review, alerts, archival, analytics, recommendations, generated artifacts, and a synthetic lifecycle.'
+            'I ran 147 deterministic tests without live integrations, including a simulated run from discovery through archive.'
         },
         {
           kind: 'product',
           value: 'Manual-only',
           label: 'Candidate keeps control',
           context:
-            'Prepares application material while requiring the candidate to review and submit every application.'
+            'The candidate still has to review and submit every application.'
         }
       ],
       decisions: [
         {
           title: 'Generate seven automations from one policy',
           constraint:
-            'Editing exported workflows directly would let runtime behavior drift from profile, ranking, alert, analytics, and application rules.',
+            'Editing the workflow exports by hand could leave the candidate profile or ranking rules out of sync.',
           decision:
-            'Treat versioned configuration as the source of truth and generate the seven workflow exports and Sheet setup from it.',
+            'I generated the workflow exports and Sheet setup from versioned configuration.',
           rationale:
-            'Review and test one set of rules before producing the files n8n and Google Sheets consume.',
+            'I can review one change to the rules before it reaches the exports.',
           validation:
-            'The validation command checks generated-artifact drift and runs 147 deterministic tests without live service calls.'
+            'The validation command checks that the exported files still match the checked-in rules.'
         },
         {
           title: 'Give every listing one durable identity',
           constraint:
-            'Independent schedules, retries, legacy rows, and reviewer actions could otherwise duplicate work or overwrite a newer decision.',
+            'Two scheduled runs can see the same job, or a retry can finish after a reviewer has changed its status.',
           decision:
-            'Use canonical job identities, append-only claims, processing tokens, state guards, idempotent upserts, and archive confirmation before deletion.',
+            'I gave each listing one ID across active and archived rows. I used claims and state checks to keep overlapping runs from reprocessing the same job or overwriting a newer decision.',
           rationale:
-            'Recognize the same listing across active and archived Sheets even when work overlaps or retries.',
+            'An archive step confirms the new row before removing the original.',
           validation:
-            'Regression fixtures cover duplicate discovery, stale claims, concurrent review, partial archive writes, row shifts, and legacy records.'
+            'Tests cover duplicate listings, stale claims, and overlapping reviews, plus moved rows and partial archive writes.'
         },
         {
           title: 'Automate preparation, never submission',
           constraint:
-            'The pipeline needed better prioritization and feedback without allowing generated output or aggregate analytics to take action for the candidate.',
+            'A generated draft can sound right even when it misstates the candidate’s experience.',
           decision:
-            'Keep review, Apply Points, submission, and outcomes explicit while limiting analytics and weekly recommendations to versioned, evidence-backed advisory output.',
+            'I gave Groq the versioned candidate profile as a source for drafts and left review and submission to the candidate.',
           rationale:
-            'Use past outcomes to improve the review queue without making the candidate’s decision.',
+            'Past outcomes inform the analytics and recommendations for future reviews.',
           tradeoff:
-            'The system prepares and prioritizes work but never applies for a job.'
+            'The pipeline never applies for a job.'
         }
       ],
       highlights: [
@@ -733,7 +733,7 @@ export const projects: ProjectRecord[] = [
           alt:
             'Job Pipeline repository table listing seven workflow exports with their schedules and responsibilities.',
           caption:
-            'The checked-in workflow inventory makes each independently scheduled export and its responsibility explicit before activation.',
+            'The repository lists each workflow and its intended schedule.',
           sourceLabel: 'Public repository'
         }
       ]
@@ -765,31 +765,31 @@ export const projects: ProjectRecord[] = [
     },
     caseStudy: {
       summary:
-        'At Pharmacy & Acute Care University, I worked on the details learners depend on: progress that adds up, certificates that stay recorded, and content that moves safely into production.',
+        'At Pharmacy & Acute Care University, I fixed a bug that let course progress go past 100%. I also prevented duplicate certificate records and gave the team a way to undo a content release.',
       evidence: [
         {
           kind: 'live-product',
+          linkLabel: 'Public PACU site',
           description:
-            'The public PACU website demonstrates the current course, literature, board-prep, pricing, and account-entry experience.'
+            'You can browse courses, board prep, and clinical resources. Progress and certificate records are behind sign-in, and content releases use an internal tool.'
         }
       ],
       roleScope: {
-        role: 'Full-Stack Engineer (Contract)',
+        role: 'Software Engineer (Contract)',
         team: 'PACU product team',
         status: 'Live client platform; contract completed',
         duration: 'February–August 2026',
         ownership: [
-          'I worked with the PACU product team on learner and administrator workflows across custom React, TypeScript, Node.js, and PostgreSQL features, alongside WordPress and Airtable-supported operations.',
-          'My work connected production debugging with feature delivery: repairing learning progress, recording certificate achievements, promoting content, and correcting enrollment-based access decisions.'
+          'I worked with the PACU product team on study tools and subscription access for learners, plus the WordPress and Airtable workflows the team used to manage the site.'
         ]
       },
       problem: {
         audience:
           'Pharmacy professionals who need one place to discover courses, stay current with clinical literature, and prepare for board certification.',
         challenge:
-          'Learners could see completion above 100%, miss required readings, or find FastTrack status out of sync. I also needed to keep certificate achievements consistent and give administrators a safer way to promote content.',
+          'Learners could miss required readings or see the wrong status in FastTrack.',
         stakes:
-          'When course information, subscription entitlements, or operational records disagree, learners can lose access and administrators can be blocked from supporting them.',
+          'That made it hard to tell what they still needed to finish.',
         constraints: [
           'The live platform needed targeted improvements without interrupting active learning and administrative workflows.',
           'WordPress, Airtable, custom application code, APIs, and PostgreSQL each owned a different part of the experience.',
@@ -798,7 +798,7 @@ export const projects: ProjectRecord[] = [
       },
       solution: {
         summary:
-          'I worked across the interface, APIs, and database to align learning progress, record certificate achievements consistently, and make content promotion reviewable and reversible.',
+          'I traced where the platform counted a reading or activity as complete.',
         workflow: [
           'Publish course, board-prep, literature, pricing, and resource information through the public WordPress experience.',
           'Support content and operational records in Airtable where the team needs fast, structured updates.',
@@ -808,38 +808,48 @@ export const projects: ProjectRecord[] = [
       },
       learnings: {
         lessons: [
-          'This work reinforced that a correct interface depends on consistent checks and records beneath it; fixing one screen is not enough when several paths calculate progress.',
-          'I learned to make recovery part of content-promotion tooling through snapshots, transactions, rollback, and integrity checks.'
+          'I learned to plan for retries and failed writes before building the first version.'
         ],
         improvements: [
-          'Continue strengthening cross-system regression coverage and operational documentation as learning products and subscription paths evolve.'
+          'I’d add a test that follows a required reading from completion to the learner’s progress screen.'
         ],
         unvalidated: [
-          'The live site demonstrates delivered capabilities, but it does not by itself attribute learner growth, certification outcomes, or revenue changes to this engineering work.'
+          'Measuring the effect on course completion would take a follow-up with learner data.'
         ]
       },
       impact: [
-        { kind: 'implementation', value: '5 code paths', label: 'Consistent completion checks', context: 'I unified completion checks across five code paths to address progress above 100%, missing required readings, and FastTrack status mismatches.' },
-        { kind: 'implementation', value: '51 passing tests', label: 'Certificate records verified', context: 'The certificate achievement change was validated with 51 passing tests, including authorization coverage.' },
-        { kind: 'product', value: 'Content promotion', label: 'Recovery built into the workflow', context: 'I delivered development-to-production content-promotion tooling with completeness checks, snapshots, transactional writes, rollback, and post-write integrity verification.' },
         {
-          kind: 'product',
-          value: '3 delivery layers',
-          label: 'Right tool for each job',
-          context:
-            'Combined WordPress publishing, Airtable-supported operations, and custom full-stack features in one client platform.'
+          kind: 'implementation',
+          value: '5 code paths',
+          label: 'Shared completion check',
+          context: 'I made five code paths use the same completion check.'
+        },
+        {
+          kind: 'implementation',
+          value: '51 passing tests',
+          label: 'Certificate records verified',
+          context: 'The certificate change passed 51 tests, including access checks.'
         },
         {
           kind: 'product',
-          value: 'Learner + admin',
-          label: 'Two sides supported',
-          context:
-            'Covered learner-facing study, reading, reminder, and subscription flows alongside the administrative workflows that support them.'
+          value: 'Release rollback',
+          label: 'Content recovery',
+          context: 'The team could roll back a content release using the snapshot.'
         }
       ],
       decisions: [
-        { title: 'Enforce certificate uniqueness in the database', constraint: 'Repeated writes must not create duplicate certificate achievements.', decision: 'I combined idempotent writes with database uniqueness constraints, migration and backfill support, and authorization coverage.', rationale: 'The database enforces the same rule even when a write is retried.', validation: 'The change was validated with 51 passing tests.' },
-        { title: 'Make content promotion recoverable', constraint: 'Content needs to move from development to production with its identifiers and relationships intact.', decision: 'I added completeness checks and snapshots before transactional writes, then rollback support and post-write integrity verification.', rationale: 'The tooling checks what is being promoted and provides a recovery path when a change needs to be undone.' }
+        {
+          title: 'Keep one record per certificate achievement',
+          constraint: 'A request to save an achievement could be sent more than once.',
+          decision: 'I made the write safe to retry and added a database rule to prevent duplicate records. I also added support for filling in past achievements.',
+          rationale: 'The rule also applies if two requests arrive at the same time.'
+        },
+        {
+          title: 'Keep content linked through a release',
+          constraint: 'Content had to move from development to production with its IDs and relationships intact.',
+          decision: 'I built a release tool that checks for missing content, saves a snapshot, and verifies the records after writing them.',
+          rationale: 'The tool writes the changes together, so a failed write won’t leave half a release in production.'
+        }
       ],
       highlights: [
         'I unified learning-progress completion checks across five code paths and implemented certificate achievement records validated with 51 passing tests.',
@@ -853,8 +863,7 @@ export const projects: ProjectRecord[] = [
           src: '/project/pacu-logo.png',
           alt:
             'Orange PACU wordmark for Pharmacy & Acute Care University with a medical caduceus integrated into the letter U.',
-          caption:
-            'PACU is a live pharmacy education platform spanning public course discovery, clinical learning resources, board preparation, and account access.',
+          caption: 'The PACU wordmark.',
           sourceLabel: 'Live product'
         }
       ]

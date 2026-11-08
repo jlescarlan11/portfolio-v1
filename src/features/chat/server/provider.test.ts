@@ -90,11 +90,11 @@ describe('startHostedChat', () => {
   });
 
   it.each([
-    ['Where has John worked?', "John has worked at Wind's Gate Philippines, Upwork, Pharmacy & Acute Care University, Alliance Software Inc., and Bayoa Analytics."],
+    ['Where has John worked?', "John has held roles at Wind's Gate Philippines, Pharmacy & Acute Care University, Alliance Software Inc., and Bayoa Analytics, and has done freelance client work through Upwork."],
     ['Which projects show mobile development experience?', 'HEALTH demonstrates mobile development with React Native and Expo, including offline care records stored on-device.'],
     ['What is PriceCraft?', 'PriceCraft is a live, offline-capable pricing app that helps small food businesses turn ingredient, labor, and overhead costs into selling prices.'],
     ['Has Rent N Roll launched, and how many customers does it have?', 'Rent N Roll is pre-launch; customer numbers and adoption have not been verified.'],
-    [" WHERE HAS JOHN WORKED?! ", "John has worked at Wind's Gate Philippines, Upwork, Pharmacy & Acute Care University, Alliance Software Inc., and Bayoa Analytics."]
+    [" WHERE HAS JOHN WORKED?! ", "John has held roles at Wind's Gate Philippines, Pharmacy & Acute Care University, Alliance Software Inc., and Bayoa Analytics, and has done freelance client work through Upwork."]
   ])('returns a concise, grounded answer to %s after an overview', async (content, answer) => {
     const stream = await startHostedChat({
       messages: [

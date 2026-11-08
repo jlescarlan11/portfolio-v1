@@ -101,6 +101,7 @@ describe('useOnlineChat', () => {
 
     const first = renderHook(() => useOnlineChat());
     expect(first.result.current.messages).toEqual([WELCOME_MESSAGE]);
+    expect(first.result.current.messages[0]?.content).toContain('What is PriceCraft?');
     first.unmount();
 
     const second = renderHook(() => useOnlineChat());

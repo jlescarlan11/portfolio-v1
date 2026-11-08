@@ -31,6 +31,7 @@ export interface ProjectImpact {
   value: string;
   label: string;
   context: string;
+  showInLead?: boolean;
 }
 
 export type ProjectVisualSection =
@@ -52,6 +53,7 @@ export type ProjectEvidenceKind = 'live-product' | 'public-repository';
 export interface ProjectEvidence {
   kind: ProjectEvidenceKind;
   description: string;
+  linkLabel?: string;
 }
 
 export interface ProjectHeroVisual extends ProjectVisualBase {

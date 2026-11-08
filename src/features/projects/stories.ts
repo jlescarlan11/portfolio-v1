@@ -1,18 +1,20 @@
 // Short homepage chapters. Detailed evidence lives in the project records.
-export const projectStories: Record<string, { kind: string; preview: string; lesson: string }> = {
+export const healthHackathonResult = 'Hackathon semifinalist · Top 15 of 200+ teams';
+
+export const projectStories: Record<string, { kind: string; preview: string; detail: string }> = {
   pacu: {
-    kind: 'Client work · Feb–Aug 2026',
-    preview: 'At PACU, I worked on progress that could exceed 100%, certificate records, and content promotion. I aligned completion checks across five code paths and used database constraints to prevent duplicate achievements. The certificate change was validated with 51 passing tests.',
-    lesson: 'It reinforced how much a learning experience depends on consistent records behind the interface.'
+    kind: 'Client project · Feb–Aug 2026',
+    preview: 'Some learners at PACU could see their course progress go past 100%. I fixed how the platform counted completed work and made sure retrying a certificate write couldn’t create a duplicate record.',
+    detail: 'I also added a way for the team to roll back content releases if something went wrong.'
   },
   pricecraft: {
-    kind: 'Personal product · Offline-capable PWA',
-    preview: 'I built PriceCraft to turn ingredients, labor, and overhead into a clearer selling price. It works offline before sign-in, and receipt OCR suggests entries for the person using it to review before costs change.',
-    lesson: 'I learned to treat OCR as a useful draft and make the math behind a price visible.'
+    kind: 'Personal project · Offline pricing app',
+    preview: 'I built PriceCraft so small food businesses can turn ingredient costs, labor, and overhead into a selling price. The calculator works offline without an account.',
+    detail: 'If you scan a receipt, you can check the suggested prices before they change your costs.'
   },
   health: {
     kind: 'Hackathon prototype · Team lead',
-    preview: 'I led a five-person team building symptom assessment, facility discovery, and offline records. We put deterministic safety checks before AI-assisted assessment and reached the top 15 of more than 200 teams.',
-    lesson: 'The prototype taught me to define clear limits for both AI assistance and offline support.'
+    preview: 'I led a five-person team building a health app prototype for Naga City.',
+    detail: 'We put safety checks ahead of AI-assisted assessment and kept selected records available offline.'
   }
 };

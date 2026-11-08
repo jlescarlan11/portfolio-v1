@@ -202,6 +202,16 @@ export default async function ProjectPage({
     (visual): visual is ProjectHeroVisual => visual.kind === 'hero'
   );
   const nextProject = getNextProject(project.slug);
+  const { evidence, impact, roleScope } = project.caseStudy;
+  const leadImpact = impact.find(item => item.showInLead);
+  const projectLinks = [
+    { kind: 'live-product', url: project.links.liveUrl, defaultLabel: 'Visit website' },
+    { kind: 'public-repository', url: project.links.githubUrl, defaultLabel: 'View code' }
+  ].flatMap(({ kind, url, defaultLabel }) => {
+    if (!isRenderableExternalUrl(url)) return [];
+    const item = evidence.find(item => item.kind === kind);
+    return [{ url, label: item?.linkLabel ?? defaultLabel, description: item?.description, id: `${kind}-description` }];
+  });
 
   return (
     <main
@@ -250,6 +260,12 @@ export default async function ProjectPage({
               {project.title}
             </Typography>
 
+            <Typography variant="body-sm" className="mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-muted-foreground">
+              <span className="font-medium text-foreground">{roleScope.role}</span>
+              {roleScope.team && <span>{roleScope.team}</span>}
+              {roleScope.duration && <span>{roleScope.duration}</span>}
+            </Typography>
+
             <Typography
               variant="body-lg"
               as="p"
@@ -257,27 +273,43 @@ export default async function ProjectPage({
             >
               {project.caseStudy.summary}
             </Typography>
+            {leadImpact && (
+              <Typography variant="body-sm" className="mt-4 font-medium text-foreground">
+                {leadImpact.context}
+              </Typography>
+            )}
+            {projectLinks.length > 0 && (
+              <ul aria-label="Project links" className="mt-6 flex flex-wrap gap-x-8 gap-y-4">
+                {projectLinks.map(link => (
+                  <li key={link.id} className="max-w-xs">
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-describedby={link.description ? link.id : undefined}
+                      className="portfolio-link"
+                    >
+                      {link.label} <span aria-hidden="true">↗</span><NewTabNotice />
+                    </a>
+                    {link.description && (
+                      <Typography variant="body-sm" id={link.id} className="mt-2 text-muted-foreground">
+                        {link.description}
+                      </Typography>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </FadeIn>
 
-        <FadeIn delay={80} className="mb-8 md:mb-10">
+        <FadeIn delay={80} className="mb-14">
           <ProjectHero
             visual={heroVisual}
             fallbackSrc={project.logo}
             title={project.title}
           />
         </FadeIn>
-
-        <div className="mb-14 flex flex-wrap gap-6" aria-label="Project links">
-          {[
-            { label: 'Visit website', url: project.links.liveUrl },
-            { label: 'View code', url: project.links.githubUrl },
-          ].filter(link => isRenderableExternalUrl(link.url)).map(link => (
-            <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="portfolio-link">
-              {link.label} <span aria-hidden="true">↗</span><NewTabNotice />
-            </a>
-          ))}
-        </div>
 
         <section aria-labelledby="problem-heading" className="mb-14 space-y-5">
           <h2 id="problem-heading" className="h2">The problem</h2>
@@ -287,10 +319,8 @@ export default async function ProjectPage({
 
         <section aria-labelledby="contribution-heading" className="mb-14 space-y-5">
           <h2 id="contribution-heading" className="h2">My contribution</h2>
-          <p>{project.caseStudy.roleScope.role}</p>
-          <p className="text-muted-foreground">{[project.caseStudy.roleScope.team, project.caseStudy.roleScope.duration, project.caseStudy.roleScope.status].filter(Boolean).join(' · ')}</p>
           <div className="space-y-4 text-muted-foreground">
-            {project.caseStudy.roleScope.ownership.map(item => <p key={item}>{item}</p>)}
+            {roleScope.ownership.map(item => <p key={item}>{item}</p>)}
           </div>
         </section>
 
@@ -303,6 +333,7 @@ export default async function ProjectPage({
             <p>{decision.decision}</p>
             <p className="text-muted-foreground">{decision.rationale}</p>
             {decision.tradeoff && <p className="text-muted-foreground">{decision.tradeoff}</p>}
+            {decision.validation && <p className="text-muted-foreground">{decision.validation}</p>}
           </div>)}
         </section>
 
@@ -314,7 +345,7 @@ export default async function ProjectPage({
 
         <section aria-labelledby="outcome-heading" className="mb-14 space-y-5">
           <h2 id="outcome-heading" className="h2">Outcome</h2>
-          {project.caseStudy.impact.map(item => (
+          {impact.filter(item => item !== leadImpact).map(item => (
             <p key={item.label} className="text-muted-foreground">{item.context}</p>
           ))}
         </section>

@@ -25,13 +25,12 @@ afterEach(() => {
 });
 
 describe('ContactSection', () => {
-  it('states only the approved inquiry scope and response commitment', () => {
+  it('invites role and project inquiries in the first person', () => {
     const { container } = render(<ContactSection content={contactContent} />);
 
     expect(
-      screen.getByText('Employment, freelance, and contract inquiries')
+      screen.getByText(/if you’re hiring for a software engineering role or have a project in mind, i’d like to hear from you/i)
     ).toBeVisible();
-    expect(screen.getByText(/Have a role, project, or problem in mind/)).toBeVisible();
     expect(container.innerHTML).not.toMatch(/animate-ping|available now|timezone/i);
   });
 
@@ -58,14 +57,20 @@ describe('ContactSection', () => {
   });
 
   it('keeps email available when scheduling is not configured', () => {
-    render(<ContactSection content={contactContent} />);
+    const content = {
+      ...contactContent,
+      booking: { ...contactContent.booking, url: null }
+    };
+    render(<ContactSection content={content} />);
 
     expect(
       screen.queryByRole('link', { name: /schedule an introductory call/i })
     ).not.toBeInTheDocument();
+    expect(screen.queryByText(/choose a time|introductory call/i)).not.toBeInTheDocument();
     expect(
-      screen.getByRole('link', { name: contactContent.primaryCtaLabel })
-    ).toHaveAttribute('href', `mailto:${contactContent.email}`);
+      screen.getByRole('link', { name: 'Email me' })
+    ).toHaveAttribute('href', `mailto:${content.email}`);
+    expect(screen.getByText(content.email)).toBeVisible();
   });
 
   it('announces that the resume opens in a new tab', () => {

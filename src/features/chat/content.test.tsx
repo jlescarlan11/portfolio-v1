@@ -58,8 +58,15 @@ describe('buildSystemPrompt', () => {
       "Software Monitoring Engineer at Wind's Gate Philippines — Cebu City (2025-06–Present)"
     );
     expect(prompt).toContain(
-      '"Where has John worked?" → John has worked at Pharmacy & Acute Care University'
+      'Freelance Software Engineer through Upwork — Remote (2025-01–Present)'
     );
+  });
+
+  it('does not treat a past education end date as degree completion', () => {
+    const prompt = buildSystemPrompt();
+
+    expect(prompt).toContain('Mathematics studies, University of the Philippines Cebu (2022-09–2025-06)');
+    expect(prompt).toContain('A past end date does not establish that a degree was awarded.');
   });
 
   it('places the strict output contract after the profile data', () => {

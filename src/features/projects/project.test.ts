@@ -192,8 +192,9 @@ test('case-study openings describe concrete user problems', () => {
       'pharmacy professionals',
       'courses',
       'progress',
-      'certificate',
-      'content'
+      '100%',
+      'required readings',
+      'FastTrack'
     ]
   };
 
@@ -554,9 +555,10 @@ test('HEALTH copy uses precise safety, offline, and team claims', () => {
     health.caseStudy.impact.some(
       impact =>
         impact.value === 'Top 15 / 200+' &&
-        impact.context.includes('five-person team')
+        impact.showInLead === true &&
+        /hackathon semifinalist/i.test(impact.context)
     ),
-    'HEALTH should attribute the hackathon result to the team'
+    'HEALTH should surface the hackathon result in the lead'
   );
   assert.ok(
     health.technologies.includes('Gemini API'),
@@ -578,7 +580,7 @@ test('PriceCraft copy reflects its current pricing and persistence capabilities'
       'offline',
       'Supabase',
       'Row-Level Security',
-      'guest-data migration',
+      'saved work into an account',
       'JSON import and export',
       'installable PWA',
       'receipt',
@@ -688,7 +690,7 @@ test('PACU copy covers the mixed-platform client delivery scope', () => {
   );
   assert.equal(pacu.completedAt, '2026-08');
   assert.equal(pacu.client, 'Pharmacy & Acute Care University');
-  assert.equal(pacu.caseStudy.roleScope.role, 'Full-Stack Engineer (Contract)');
+  assert.equal(pacu.caseStudy.roleScope.role, 'Software Engineer (Contract)');
   assert.equal(
     pacu.caseStudy.roleScope.status,
     'Live client platform; contract completed'

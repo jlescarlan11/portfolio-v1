@@ -53,9 +53,9 @@ describe('about experience content', () => {
     const copy = getExperienceCopy();
 
     for (const claim of [
-      'online learning platform',
-      'entitlement rules',
-      '12+ production-blocking defects',
+      'five code paths use the same completion check',
+      'the right enrollment and course group',
+      '12+ production issues that blocked client work',
       '15+ manual steps',
       '25+ incidents across eight production services',
       'eight recovery runbooks',

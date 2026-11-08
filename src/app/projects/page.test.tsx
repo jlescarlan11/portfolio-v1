@@ -25,16 +25,6 @@ describe('ProjectsPage', () => {
     expect(screen.getByText(`${projects.length} project stories`)).toBeVisible();
 
     const list = screen.getByRole('list', { name: 'All projects' });
-    expect(list).toHaveAttribute('data-layout', 'archive');
-    expect(list).toHaveClass(
-      'grid-cols-1'
-    );
-
-    const headings = within(list).getAllByRole('heading', { level: 3 });
-    expect(headings.map(heading => heading.textContent)).toEqual(
-      projects.map(project => project.title)
-    );
-
     for (const project of projects) {
       expect(
         within(list).getByRole('heading', { name: project.title })
@@ -50,6 +40,44 @@ describe('ProjectsPage', () => {
         })
       ).toBeVisible();
     }
+  });
+
+  it('lists the featured work first and retains the rest of the catalog in order', () => {
+    render(<ProjectsPage />);
+
+    const catalog = screen.getByRole('list', { name: 'All projects' });
+    const links = within(catalog).getAllByRole('link');
+
+    expect(links.map(link => link.getAttribute('href'))).toEqual([
+      '/projects/pacu',
+      '/projects/pricecraft',
+      '/projects/health',
+      '/projects/rent-n-roll',
+      '/projects/regex2nfa',
+      '/projects/job-pipeline'
+    ]);
+  });
+
+  it.each([
+    ['PACU', 'Client contract'],
+    ['PriceCraft', 'Personal product'],
+    ['HEALTH', 'Hackathon semifinalist · Top 15 of 200+ teams'],
+    ['Rent N Roll', 'Solo pre-launch marketplace'],
+    ['Regex2NFA', 'Class project'],
+    ['Job Pipeline', 'Automation']
+  ])('shows the title and work type before the %s preview image', (title, workType) => {
+    render(<ProjectsPage />);
+
+    const link = screen.getByRole('link', {
+      name: `${projectsSectionContent.ctaLabel}: ${title}`
+    });
+    const heading = within(link).getByRole('heading', { name: title });
+    const type = within(link).getByText(workType, { selector: 'p' });
+    const image = within(link).getByRole('img');
+
+    expect(type).toBeVisible();
+    expect(heading.compareDocumentPosition(image) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(type.compareDocumentPosition(image) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it('keeps PACU capability scope visible in the archive', () => {
@@ -69,7 +97,7 @@ describe('ProjectsPage', () => {
     expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content');
     expect(screen.getByRole('main')).toHaveAttribute('tabindex', '-1');
     expect(
-      screen.getByRole('link', { name: 'Back to projects' })
+      screen.getByRole('link', { name: 'Back to featured work' })
     ).toHaveAttribute('href', '/#work');
   });
 

@@ -57,13 +57,14 @@ describe('HeroSection', () => {
     expect(portrait).toHaveAttribute('data-src', '/hero-dither.png');
   });
 
-  it('presents a concise introduction and a direct hiring path', () => {
+  it('links the introduction to selected work, contact, and the résumé', () => {
     const { container } = render(<HeroSection {...heroContent} />);
 
     expect(container.querySelector('#about')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Hi, I’m John.' })).toBeVisible();
     expect(screen.getByText(heroContent.tagline)).toBeVisible();
     expect(
-      screen.getByRole('link', { name: heroContent.primaryCta.label })
+      screen.getByRole('link', { name: 'See my work' })
     ).toHaveAttribute('href', '#work');
     expect(screen.getByRole('link', { name: 'Get in touch' })).toHaveAttribute('href', '#contact');
     expect(screen.getByRole('link', { name: 'Résumé' })).toHaveAttribute('href', '/John_Lester_Escarlan_Resume.pdf');

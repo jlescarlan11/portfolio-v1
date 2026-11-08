@@ -36,24 +36,21 @@ describe('ChatBubble', () => {
     expect(getByRole('button', { name: /open ai chat/i })).toBeTruthy();
   });
 
-  it('gives compact chat controls at least a 24px pointer target', () => {
+  it('gives the chat launcher a 44px pointer target', () => {
     const { getByRole } = render(<ChatBubble />);
 
-    expect(getByRole('button', { name: 'Dismiss' })).toHaveClass('size-6');
     expect(getByRole('button', { name: /open ai chat/i })).toHaveClass(
       'h-11',
       'w-11'
     );
   });
 
-  it('defers the promotional label below the desktop breakpoint and supports dismissal', () => {
-    const { getByText, getByRole, queryByText } = render(<ChatBubble />);
-    const label = getByText(/ask about john's work/i).parentElement;
+  it('keeps the closed chat entry to a launcher without an invitation overlay', () => {
+    render(<ChatBubble />);
 
-    expect(label).toHaveClass('hidden', 'lg:flex');
-    fireEvent.click(getByRole('button', { name: 'Dismiss' }));
-    expect(queryByText(/ask about john's work/i)).not.toBeInTheDocument();
-    expect(getByRole('button', { name: /open ai chat/i })).toBeVisible();
+    expect(screen.queryByText(/ask about john's work/i)).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { hidden: true })).toHaveLength(1);
+    expect(screen.getByRole('button', { name: /open ai chat/i })).toBeVisible();
   });
 
   it('mounts ChatWindow when button is clicked', async () => {

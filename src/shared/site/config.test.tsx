@@ -46,7 +46,7 @@ describe('siteConfig SEO defaults', () => {
     expect(siteConfig.seo).toMatchObject({
       siteTitle: 'John Lester Escarlan | Full-Stack Software Engineer',
       description:
-        'I’m John, a full-stack software engineer in Cebu City with a background in mathematics. Explore my journey, client work, personal projects, and what I’m learning.',
+        'I’m John Lester Escarlan, a full-stack software engineer in Cebu City. See how I build web apps, fix problems in live software, and work with teams.',
       siteName: 'John Lester Escarlan',
       siteUrl: PRODUCTION_SITE_URL,
       socialImage: {

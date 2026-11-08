@@ -293,9 +293,10 @@ body > footer, main + footer { margin-top: 8rem; }
 
 /* Story sections extend the existing type scale and layout tokens. */
 .journey-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3rem; }
-.project-selectors { display: flex; justify-content: center; flex-wrap: wrap; gap: 1.5rem; margin-top: 1rem; }
-.project-selectors button[aria-pressed="true"] { text-decoration: underline; text-underline-offset: 6px; }
-.project-selectors button[aria-pressed="false"] { color: var(--text-muted-foreground); }
+.project-selectors { display: flex; justify-content: center; flex-wrap: wrap; gap: 1.5rem; }
+.project-selectors input:checked + span { text-decoration: underline; text-underline-offset: 6px; }
+.project-selectors input:not(:checked) + span { color: var(--text-muted-foreground); }
+.project-selectors input:focus-visible + span { outline: 2px solid var(--focus-ring); outline-offset: 4px; }
 .project-active:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 4px; }
 .project-preview .project-thumbnail { aspect-ratio: 16 / 9; }
 .project-case-study-story p, .project-story p { overflow-wrap: anywhere; }

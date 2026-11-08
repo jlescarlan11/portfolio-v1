@@ -4,7 +4,13 @@ import Link from 'next/link';
 import { ExperienceHistory } from '@/features/about/ExperienceSection';
 import { aboutContent } from '@/features/about/content';
 
-export const metadata: Metadata = { title: 'Experience', description: 'My work and education, from the latest chapter back.', alternates: { canonical: '/experience' } };
+const description = 'My work in software engineering and production monitoring, and my studies at UP Cebu.';
+
+export const metadata: Metadata = {
+  title: 'Experience',
+  description,
+  alternates: { canonical: '/experience' }
+};
 
 export default function Page(): React.JSX.Element {
   return <main id="main-content" tabIndex={-1} className="bg-surface px-6 pb-24 pt-28 md:pb-32 md:pt-32">
@@ -12,9 +18,9 @@ export default function Page(): React.JSX.Element {
       <header className="mb-12">
         <Link href="/#experience" className="portfolio-link mb-10"><span aria-hidden="true">←</span> Back to home</Link>
         <h1 className="h1">Experience</h1>
-        <p className="mt-4 text-muted-foreground">My work and education, from the latest chapter back.</p>
+        <p className="mt-4 text-muted-foreground">{description}</p>
       </header>
-      <ExperienceHistory content={aboutContent} full />
+      <ExperienceHistory content={aboutContent} />
     </div>
   </main>;
 }

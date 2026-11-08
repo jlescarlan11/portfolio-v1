@@ -39,9 +39,9 @@ export const heroContent: HeroContent = {
   name: 'John Lester Escarlan',
   role: 'Full-Stack Software Engineer',
   tagline:
-    'I’m John, a developer with a background in mathematics. I like figuring things out and turning ideas into useful software.',
+    'I build web apps and like getting the details right, from what you see on screen to what happens when you hit submit.',
   primaryCta: {
-    label: 'Explore my work',
+    label: 'See my work',
     href: '#work'
   },
   secondaryCta: {
@@ -99,13 +99,10 @@ export const impactSnapshotContent: ImpactSnapshotContent = {
 export const journeyContent = {
   title: 'How I got here',
   paragraphs: [
-    'I started in mathematics because I liked working through problems and understanding why things work. That curiosity eventually led me to computer science, where I could take an idea, build it, and see someone use it.',
-    'What keeps me interested is the mix of problem-solving and making things. I enjoy getting a stubborn feature to work, making an interface easier to use, and learning whatever the next challenge calls for.'
-  ],
-  transition: 'Those interests have taken different forms in my work: supporting learners, making pricing clearer, and building with a team.'
+    'I started in mathematics because I liked figuring out why things work. I switched to computer science to build things people could use.'
+  ]
 };
 
 export const currentFocusContent = {
-  title: 'What comes next',
-  intro: 'I’m continuing my Computer Science studies at UP Cebu, and looking for opportunities to contribute, take ownership, and learn alongside others. I’m open to engineering roles and freelance projects.'
+  intro: 'I’m open to engineering roles and freelance projects.'
 };

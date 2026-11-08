@@ -43,10 +43,10 @@ export const contactContent: ContactContent = {
   eyebrow: 'Contact',
   title: 'Let’s connect.',
   intro:
-    'Have a role, project, or problem in mind? I’d like to hear about it. Send me an email, or choose a time for an introductory call.',
+    'If you’re hiring for a software engineering role or have a project in mind, I’d like to hear from you.',
   prompt: 'Employment, freelance, and contract inquiries',
   email: resolveContactEmail(process.env.NEXT_PUBLIC_CONTACT_EMAIL),
-  primaryCtaLabel: 'Email John',
+  primaryCtaLabel: 'Email me',
   resumeLabel: 'View résumé',
   resumeHref: '/John_Lester_Escarlan_Resume.pdf',
   booking: {

@@ -28,17 +28,6 @@ export default function ContactSection({
         delay={100}
         className="contact-redesign__actions"
       >
-        {/* ── Inquiry scope; intentionally not a current-availability signal ── */}
-        <div className="mb-9">
-          <Typography
-            variant="caption"
-            as="span"
-            className="text-base font-medium uppercase tracking-[0.12em] text-subtle-foreground"
-          >
-            {content.prompt}
-          </Typography>
-        </div>
-
         {/* ── Primary CTA — full-width on mobile, auto on desktop ── */}
         <div className="mb-7">
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-3">

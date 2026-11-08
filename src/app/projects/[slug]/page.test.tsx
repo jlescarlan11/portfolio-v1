@@ -40,13 +40,83 @@ describe('ProjectPage', () => {
     expect(screen.queryByRole('navigation', { name: 'Case study sections' })).not.toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Engineering Decisions' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Back to projects/ })).toHaveAttribute('href', '/projects');
-    for (const [label, url] of [['Visit website', project.links.liveUrl], ['View code', project.links.githubUrl]]) {
+    for (const url of [project.links.liveUrl, project.links.githubUrl]) {
       if (!url) continue;
-      const link = screen.getByRole('link', { name: new RegExp(label!) });
-      expect(link).toHaveAttribute('href', url);
+      const link = screen.getAllByRole('link').find(link => link.getAttribute('href') === url);
+      expect(link).toBeDefined();
       expect(link).toHaveAttribute('target', '_blank');
       expect(link).toHaveAttribute('rel', 'noopener noreferrer');
     }
+  });
+
+  it.each([
+    ['rent-n-roll', 'Full-Stack Engineer', 'Solo project'],
+    ['health', 'Project and Technical Lead', 'Five-person hackathon team'],
+    ['pricecraft', 'Full-Stack Engineer', 'Solo project'],
+    ['regex2nfa', 'Frontend Engineer and Product Designer', 'Four-person class project'],
+    ['job-pipeline', 'Workflow Automation Engineer', 'Solo project']
+  ])('introduces the role and team before the %s screenshot', async (slug, role, team) => {
+    render(await ProjectPage({ params: Promise.resolve({ slug }) }));
+
+    const header = screen.getByRole('heading', { level: 1 }).closest('header')!;
+    expect(within(header).getByText(role)).toBeVisible();
+    expect(within(header).getByText(team)).toBeVisible();
+    expect(header.compareDocumentPosition(screen.getAllByRole('img')[0]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('puts PriceCraft’s calculator and source links in the opening with separate descriptions', async () => {
+    render(await ProjectPage({ params: Promise.resolve({ slug: 'pricecraft' }) }));
+
+    const opening = within(screen.getByRole('heading', { level: 1 }).closest('header')!);
+    const calculator = opening.getByRole('link', { name: /Try the calculator/ });
+    const source = opening.getByRole('link', { name: /View source/ });
+    expect(calculator).toHaveAttribute('href', 'https://pricecraft.netlify.app/');
+    expect(calculator).toHaveAccessibleDescription(/without signing in/i);
+    expect(source).toHaveAccessibleDescription(/tests/i);
+  });
+
+  it('shows the HEALTH team’s semifinalist result before the screenshot', async () => {
+    render(await ProjectPage({ params: Promise.resolve({ slug: 'health' }) }));
+
+    const opening = within(screen.getByRole('heading', { level: 1 }).closest('header')!);
+    expect(opening.getByText(/Hackathon semifinalist.*Top 15 of 200\+ teams/)).toBeVisible();
+  });
+
+  it('includes the overlap and retry checks in the Job Pipeline decision they support', async () => {
+    render(await ProjectPage({ params: Promise.resolve({ slug: 'job-pipeline' }) }));
+
+    const decisions = screen.getByRole('region', { name: 'The choices behind the work' });
+    expect(within(decisions).getByText(/Tests cover duplicate listings, stale claims, and overlapping reviews/)).toBeVisible();
+  });
+
+  it('introduces the PACU contract and progress fix before the hero image', async () => {
+    render(await ProjectPage({ params: Promise.resolve({ slug: 'pacu' }) }));
+
+    const header = screen.getByRole('heading', { name: 'PACU', level: 1 }).closest('header')!;
+    const hero = screen.getByRole('img', { name: /Orange PACU wordmark/ });
+
+    expect(within(header).getByText('Software Engineer (Contract)')).toBeVisible();
+    expect(within(header).getByText('February–August 2026')).toBeVisible();
+    expect(within(header).getByText(/At Pharmacy & Acute Care University, I fixed .* go past 100%/)).toBeVisible();
+    expect(within(header).getByText(/duplicate certificate records.*undo a content release/)).toBeVisible();
+    expect(header.compareDocumentPosition(hero) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('explains what the public PACU link shows and keeps it separate from the fixes', async () => {
+    render(await ProjectPage({ params: Promise.resolve({ slug: 'pacu' }) }));
+
+    const link = screen.getByRole('link', { name: /Public PACU site/ });
+
+    expect(link).toHaveAccessibleDescription(/browse courses.*progress and certificate records are behind sign-in.*internal tool/i);
+  });
+
+  it('shows the scope of the PACU fixes and the certificate test result', async () => {
+    render(await ProjectPage({ params: Promise.resolve({ slug: 'pacu' }) }));
+
+    expect(screen.getByText(/I made five code paths use the same completion check/)).toBeVisible();
+    expect(screen.getByText(/The certificate change passed 51 tests/)).toBeVisible();
+    expect(screen.getByText(/prevent duplicate records/)).toBeVisible();
+    expect(screen.getByText(/roll back a content release/)).toBeVisible();
   });
 
   it.each([

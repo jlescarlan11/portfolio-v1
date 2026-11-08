@@ -1,8 +1,10 @@
 import { aboutContent } from '@/features/about/content';
-import { CHAT_OVERVIEW_ANSWER, getDirectContactAnswer } from '../content';
+import {
+  CHAT_OVERVIEW_ANSWER,
+  CHAT_WORK_ANSWER,
+  getDirectContactAnswer
+} from '../content';
 
-const employers = aboutContent.experience.map(item => item.company.split(' — ')[0]);
-const workAnswer = `John has worked at ${employers.slice(0, -1).join(', ')}, and ${employers.at(-1)}.`;
 const currentEducation = aboutContent.education.find(item => item.isCurrent);
 
 // Only standalone questions receive fixed answers; detailed or mixed requests
@@ -14,7 +16,7 @@ const directAnswers: ReadonlyArray<readonly [RegExp, string]> = [
   ],
   [
     /^(?:where (?:has john|has he|have you) worked|what is john's work (?:history|experience))$/,
-    workAnswer
+    CHAT_WORK_ANSWER
   ],
   [
     /^(?:which projects show mobile development experience|(?:does john|do you) have mobile (?:development )?experience|what is john's mobile development experience)$/,

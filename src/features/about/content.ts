@@ -21,12 +21,15 @@ export interface PortfolioEducationItem {
   startDate: string;
   endDate?: string | null;
   isCurrent?: boolean;
+  expectedGraduationDate?: string;
 }
 
 export interface PortfolioCertificationItem {
   name: string;
   issuer?: string;
   year?: string;
+  issuedOn?: string;
+  description?: string;
   url?: string;
 }
 
@@ -58,24 +61,30 @@ export const aboutContent: AboutContent = {
   intro:
     'I started in mathematics and now study Computer Science at the University of the Philippines Cebu. Along the way, I’ve built client features, worked on a pharmacy learning platform, and helped monitor production services.',
   skillsHeading: 'Core stack',
-  skillsIntro: 'The tools most relevant to the product, reliability, and automation work I take on.',
+  skillsIntro: 'I build interfaces with React and TypeScript and use Node.js and PostgreSQL for APIs and data.',
   credentialsHeading: 'Certificates',
-  credentialsIntro: 'Selected certifications and formal training that support the engineering work.',
+  credentialsIntro: 'Selected courses and certificates in data science, software development, and project management.',
   experienceHeading: 'Experience',
   educationHeading: 'Education',
   certificationsVisibleCount: 2,
 
-  // A focused, evidence-backed stack for the work positioned on this page.
   techCategories: [
     {
-      category: 'Product development',
+      category: 'Core stack',
       items: [
-        { label: 'TypeScript' },
         { label: 'React' },
+        { label: 'TypeScript' },
+        { label: 'Node.js' },
+        { label: 'PostgreSQL' }
+      ]
+    },
+    {
+      category: 'Web and mobile',
+      items: [
         { label: 'Next.js' },
         { label: 'React Native' },
+        { label: 'Expo' },
         { label: 'Flutter' },
-        { label: 'Node.js' },
         { label: 'Tailwind CSS' }
       ]
     },
@@ -83,12 +92,9 @@ export const aboutContent: AboutContent = {
       category: 'Backend and data',
       items: [
         { label: 'REST APIs' },
-        { label: 'PostgreSQL' },
         { label: 'Supabase' },
-        { label: 'Prisma ORM' },
-        { label: 'Drizzle ORM' },
-        { label: 'MySQL' },
-        { label: 'MongoDB' }
+        { label: 'Prisma' },
+        { label: 'SQLite' }
       ]
     },
     {
@@ -112,19 +118,20 @@ export const aboutContent: AboutContent = {
       school: 'University of the Philippines Cebu',
       achievements: [
         'University Scholar (consistent academic honor)',
-        'Semi-Finalist, 1st Naga City Mayoral Hackathon'
+        'DOST Junior Level Science Scholarship (JLSS) Awardee',
+        'Semifinalist with the HEALTH team at the 1st Naga City Mayoral Hackathon'
       ],
       startDate: '2025-08',
       endDate: null,
-      isCurrent: true
+      isCurrent: true,
+      expectedGraduationDate: '2027-08'
     },
     {
       id: 'edu-up-math',
-      degree: 'Bachelor of Science in Mathematics',
+      degree: 'Mathematics studies',
       school: 'University of the Philippines Cebu',
       achievements: [
-        'College Scholar (consistent academic honor)',
-        'DOST Junior Level Science Scholarship (JLSS) Awardee'
+        'College Scholar (consistent academic honor)'
       ],
       startDate: '2022-09',
       endDate: '2025-06'
@@ -134,43 +141,43 @@ export const aboutContent: AboutContent = {
   experience: [
     {
       id: 'exp-wg-monitoring-engineer',
-      summary: 'Monitoring eight production services has given me practice recognizing incidents, escalating them, and documenting recovery steps.',
+      summary: 'I caught and escalated at least 25 incidents across eight production services and wrote eight recovery guides.',
       title: 'Software Monitoring Engineer',
       company: "Wind's Gate Philippines — Cebu City",
       startDate: '2025-06',
       endDate: null,
       isCurrent: true,
       responsibilities: [
-        'Identified and escalated 25+ incidents across eight production services before they reached end users.',
-        'Authored eight recovery runbooks that enabled engineers to resolve Tier 1 issues without escalation and reduced average triage time by 30%.'
+        'I identified and escalated 25+ incidents across eight production services before they reached users.',
+        'I wrote eight recovery runbooks that helped engineers resolve Tier 1 issues without escalation and cut average triage time by 30%.'
       ]
     },
     {
       id: 'exp-freelance-software-engineer',
-      summary: 'Freelance work has meant taking client features and production fixes through delivery, then making releases and handoffs easier.',
+      summary: 'I fixed at least a dozen issues that blocked client work and automated release steps, saving about four engineering hours a week.',
       title: 'Freelance Software Engineer',
       company: 'Upwork — Remote',
       startDate: '2025-01',
       endDate: null,
       isCurrent: true,
       responsibilities: [
-        'Resolved 12+ production-blocking defects with an average turnaround of less than 24 hours, restoring affected client workflows.',
-        'Rebuilt release automation to remove 15+ manual steps and save approximately four engineering hours per week.',
-        'Delivered three client-facing features using React, TypeScript, and Node.js and wrote REST API documentation that reduced contributor onboarding from one week to two days.'
+        'I fixed 12+ production issues that blocked client work, with an average turnaround under 24 hours.',
+        'I automated releases, removing 15+ manual steps and saving about four engineering hours a week.',
+        'I delivered three client features with React, TypeScript, and Node.js. I also documented REST APIs, cutting contributor onboarding from one week to two days.'
       ]
     },
     {
       id: 'exp-pharmacy-acute-care-software-engineer',
-      summary: 'At PACU, I contributed across learner and administrator workflows, from diagnosing issues to implementation, review, and testing.',
+      summary: 'I fixed course progress and corrected exam access checks so they used the learner’s enrollment.',
       title: 'Software Engineer (Contract)',
       company: 'Pharmacy & Acute Care University — Remote',
       startDate: '2026-02',
       endDate: '2026-08',
       responsibilities: [
-        'Fixed learning-progress defects on an online learning platform and unified completion checks across five code paths.',
-        'Implemented certificate achievement records with idempotent writes, database uniqueness constraints, migration and backfill support, and authorization coverage; validated with 51 passing tests.',
-        'Built development-to-production content-promotion tooling with completeness checks, snapshots, transactional writes, rollback, and post-write integrity verification.',
-        'Corrected enrollment-scoped exam lookups and course-group mapping so entitlement rules used the correct learning records.'
+        'I fixed course progress bugs and made five code paths use the same completion check.',
+        'I made certificate records safe to retry, added a database rule to prevent duplicates, and supported filling in past records. The change passed 51 tests, including access checks.',
+        'I built a tool to release course content from development to production. It checks for missing content, takes a snapshot, applies changes in a transaction, verifies the result, and supports rollback.',
+        'I fixed exam access so it checks the right enrollment and course group.'
       ]
     },
     {
@@ -181,8 +188,8 @@ export const aboutContent: AboutContent = {
       startDate: '2025-06',
       endDate: '2025-07',
       responsibilities: [
-        'Contributed to enterprise web applications using C# and ASP.NET MVC across frontend and backend tasks.',
-        'Collaborated with senior engineers through code reviews, pair programming, and agile ceremonies.'
+        'I worked on the frontend and backend of enterprise web applications using C# and ASP.NET MVC.',
+        'I paired with senior engineers, took part in code reviews, and joined the team’s agile meetings.'
       ]
     },
     {
@@ -193,8 +200,8 @@ export const aboutContent: AboutContent = {
       startDate: '2024-09',
       endDate: '2024-11',
       responsibilities: [
-        'Worked across Node.js and Express APIs and React interfaces for analytics-focused product workflows.',
-        'Built reusable interface components with TypeScript and Tailwind CSS and contributed database and API performance improvements.'
+        'I worked on React interfaces and Node.js and Express APIs for analytics workflows.',
+        'I built reusable components with TypeScript and Tailwind CSS and helped improve database and API performance.'
       ]
     }
   ],
@@ -202,8 +209,10 @@ export const aboutContent: AboutContent = {
   certifications: [
     {
       name: 'GCI World April 2026',
-      issuer: 'Matsuo-Iwasawa Laboratory, The University of Tokyo',
+      issuer: 'Matsuo-Iwasawa Laboratory, Graduate School of Engineering, The University of Tokyo',
       year: '2026',
+      issuedOn: '2026-08-31',
+      description: 'I completed the April 2026 course in data science theory and implementation and passed the final assessment.',
       url: '/certificates/gci-world-april-2026.pdf'
     },
     {
@@ -220,3 +229,31 @@ export const aboutContent: AboutContent = {
     }
   ]
 };
+
+export const stackExamples = [
+  {
+    slug: 'pacu',
+    title: 'PACU',
+    description: 'React and TypeScript study tools, with Node.js APIs and PostgreSQL for learner progress and certificate records.'
+  },
+  {
+    slug: 'pricecraft',
+    title: 'PriceCraft',
+    description: 'An offline-capable React and TypeScript pricing calculator with Supabase sync and Vitest coverage for pricing calculations.'
+  },
+  {
+    slug: 'health',
+    title: 'HEALTH',
+    description: 'A React Native and Expo app that stores care records offline in SQLite and syncs them with a Node.js, Prisma, and PostgreSQL backend.'
+  },
+  {
+    slug: 'rent-n-roll',
+    title: 'Rent N Roll',
+    description: 'A Next.js rental marketplace with typed Supabase database calls and PayMongo webhooks for payment and deposit updates.'
+  },
+  {
+    slug: 'job-pipeline',
+    title: 'Job Pipeline',
+    description: 'Seven n8n workflows that rank job listings and use Groq to prepare application drafts for manual review.'
+  }
+];

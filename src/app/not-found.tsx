@@ -27,15 +27,14 @@ export default function NotFound(): React.JSX.Element {
         <p
           className="body-lg mt-5"
         >
-          The project link may have changed, but the portfolio and project stories
-          are still available.
+          The link may be outdated.
         </p>
         <div className="mt-8 flex flex-wrap gap-4">
           <a
-            href="/#work"
+            href="/projects"
             className="label inline-flex items-center justify-center border border-surface-strong px-6 py-3 text-foreground transition-colors duration-300 hover:bg-surface-tint active:bg-surface-tint-strong"
           >
-            Browse selected work
+            Browse all projects
           </a>
           <a
             href="/"
