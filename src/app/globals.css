@@ -253,7 +253,7 @@ body > footer, main + footer { margin-top: 8rem; }
 .project-case-study-story section { scroll-margin-top: 7rem; }
 @media (max-width: 760px) {
   .portfolio-hero { grid-template-columns: 1fr; gap: 2rem; padding-top: 7rem; }
-  .hero-portrait { order: -1; width: min(100%, 280px); justify-self: center; }
+  .hero-portrait { width: min(100%, 280px); justify-self: center; }
   .portfolio-section { margin-top: 5rem; }
   .experience-row { grid-template-columns: 1fr; gap: .35rem; }
   .experience-company { text-align: left; }
