@@ -119,7 +119,7 @@ export const aboutContent: AboutContent = {
       achievements: [
         'University Scholar (consistent academic honor)',
         'DOST Junior Level Science Scholarship (JLSS) Awardee',
-        'Semifinalist with the HEALTH team at the 1st Naga City Mayoral Hackathon'
+        'Health-track semifinalist with Team CTRL+H at the 1st Naga City Mayoral Hackathon'
       ],
       startDate: '2025-08',
       endDate: null,

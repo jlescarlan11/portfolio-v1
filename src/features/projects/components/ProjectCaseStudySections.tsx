@@ -75,17 +75,21 @@ export function ProjectSectionLabel({
 
 const evidenceLabels: Record<ProjectEvidence['kind'], string> = {
   'live-product': 'Live product',
-  'public-repository': 'Public repository'
+  'public-repository': 'Public repository',
+  'organizer-announcement': 'Organizer announcement'
 };
 
 export function ProjectEvidenceLinks({
   evidence,
   links
 }: ProjectEvidenceLinksProps) {
+  const destinations = {
+    'live-product': links.liveUrl,
+    'public-repository': links.githubUrl,
+    'organizer-announcement': links.announcementUrl
+  };
   const safeEvidence = evidence.flatMap(item => {
-    const url = item.kind === 'live-product'
-      ? links.liveUrl
-      : links.githubUrl;
+    const url = destinations[item.kind];
     return isRenderableExternalUrl(url) ? [{ ...item, url }] : [];
   });
 

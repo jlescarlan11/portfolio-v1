@@ -79,7 +79,10 @@ describe('ProjectPage', () => {
     render(await ProjectPage({ params: Promise.resolve({ slug: 'health' }) }));
 
     const opening = within(screen.getByRole('heading', { level: 1 }).closest('header')!);
-    expect(opening.getByText(/Hackathon semifinalist.*Top 15 of 200\+ teams/)).toBeVisible();
+    expect(opening.getByText(/Team CTRL\+H.*Health-track semifinalist/)).toBeVisible();
+    const announcement = opening.getByRole('link', { name: /View semifinalist announcement/ });
+    expect(announcement).toHaveAttribute('href', 'https://www.facebook.com/photo/?fbid=122119673397051230&set=pcb.122119673733051230');
+    expect(announcement).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
   it('includes the overlap and retry checks in the Job Pipeline decision they support', async () => {

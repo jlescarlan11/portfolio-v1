@@ -235,15 +235,18 @@ test('all projects provide complete case-study content', () => {
     assert.ok(
       project.caseStudy.evidence.length > 0 &&
         project.caseStudy.evidence.every(item =>
-          ['live-product', 'public-repository'].includes(item.kind) &&
+          ['live-product', 'public-repository', 'organizer-announcement'].includes(item.kind) &&
           item.description.trim()
         ),
       `${project.title} should have complete public evidence`
     );
+    const destinations = {
+      'live-product': project.links.liveUrl,
+      'public-repository': project.links.githubUrl,
+      'organizer-announcement': project.links.announcementUrl
+    };
     for (const item of project.caseStudy.evidence) {
-      const destination = item.kind === 'live-product'
-        ? project.links.liveUrl
-        : project.links.githubUrl;
+      const destination = destinations[item.kind];
       assert.ok(
         isRenderableExternalUrl(destination),
         `${project.title} ${item.kind} should map to a safe public destination`
@@ -526,7 +529,7 @@ test('HEALTH copy uses precise safety, offline, and team claims', () => {
     copy,
     [
       'five-person team',
-      'top 15 of 200+',
+      'Health-track semifinalist',
       'deterministic',
       'emergency',
       'mental-health',
@@ -539,6 +542,7 @@ test('HEALTH copy uses precise safety, offline, and team claims', () => {
   );
   assert.doesNotMatch(copy, /\b100%\b/i);
   assert.doesNotMatch(copy, /\ball core features\b/i);
+  assert.doesNotMatch(copy, /top 15 of 200\+/i);
   assert.equal(
     health.caseStudy.roleScope.team,
     'Five-person hackathon team'
@@ -554,9 +558,9 @@ test('HEALTH copy uses precise safety, offline, and team claims', () => {
   assert.ok(
     health.caseStudy.impact.some(
       impact =>
-        impact.value === 'Top 15 / 200+' &&
+        impact.value === 'Health-track semifinalist' &&
         impact.showInLead === true &&
-        /hackathon semifinalist/i.test(impact.context)
+        /Team CTRL\+H.*Health-track semifinalist/i.test(impact.context)
     ),
     'HEALTH should surface the hackathon result in the lead'
   );
@@ -702,13 +706,14 @@ test('PACU copy covers the mixed-platform client delivery scope', () => {
   );
 });
 
-test('project evidence reuses the established live and GitHub destinations', () => {
+test('project evidence points to the expected public destinations', () => {
   const expectedLinks: Record<string, ProjectRecord['links']> = {
     'rent-n-roll': {
       liveUrl: 'https://rentnroll.store'
     },
     health: {
-      githubUrl: 'https://github.com/jlescarlan11/health'
+      githubUrl: 'https://github.com/jlescarlan11/health',
+      announcementUrl: 'https://www.facebook.com/photo/?fbid=122119673397051230&set=pcb.122119673733051230'
     },
     pricecraft: {
       githubUrl: 'https://github.com/jlescarlan11/pricecraft',

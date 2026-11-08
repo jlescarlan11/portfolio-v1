@@ -166,12 +166,13 @@ export const projects: ProjectRecord[] = [
       }
     },
     description:
-      'A Naga City health app that routes immediate-danger and mental-health inputs before Gemini, keeps supported care records available offline, and helped a five-person team reach the top 15 of 200+ hackathon teams.',
+      'A Naga City health app prototype that checks for emergencies before calling Gemini and keeps selected care records available offline. Team CTRL+H was a Health-track semifinalist.',
     logo: '/project/health.svg',
     technologies: ['TypeScript', 'React Native', 'Expo', 'Node.js', 'Prisma', 'PostgreSQL', 'SQLite', 'Gemini API'],
     completedAt: '2026-02',
     links: {
-      githubUrl: 'https://github.com/jlescarlan11/health'
+      githubUrl: 'https://github.com/jlescarlan11/health',
+      announcementUrl: 'https://www.facebook.com/photo/?fbid=122119673397051230&set=pcb.122119673733051230'
     },
     caseStudy: {
       summary:
@@ -182,6 +183,11 @@ export const projects: ProjectRecord[] = [
           linkLabel: 'View archived source',
           description:
             'The repository shows the symptom checks and which records the prototype stores offline.'
+        },
+        {
+          kind: 'organizer-announcement',
+          linkLabel: 'View semifinalist announcement',
+          description: 'MyNaga App’s Facebook announcement lists Team CTRL+H and names me as team lead.'
         }
       ],
       roleScope: {
@@ -230,11 +236,11 @@ export const projects: ProjectRecord[] = [
       impact: [
         {
           kind: 'product',
-          value: 'Top 15 / 200+',
+          value: healthHackathonResult,
           label: 'Hackathon result',
           showInLead: true,
           context:
-            `${healthHackathonResult} at the 1st Naga City Mayoral Hackathon`
+            `Team CTRL+H was a ${healthHackathonResult} at the 1st Naga City Mayoral Hackathon.`
         },
         {
           kind: 'product',
@@ -265,7 +271,7 @@ export const projects: ProjectRecord[] = [
         }
       ],
       highlights: [
-        'Led a five-person team to the semi-finals, placing in the top 15 of 200+ teams at the 1st Naga City Mayoral Hackathon.',
+        'Led Team CTRL+H, a five-person Health-track semifinalist team at the 1st Naga City Mayoral Hackathon.',
         'Gated emergency and mental-health inputs with deterministic checks before any Gemini request.',
         'Persisted assessments, medication records, and facility data locally, with synchronization when connectivity returns.'
       ],

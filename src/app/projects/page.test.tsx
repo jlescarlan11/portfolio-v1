@@ -61,7 +61,7 @@ describe('ProjectsPage', () => {
   it.each([
     ['PACU', 'Client contract'],
     ['PriceCraft', 'Personal product'],
-    ['HEALTH', 'Hackathon semifinalist · Top 15 of 200+ teams'],
+    ['HEALTH', 'Health-track semifinalist'],
     ['Rent N Roll', 'Solo pre-launch marketplace'],
     ['Regex2NFA', 'Class project'],
     ['Job Pipeline', 'Automation']

@@ -48,7 +48,7 @@ interface ProjectVisualBase {
   sourceLabel: string;
 }
 
-export type ProjectEvidenceKind = 'live-product' | 'public-repository';
+export type ProjectEvidenceKind = 'live-product' | 'public-repository' | 'organizer-announcement';
 
 export interface ProjectEvidence {
   kind: ProjectEvidenceKind;
@@ -92,6 +92,7 @@ export interface ProjectCaseStudy {
 export interface ProjectLinks {
   liveUrl?: string;
   githubUrl?: string;
+  announcementUrl?: string;
 }
 
 export type ProjectThumbnailFit = 'cover' | 'contain';

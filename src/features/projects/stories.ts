@@ -1,5 +1,5 @@
 // Short homepage chapters. Detailed evidence lives in the project records.
-export const healthHackathonResult = 'Hackathon semifinalist · Top 15 of 200+ teams';
+export const healthHackathonResult = 'Health-track semifinalist';
 
 export const projectStories: Record<string, { kind: string; preview: string; detail: string }> = {
   pacu: {

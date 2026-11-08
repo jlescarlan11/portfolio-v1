@@ -206,7 +206,8 @@ export default async function ProjectPage({
   const leadImpact = impact.find(item => item.showInLead);
   const projectLinks = [
     { kind: 'live-product', url: project.links.liveUrl, defaultLabel: 'Visit website' },
-    { kind: 'public-repository', url: project.links.githubUrl, defaultLabel: 'View code' }
+    { kind: 'public-repository', url: project.links.githubUrl, defaultLabel: 'View code' },
+    { kind: 'organizer-announcement', url: project.links.announcementUrl, defaultLabel: 'View announcement' }
   ].flatMap(({ kind, url, defaultLabel }) => {
     if (!isRenderableExternalUrl(url)) return [];
     const item = evidence.find(item => item.kind === kind);

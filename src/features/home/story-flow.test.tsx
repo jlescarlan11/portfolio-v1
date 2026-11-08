@@ -31,7 +31,7 @@ describe('Personal portfolio journey', () => {
   it('lets visitors open every featured story without relying on the rotated cards', () => {
     render(<HomePage />);
     expect(screen.getByRole('radio', { name: 'PACU' })).toBeChecked();
-    expect(screen.getByRole('link', { name: /HEALTH.*Hackathon semifinalist.*Top 15 of 200\+ teams/ }))
+    expect(screen.getByRole('link', { name: /HEALTH.*Health-track semifinalist/ }))
       .toHaveAttribute('href', '/projects/health');
     for (const [title, slug] of [['PACU', 'pacu'], ['PriceCraft', 'pricecraft'], ['HEALTH', 'health']]) {
       const option = screen.getByRole('radio', { name: title });
